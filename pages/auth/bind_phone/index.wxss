@@ -1,0 +1,96 @@
+.page {
+  min-height: 100vh;
+  padding: 40rpx 28rpx;
+  box-sizing: border-box;
+  background: #f5f7fb;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 32rpx;
+  padding: 36rpx 28rpx;
+  box-shadow: 0 12rpx 32rpx rgba(31, 36, 48, 0.08);
+}
+
+.title {
+  font-size: 40rpx;
+  font-weight: 600;
+  color: #111827;
+}
+
+.subtitle {
+  margin-top: 16rpx;
+  line-height: 1.6;
+  color: #5b6475;
+}
+
+.section {
+  margin-top: 28rpx;
+}
+
+.label {
+  font-size: 24rpx;
+  color: #6b7280;
+}
+
+.value {
+  margin-top: 10rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 20rpx;
+  background: #f5f7fb;
+  word-break: break-all;
+  color: #1f2430;
+}
+
+.text-input {
+  margin-top: 10rpx;
+  padding: 22rpx 20rpx;
+  border-radius: 20rpx;
+  background: #f5f7fb;
+  color: #1f2430;
+}
+
+.value-empty {
+  color: #b42318;
+}
+
+.status {
+  margin-top: 24rpx;
+  padding: 20rpx;
+  border-radius: 20rpx;
+  line-height: 1.5;
+}
+
+.status-error {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.status-success {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.debug-box {
+  margin-top: 10rpx;
+  padding: 20rpx;
+  border-radius: 20rpx;
+  background: #101828;
+  color: #f8fafc;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-size: 24rpx;
+  line-height: 1.6;
+}
+
+.primary-button {
+  margin-top: 32rpx;
+  background: #07c160;
+  color: #ffffff;
+}
+
+.secondary-button {
+  margin-top: 20rpx;
+  background: #f3f4f6;
+  color: #111827;
+}
