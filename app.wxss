@@ -33,29 +33,27 @@ button::after {
 }
 
 .hero {
-  padding: 34rpx 30rpx;
-  border-radius: 28rpx;
-  color: #ffffff;
-  background: linear-gradient(135deg, #1677ff 0%, #18a058 100%);
+  padding: 10rpx 2rpx 20rpx;
+  color: #182033;
 }
 
 .hero-title {
-  font-size: 42rpx;
+  font-size: 44rpx;
   font-weight: 700;
 }
 
 .hero-subtitle {
   margin-top: 12rpx;
   line-height: 1.55;
-  color: rgba(255, 255, 255, 0.88);
+  color: #667085;
 }
 
 .card {
   margin-top: 24rpx;
   padding: 28rpx;
-  border-radius: 24rpx;
+  border-radius: 18rpx;
   background: #ffffff;
-  box-shadow: 0 10rpx 28rpx rgba(28, 38, 63, 0.06);
+  border: 1rpx solid #edf0f5;
 }
 
 .section-title {
@@ -93,6 +91,15 @@ button::after {
   color: #155eef;
   background: #eef4ff;
   font-size: 23rpx;
+}
+
+.caption {
+  color: #98a2b3;
+  font-size: 23rpx;
+}
+
+.link-text {
+  color: #1677ff;
 }
 
 .status-ok {
@@ -145,7 +152,7 @@ button::after {
   width: 100%;
   min-height: 88rpx;
   padding: 22rpx 24rpx;
-  border-radius: 18rpx;
+  border-radius: 14rpx;
   background: #f3f6fb;
   color: #182033;
 }
@@ -167,7 +174,7 @@ button::after {
 .empty-box {
   margin-top: 20rpx;
   padding: 30rpx;
-  border-radius: 22rpx;
+  border-radius: 16rpx;
   color: #667085;
   background: #f7f9fc;
   text-align: center;
@@ -181,5 +188,5 @@ button::after {
   z-index: 10;
   padding: 20rpx 28rpx 34rpx;
   background: #ffffff;
-  box-shadow: 0 -8rpx 24rpx rgba(28, 38, 63, 0.08);
+  border-top: 1rpx solid #edf0f5;
 }

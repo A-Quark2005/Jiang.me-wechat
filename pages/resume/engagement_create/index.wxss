@@ -1,0 +1,35 @@
+.bottom-bar button {
+  width: 100%;
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16rpx;
+}
+
+.segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+  min-height: 88rpx;
+  border-radius: 14rpx;
+  color: #475467;
+  background: #f3f6fb;
+}
+
+.segment-active {
+  color: #155eef;
+  background: #eef4ff;
+}
+
+.segment radio {
+  transform: scale(.78);
+}
+
+.picker-value {
+  display: flex;
+  align-items: center;
+  color: #182033;
+}

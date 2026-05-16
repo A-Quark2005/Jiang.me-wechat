@@ -1,4 +1,8 @@
 const profileService = require('../../../services/profile');
+const refreshState = require('../../../services/refresh-state');
+
+const PAGE_KEY = 'engagements';
+const CACHE_MAX_AGE_MS = 5 * 60 * 1000;
 
 function normalizeList(raw) {
   if (Array.isArray(raw)) return raw;
@@ -19,6 +23,7 @@ function isPending(item) {
 Page({
   data: {
     loading: true,
+    hasLoaded: false,
     errorMessage: '',
     activeTab: 'all',
     allItems: [],
@@ -36,7 +41,9 @@ Page({
   },
 
   onShow() {
-    this.loadEngagements();
+    if (!this.data.hasLoaded || refreshState.consume(PAGE_KEY) || refreshState.isExpired(PAGE_KEY, CACHE_MAX_AGE_MS)) {
+      this.loadEngagements();
+    }
   },
 
   async loadEngagements() {
@@ -44,7 +51,8 @@ Page({
     try {
       const raw = await profileService.getEngagements();
       const allItems = normalizeList(raw);
-      this.setData({ loading: false, allItems }, () => this.applyFilter());
+      this.setData({ loading: false, hasLoaded: true, allItems }, () => this.applyFilter());
+      refreshState.touch(PAGE_KEY);
     } catch (error) {
       this.setData({
         loading: false,
@@ -71,5 +79,9 @@ Page({
     const id = event.currentTarget.dataset.id;
     if (!id) return;
     wx.navigateTo({ url: `/pages/resume/engagement_detail/index?id=${encodeURIComponent(id)}` });
+  },
+
+  createEngagement() {
+    wx.navigateTo({ url: '/pages/resume/engagement_create/index' });
   },
 });

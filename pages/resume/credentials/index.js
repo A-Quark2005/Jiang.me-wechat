@@ -1,4 +1,8 @@
 const profileService = require('../../../services/profile');
+const refreshState = require('../../../services/refresh-state');
+
+const PAGE_KEY = 'credentials';
+const CACHE_MAX_AGE_MS = 5 * 60 * 1000;
 
 function normalizeList(raw) {
   if (Array.isArray(raw)) return raw;
@@ -8,19 +12,23 @@ function normalizeList(raw) {
 Page({
   data: {
     loading: true,
+    hasLoaded: false,
     errorMessage: '',
     credentials: [],
   },
 
   onShow() {
-    this.loadCredentials();
+    if (!this.data.hasLoaded || refreshState.consume(PAGE_KEY) || refreshState.isExpired(PAGE_KEY, CACHE_MAX_AGE_MS)) {
+      this.loadCredentials();
+    }
   },
 
   async loadCredentials() {
     this.setData({ loading: true, errorMessage: '' });
     try {
       const raw = await profileService.getCredentials();
-      this.setData({ loading: false, credentials: normalizeList(raw) });
+      this.setData({ loading: false, hasLoaded: true, credentials: normalizeList(raw) });
+      refreshState.touch(PAGE_KEY);
     } catch (error) {
       this.setData({
         loading: false,

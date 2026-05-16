@@ -1,0 +1,45 @@
+<view class="page page-with-bar">
+  <view class="hero">
+    <view class="hero-title">新建服务履历</view>
+    <view class="hero-subtitle">填写服务事实并邀请联系人确认，确认后会进入双方可信资料。</view>
+  </view>
+
+  <view class="card">
+    <view class="field">
+      <view class="field-label">履历类型</view>
+      <radio-group class="segmented" bindchange="changeKind">
+        <label class="segment {{form.kind === 'provided_service' ? 'segment-active' : ''}}">
+          <radio value="provided" checked="{{form.kind === 'provided_service'}}" />
+          我服务过别人
+        </label>
+        <label class="segment {{form.kind === 'purchased_service' ? 'segment-active' : ''}}">
+          <radio value="received" checked="{{form.kind === 'purchased_service'}}" />
+          我被服务过
+        </label>
+      </radio-group>
+    </view>
+
+    <view class="field">
+      <view class="field-label">标题</view>
+      <input class="input" value="{{form.title}}" data-field="title" bindinput="updateField" placeholder="例如：线上会议咨询服务" />
+    </view>
+
+    <view class="field">
+      <view class="field-label">详情</view>
+      <textarea class="textarea" value="{{form.detailText}}" data-field="detailText" bindinput="updateField" placeholder="可分行填写服务时间、内容、成果等" />
+    </view>
+
+    <view wx:if="{{errorMessage}}" class="error-box">{{errorMessage}}</view>
+  </view>
+
+  <view wx:if="{{invite}}" class="card">
+    <view class="section-title">微信邀请已生成</view>
+    <view class="section-subtitle">点击下方按钮转发给微信联系人。对方打开后登录，即可确认这条履历。</view>
+    <button class="primary-button action-button" open-type="share" bindtap="openShare">发给微信联系人</button>
+    <button class="ghost-button action-button" bindtap="openDetail">查看履历</button>
+  </view>
+
+  <view class="bottom-bar">
+    <button class="primary-button" loading="{{saving}}" disabled="{{saving || loading || invite}}" bindtap="save">生成微信邀请</button>
+  </view>
+</view>

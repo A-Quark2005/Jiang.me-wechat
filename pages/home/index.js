@@ -3,6 +3,10 @@ const apiClient = require('../../services/api-client');
 const sessionStore = require('../../services/session-store');
 const entitlementsService = require('../../services/meeting-entitlements');
 const profileService = require('../../services/profile');
+const refreshState = require('../../services/refresh-state');
+
+const PAGE_KEY = 'home';
+const CACHE_MAX_AGE_MS = 5 * 60 * 1000;
 
 function safeArray(value) {
   return Array.isArray(value) ? value : [];
@@ -22,7 +26,7 @@ function resolveEntitlementSummary(entitlements) {
   if (!active) {
     return {
       title: '未开通会议权益',
-      detail: '可按次、按天或按月购买腾讯会议能力',
+      detail: '可按需购买会议权益，并同步到安卓 APP',
       tone: 'warn',
     };
   }
@@ -46,7 +50,7 @@ function resolveResumeSummary(resume, credentials, engagements) {
     const status = String(item.status || item.confirmationStatus || '').toLowerCase();
     return status.includes('pending');
   }).length;
-  const intro = resume && (resume.selfIntroduction || resume.summary || '');
+  const intro = resume && (resume.selfIntroduction || '');
   const completion = resume && (resume.completionPercent || (resume.completion && resume.completion.percent));
   return {
     completion: completion || (intro ? 60 : 25),
@@ -75,7 +79,9 @@ Page({
   },
 
   onShow() {
-    this.ensureRegisteredAndLoad();
+    if (!this.data.session || refreshState.consume(PAGE_KEY) || refreshState.isExpired(PAGE_KEY, CACHE_MAX_AGE_MS)) {
+      this.ensureRegisteredAndLoad();
+    }
   },
 
   async ensureRegisteredAndLoad() {
@@ -86,12 +92,21 @@ Page({
         wx.redirectTo({ url: '/pages/auth/register/index' });
         return;
       }
+      const app = getApp();
+      const pendingInviteToken =
+        app && app.globalData ? app.globalData.pendingEngagementInviteToken : '';
+      if (pendingInviteToken) {
+        wx.redirectTo({
+          url: `/pages/resume/engagement_detail/index?inviteToken=${encodeURIComponent(pendingInviteToken)}`,
+        });
+        return;
+      }
       const sessionRecord = sessionStore.getSessionRecord();
       await this.loadDashboard(sessionRecord);
     } catch (error) {
       this.setData({
         loading: false,
-        errorMessage: error && error.message ? error.message : '首页加载失败',
+        errorMessage: error && error.message ? error.message : '服务中心加载失败',
       });
     }
   },
@@ -116,6 +131,7 @@ Page({
       entitlementSummary: resolveEntitlementSummary(entitlements || capabilities),
       resumeSummary: resolveResumeSummary(resume, credentials, engagements),
     });
+    refreshState.touch(PAGE_KEY);
   },
 
   openRegister() {
@@ -139,6 +155,7 @@ Page({
   },
 
   refresh() {
+    refreshState.mark(PAGE_KEY);
     this.ensureRegisteredAndLoad();
   },
 });

@@ -1,4 +1,8 @@
 const service = require('../../services/meeting-entitlements');
+const refreshState = require('../../services/refresh-state');
+
+const PAGE_KEY = 'entitlements';
+const CACHE_MAX_AGE_MS = 5 * 60 * 1000;
 
 function normalizeList(raw, keys) {
   if (Array.isArray(raw)) return raw;
@@ -19,48 +23,105 @@ function productIdOf(product) {
   return String(product.id || product.productId || '');
 }
 
-function decorateProducts(products, selectedProductId) {
-  return products.map((product) => ({
-    ...product,
-    viewId: productIdOf(product),
-    viewName: productLabel(product),
-    viewDescription: product.description || product.summary || '灵活购买腾讯会议能力',
-    viewPrice: product.priceText || product.amountText || product.price || '¥--',
-    selected: productIdOf(product) === selectedProductId,
+function billingModeOf(product) {
+  const value = String(product.billingMode || product.mode || product.type || product.code || productIdOf(product) || productLabel(product)).toLowerCase();
+  if (value.includes('week') || value.includes('周')) return 'week_pass';
+  if (value.includes('month') || value.includes('月')) return 'month_pass';
+  if (value.includes('single') || value.includes('per') || value.includes('次')) return 'pay_per_use';
+  return '';
+}
+
+function findProductByMode(products, billingMode) {
+  return products.find((product) => billingModeOf(product) === billingMode) || null;
+}
+
+function buildPlanCards(products, selectedPlanId) {
+  const payPerUseProduct = findProductByMode(products, 'pay_per_use');
+  const weekProduct = findProductByMode(products, 'week_pass');
+  const monthProduct = findProductByMode(products, 'month_pass');
+  const plans = [
+    {
+      id: productIdOf(payPerUseProduct) || 'meeting-pay-per-use',
+      billingMode: 'pay_per_use',
+      title: '按次付费',
+      badge: '默认',
+      description: '开通免密支付后，每次使用会议能力按次扣费。',
+      price: payPerUseProduct ? payPerUseProduct.priceText || payPerUseProduct.amountText || '按次计费' : '按次计费',
+      actionText: '开通免密',
+      requiresPasswordlessPayment: true,
+      product: payPerUseProduct,
+    },
+    {
+      id: productIdOf(weekProduct) || 'meeting-week-pass',
+      billingMode: 'week_pass',
+      title: '周卡',
+      badge: '单周不限量',
+      description: weekProduct ? weekProduct.description || weekProduct.summary || '单周不限量使用会议能力。' : '单周不限量使用会议能力。',
+      price: weekProduct ? weekProduct.priceText || weekProduct.amountText || weekProduct.price || '¥--' : '暂未上架',
+      actionText: '购买周卡',
+      product: weekProduct,
+    },
+    {
+      id: productIdOf(monthProduct) || 'meeting-month-pass',
+      billingMode: 'month_pass',
+      title: '月卡',
+      badge: '单月不限量',
+      description: monthProduct ? monthProduct.description || monthProduct.summary || '单月不限量使用会议能力。' : '单月不限量使用会议能力。',
+      price: monthProduct ? monthProduct.priceText || monthProduct.amountText || monthProduct.price || '¥--' : '暂未上架',
+      actionText: '购买月卡',
+      product: monthProduct,
+    },
+  ];
+  return plans.map((plan) => ({
+    ...plan,
+    selected: plan.id === selectedPlanId,
+    disabled: plan.billingMode !== 'pay_per_use' && !plan.product,
   }));
 }
 
 Page({
   data: {
     loading: true,
+    hasLoaded: false,
     paying: false,
     errorMessage: '',
     entitlements: [],
     products: [],
-    selectedProductId: '',
-    selectedProduct: null,
+    planCards: [],
+    selectedPlanId: 'meeting-pay-per-use',
+    selectedPlan: null,
+    passwordlessContract: null,
   },
 
   onShow() {
-    this.loadPage();
+    if (!this.data.hasLoaded || refreshState.consume(PAGE_KEY) || refreshState.isExpired(PAGE_KEY, CACHE_MAX_AGE_MS)) {
+      this.loadPage();
+    }
   },
 
   async loadPage() {
     this.setData({ loading: true, errorMessage: '' });
     try {
-      const [entitlementsRaw, productsRaw] = await Promise.all([
+      const [entitlementsRaw, productsRaw, contractRaw] = await Promise.all([
         service.getEntitlements(),
         service.getProducts(),
+        service.getPasswordlessContractStatus(),
       ]);
       const rawProducts = normalizeList(productsRaw, ['items', 'products']);
-      const selectedProductId = rawProducts[0] ? productIdOf(rawProducts[0]) : '';
+      const payPerUseProduct = findProductByMode(rawProducts, 'pay_per_use');
+      const selectedPlanId = productIdOf(payPerUseProduct) || 'meeting-pay-per-use';
+      const planCards = buildPlanCards(rawProducts, selectedPlanId);
       this.setData({
         loading: false,
+        hasLoaded: true,
         entitlements: normalizeList(entitlementsRaw, ['items', 'entitlements']),
-        products: decorateProducts(rawProducts, selectedProductId),
-        selectedProductId,
-        selectedProduct: rawProducts[0] || null,
+        products: rawProducts,
+        planCards,
+        selectedPlanId,
+        selectedPlan: planCards.find((plan) => plan.id === selectedPlanId) || planCards[0] || null,
+        passwordlessContract: contractRaw,
       });
+      refreshState.touch(PAGE_KEY);
     } catch (error) {
       this.setData({
         loading: false,
@@ -69,13 +130,18 @@ Page({
     }
   },
 
-  selectProduct(event) {
-    const productId = String(event.currentTarget.dataset.id || '');
-    const selectedProduct = this.data.products.find((item) => item.viewId === productId) || null;
+  selectPlan(event) {
+    const planId = String(event.currentTarget.dataset.id || '');
+    const planCards = buildPlanCards(this.data.products, planId);
+    const selectedPlan = planCards.find((item) => item.id === planId) || null;
+    if (selectedPlan && selectedPlan.disabled) {
+      wx.showToast({ title: '该权益暂未上架', icon: 'none' });
+      return;
+    }
     this.setData({
-      selectedProductId: productId,
-      selectedProduct,
-      products: decorateProducts(this.data.products, productId),
+      selectedPlanId: planId,
+      selectedPlan,
+      planCards,
     });
   },
 
@@ -83,16 +149,25 @@ Page({
     if (this.data.paying) {
       return;
     }
-    const productId = this.data.selectedProductId;
+    const selectedPlan = this.data.selectedPlan;
+    if (!selectedPlan) {
+      wx.showToast({ title: '请选择权益', icon: 'none' });
+      return;
+    }
+    if (selectedPlan.requiresPasswordlessPayment) {
+      await this.openPasswordlessContract();
+      return;
+    }
+    const productId = selectedPlan.product ? productIdOf(selectedPlan.product) : '';
     if (!productId) {
-      wx.showToast({ title: '请选择套餐', icon: 'none' });
+      wx.showToast({ title: '该权益暂未上架', icon: 'none' });
       return;
     }
     this.setData({ paying: true, errorMessage: '' });
     try {
       const order = await service.createWechatMiniProgramOrder(productId);
       if (!order || !order.paymentParams) {
-        throw new Error('后端未返回微信支付参数');
+        throw new Error('支付参数异常，请稍后重试');
       }
       await service.requestPayment(order.paymentParams);
       if (order.orderId) {
@@ -100,6 +175,7 @@ Page({
       }
       wx.showToast({ title: '支付成功', icon: 'success' });
       this.setData({ paying: false });
+      refreshState.mark(['home', 'orders']);
       this.loadPage();
     } catch (error) {
       const message = error && error.message ? error.message : '支付失败';
@@ -117,6 +193,42 @@ Page({
 
   openOrders() {
     wx.navigateTo({ url: '/pages/orders/index' });
+  },
+
+  async openPasswordlessContract() {
+    this.setData({ paying: true, errorMessage: '' });
+    try {
+      const result = await service.preparePasswordlessContract();
+      if (!result || result.status === 'not_configured' || result.configured === false) {
+        this.setData({ paying: false });
+        wx.showModal({
+          title: '暂未开通',
+          content: result && result.message ? result.message : '微信支付免密签约参数尚未配置。',
+          showCancel: false,
+        });
+        return;
+      }
+      this.setData({ passwordlessContract: result });
+      await service.openPasswordlessSign(result);
+      this.setData({ paying: false });
+      wx.showModal({
+        title: '等待签约结果',
+        content: '已打开微信支付免密签约。完成签约后，系统会根据微信支付通知自动生效。',
+        confirmText: '知道了',
+        showCancel: false,
+      });
+      refreshState.mark(['entitlements', 'home']);
+    } catch (error) {
+      this.setData({
+        paying: false,
+        errorMessage: error && error.message ? error.message : '免密签约准备失败',
+      });
+      wx.showModal({
+        title: '免密签约失败',
+        content: error && error.message ? error.message : '免密签约准备失败',
+        showCancel: false,
+      });
+    }
   },
 
   productLabel,

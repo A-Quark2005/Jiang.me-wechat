@@ -20,6 +20,32 @@ function createWechatMiniProgramOrder(productId) {
   });
 }
 
+function getPasswordlessContractStatus() {
+  return request({ path: '/api/payments/wechat-mini-program/passwordless-contract' });
+}
+
+function preparePasswordlessContract() {
+  return request({
+    path: '/api/payments/wechat-mini-program/passwordless-contract/prepare',
+    method: 'POST',
+  });
+}
+
+function confirmPasswordlessContract(contractId, rawPayload) {
+  return request({
+    path: '/api/payments/wechat-mini-program/passwordless-contract/confirm',
+    method: 'POST',
+    data: { contractId, rawPayload },
+  });
+}
+
+function createPayPerUseDeduction() {
+  return request({
+    path: '/api/payments/wechat-mini-program/pay-per-use/deductions',
+    method: 'POST',
+  });
+}
+
 function getOrders() {
   return request({ path: '/api/payments' });
 }
@@ -40,12 +66,37 @@ function requestPayment(paymentParams) {
   });
 }
 
+function openPasswordlessSign(signParams) {
+  return new Promise((resolve, reject) => {
+    const appId = String(signParams.signMiniProgramAppId || signParams.sign_mp_appid || '');
+    const path = String(signParams.signMiniProgramPath || signParams.sign_mp_path || '');
+    if (!appId || !path) {
+      reject(new Error('微信支付免密签约跳转参数缺失'));
+      return;
+    }
+    wx.navigateToMiniProgram({
+      appId,
+      path,
+      envVersion: 'release',
+      success: resolve,
+      fail(error) {
+        reject(new Error(error && error.errMsg ? error.errMsg : '打开微信支付免密签约失败'));
+      },
+    });
+  });
+}
+
 module.exports = {
   createWechatMiniProgramOrder,
+  createPayPerUseDeduction,
+  confirmPasswordlessContract,
   getCapabilities,
   getEntitlements,
   getOrder,
   getOrders,
+  getPasswordlessContractStatus,
   getProducts,
+  openPasswordlessSign,
+  preparePasswordlessContract,
   requestPayment,
 };

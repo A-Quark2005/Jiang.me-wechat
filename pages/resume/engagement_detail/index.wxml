@@ -9,15 +9,16 @@
   <block wx:else>
     <view class="hero">
       <view class="hero-title">{{item.title || '服务履历'}}</view>
-      <view class="hero-subtitle">确认后，这条服务事实会同时进入双方简历。</view>
+      <view class="hero-subtitle">{{inviteMode ? '对方邀请你确认这条服务履历。确认后，它会进入双方可信资料。' : '确认后，这条服务记录会进入双方可信资料。'}}</view>
     </view>
 
     <view class="card">
       <view class="section-title">服务事实</view>
-      <view class="section-subtitle">{{item.summary || '后端未返回摘要'}}</view>
-      <view class="detail-line">服务者：{{item.providerName || item.providerProfileName || item.providerProfileId || '未返回'}}</view>
-      <view class="detail-line">被服务者：{{item.receiverName || item.receiverProfileName || item.receiverProfileId || '未返回'}}</view>
-      <view class="detail-line">来源：{{item.sourceType || '未返回'}}</view>
+      <view class="section-subtitle">{{item.summary || '暂无摘要'}}</view>
+      <view wx:if="{{owner}}" class="detail-line">发起人：{{owner.displayName || owner.userId || '暂无'}}</view>
+      <view class="detail-line">服务者：{{item.providerName || item.providerProfileName || item.providerProfileId || '暂无'}}</view>
+      <view class="detail-line">被服务者：{{item.receiverName || item.receiverProfileName || item.receiverProfileId || '暂无'}}</view>
+      <view class="detail-line">来源：{{item.sourceType || '暂无'}}</view>
       <view class="detail-line">状态：{{item.status || item.confirmationStatus || '未知'}}</view>
     </view>
 
@@ -25,16 +26,16 @@
       <view class="row">
         <view>
           <view class="section-title">公开展示</view>
-          <view class="section-subtitle">只控制你自己简历中的展示状态。</view>
+          <view class="section-subtitle">只控制你自己可信资料中的展示状态。</view>
         </view>
-        <switch checked="{{visible}}" bindchange="toggleVisible" disabled="{{submitting || pending}}" />
+        <switch checked="{{visible}}" bindchange="toggleVisible" disabled="{{submitting || pending || inviteMode}}" />
       </view>
     </view>
 
     <view wx:if="{{errorMessage}}" class="error-box">{{errorMessage}}</view>
 
     <view wx:if="{{pending}}" class="bottom-bar button-row">
-      <button class="danger-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="reject">拒绝</button>
+      <button wx:if="{{!inviteMode}}" class="danger-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="reject">拒绝</button>
       <button class="primary-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="confirm">确认</button>
     </view>
   </block>

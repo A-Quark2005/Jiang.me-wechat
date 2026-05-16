@@ -1,12 +1,15 @@
 <view class="page page-with-bar">
   <view class="hero">
-    <view class="hero-title">腾讯会议能力</view>
-    <view class="hero-subtitle">按次、按天、按周、按月灵活购买会议能力。</view>
+    <view class="hero-title">会议权益</view>
+    <view class="hero-subtitle">查看当前权益，购买后会同步到你的安卓 APP 账号。</view>
   </view>
 
-  <view wx:if="{{loading}}" class="card">正在读取会议权益</view>
+  <view wx:if="{{loading}}" class="card">
+    <view class="section-title">正在读取权益</view>
+    <view class="section-subtitle">请稍候。</view>
+  </view>
 
-  <view wx:elif="{{errorMessage && products.length === 0}}" class="card">
+  <view wx:elif="{{errorMessage && planCards.length === 0}}" class="card">
     <view class="error-box">{{errorMessage}}</view>
     <button class="primary-button action-button" bindtap="loadPage">重新加载</button>
   </view>
@@ -16,7 +19,7 @@
       <view class="row">
         <view>
           <view class="section-title">当前权益</view>
-          <view class="section-subtitle">来自真实后端 `/api/me/meeting-entitlements`</view>
+          <view class="section-subtitle">用于安卓 APP 内发起或加入相关会议服务。</view>
         </view>
         <button class="ghost-button mini-button" bindtap="openOrders">订单</button>
       </view>
@@ -24,29 +27,40 @@
       <view wx:for="{{entitlements}}" wx:key="id" class="entitlement-row">
         <view>
           <view class="row-title">{{item.name || item.title || '会议权益'}}</view>
-          <view class="muted small">{{item.expiresAt || item.validUntil || '未返回有效期'}}</view>
+          <view class="muted small">{{item.expiresAt || item.validUntil || '暂无有效期'}}</view>
         </view>
         <view class="pill status-ok">{{item.status || '可用'}}</view>
       </view>
     </view>
 
     <view class="card">
-      <view class="section-title">选择套餐</view>
-      <view class="section-subtitle">商品列表由真实后端返回。</view>
-      <view wx:if="{{products.length === 0}}" class="empty-box">后端暂无会议权益商品</view>
+      <view class="section-title">选择权益</view>
+      <view class="section-subtitle">按次付费为默认模式；周卡、月卡在有效期内不限量。</view>
       <view
-        wx:for="{{products}}"
+        wx:for="{{planCards}}"
         wx:key="id"
-        class="product-card {{item.selected ? 'product-selected' : ''}}"
-        data-id="{{item.viewId}}"
-        bindtap="selectProduct"
+        class="plan-card {{item.selected ? 'plan-selected' : ''}} {{item.disabled ? 'plan-disabled' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="selectPlan"
       >
-        <view>
-          <view class="row-title">{{item.viewName}}</view>
-          <view class="muted small">{{item.viewDescription}}</view>
+        <view class="plan-main">
+          <view class="plan-title-row">
+            <view class="row-title">{{item.title}}</view>
+            <view class="pill">{{item.badge}}</view>
+          </view>
+          <view class="muted small plan-desc">{{item.description}}</view>
         </view>
-        <view class="price">{{item.viewPrice}}</view>
+        <view class="price">{{item.price}}</view>
       </view>
+    </view>
+
+    <view class="card">
+      <view class="section-title">购买说明</view>
+      <view class="note-row">按次付费是默认模式，需要先开通免密支付。</view>
+      <view class="note-row">周卡为单周不限量，月卡为单月不限量。</view>
+      <view class="note-row">权益会绑定当前微信注册账号，并同步到安卓 APP。</view>
+      <view class="note-row">如支付完成后暂未显示，请稍后刷新或查看订单记录。</view>
+      <view class="note-row">会议内页面和核心会议流程以腾讯会议原生体验为准。</view>
     </view>
 
     <view wx:if="{{errorMessage}}" class="error-box">{{errorMessage}}</view>
@@ -54,9 +68,9 @@
 
   <view class="bottom-bar buy-bar">
     <view>
-      <view class="muted small">已选套餐</view>
-      <view class="selected-title">{{selectedProduct.viewName || selectedProduct.name || selectedProduct.title || '请选择套餐'}}</view>
+      <view class="muted small">已选权益</view>
+      <view class="selected-title">{{selectedPlan.title || '请选择权益'}}</view>
     </view>
-    <button class="primary-button buy-button" loading="{{paying}}" disabled="{{paying || !selectedProductId}}" bindtap="buySelected">立即购买</button>
+    <button class="primary-button buy-button" loading="{{paying}}" disabled="{{paying || !selectedPlanId}}" bindtap="buySelected">{{selectedPlan.actionText || '继续'}}</button>
   </view>
 </view>

@@ -28,6 +28,35 @@ function getEngagements() {
   return request({ path: '/api/me/resume/engagements' });
 }
 
+function createEngagement(payload) {
+  return request({
+    path: '/api/me/resume/engagements',
+    method: 'POST',
+    data: payload,
+  });
+}
+
+function getEngagementInvite(id) {
+  return request({
+    path: `/api/me/resume/engagements/${encodeURIComponent(id)}/invite`,
+  });
+}
+
+function previewEngagementInvite(token) {
+  return request({
+    path: `/api/resume/engagement-invites/${encodeURIComponent(token)}`,
+    auth: false,
+  });
+}
+
+function acceptEngagementInvite(token) {
+  return request({
+    path: '/api/me/resume/engagement-invites/accept',
+    method: 'POST',
+    data: { token },
+  });
+}
+
 function confirmEngagement(id) {
   return request({
     path: `/api/me/resume/engagements/${encodeURIComponent(id)}/confirm`,
@@ -51,10 +80,14 @@ function updateEngagementVisibility(id, visible) {
 }
 
 module.exports = {
+  acceptEngagementInvite,
   confirmEngagement,
+  createEngagement,
   getCredentials,
   getEngagements,
+  getEngagementInvite,
   getResume,
+  previewEngagementInvite,
   rejectEngagement,
   updateEngagementVisibility,
   updateResume,

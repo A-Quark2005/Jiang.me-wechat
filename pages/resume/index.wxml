@@ -1,11 +1,11 @@
 <view class="page">
   <view class="hero">
-    <view class="hero-title">可信简历</view>
-    <view class="hero-subtitle">官方认证、自我介绍、双方确认的孪生服务履历。</view>
+    <view class="hero-title">可信资料</view>
+    <view class="hero-subtitle">维护自我介绍、官方认证和双方确认的服务履历。</view>
   </view>
 
   <view wx:if="{{loading}}" class="card">
-    <view class="section-title">正在读取简历</view>
+    <view class="section-title">正在读取资料</view>
   </view>
 
   <view wx:elif="{{errorMessage}}" class="card">
@@ -19,7 +19,7 @@
       <view class="row">
         <view>
           <view class="section-title">官方认证</view>
-          <view class="section-subtitle">由特定官方渠道签发，用户不可自行编辑。</view>
+          <view class="section-subtitle">由官方渠道签发，用于提升资料可信度。</view>
         </view>
         <button class="ghost-button mini-button" bindtap="openCredentials">查看</button>
       </view>
@@ -37,18 +37,20 @@
       <view class="row">
         <view>
           <view class="section-title">自我介绍</view>
-          <view class="section-subtitle">{{resume.selfIntroduction || resume.summary || '还没有填写自我介绍'}}</view>
+          <view class="section-subtitle">{{resume.selfIntroduction || '补充自我介绍，让对方更快了解你的服务背景。'}}</view>
         </view>
         <button class="ghost-button mini-button" bindtap="openEditSelf">编辑</button>
-      </view>
-      <view class="tag-row">
-        <view wx:for="{{resume.tags}}" wx:key="*this" class="pill">{{item}}</view>
       </view>
     </view>
 
     <view class="card">
-      <view class="section-title">相关履历</view>
-      <view class="section-subtitle">每条服务事实会形成服务者与被服务者两侧履历。</view>
+      <view class="row">
+        <view>
+          <view class="section-title">服务履历</view>
+          <view class="section-subtitle">已确认的履历会展示在你的可信资料中。</view>
+        </view>
+        <button class="ghost-button mini-button" bindtap="createEngagement">新建</button>
+      </view>
       <view class="resume-grid">
         <view class="metric" bindtap="openEngagements" data-tab="provided">
           <view class="metric-value">{{engagementGroups.provided.length}}</view>

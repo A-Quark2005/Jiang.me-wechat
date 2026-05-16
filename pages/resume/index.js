@@ -1,4 +1,8 @@
 const profileService = require('../../services/profile');
+const refreshState = require('../../services/refresh-state');
+
+const PAGE_KEY = 'resume';
+const CACHE_MAX_AGE_MS = 5 * 60 * 1000;
 
 function arrayFrom(value, keys) {
   if (Array.isArray(value)) {
@@ -26,6 +30,7 @@ function splitEngagements(raw) {
 Page({
   data: {
     loading: true,
+    hasLoaded: false,
     errorMessage: '',
     resume: null,
     credentials: [],
@@ -37,7 +42,9 @@ Page({
   },
 
   onShow() {
-    this.loadResume();
+    if (!this.data.hasLoaded || refreshState.consume(PAGE_KEY) || refreshState.isExpired(PAGE_KEY, CACHE_MAX_AGE_MS)) {
+      this.loadResume();
+    }
   },
 
   async loadResume() {
@@ -50,14 +57,16 @@ Page({
       ]);
       this.setData({
         loading: false,
+        hasLoaded: true,
         resume,
         credentials: arrayFrom(credentialsRaw, ['items', 'credentials']).slice(0, 3),
         engagementGroups: splitEngagements(engagementsRaw),
       });
+      refreshState.touch(PAGE_KEY);
     } catch (error) {
       this.setData({
         loading: false,
-        errorMessage: error && error.message ? error.message : '简历加载失败',
+        errorMessage: error && error.message ? error.message : '资料加载失败',
       });
     }
   },
@@ -73,5 +82,9 @@ Page({
   openEngagements(event) {
     const tab = event.currentTarget.dataset.tab || 'all';
     wx.navigateTo({ url: `/pages/resume/engagements/index?tab=${tab}` });
+  },
+
+  createEngagement() {
+    wx.navigateTo({ url: '/pages/resume/engagement_create/index' });
   },
 });

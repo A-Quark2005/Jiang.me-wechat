@@ -21,7 +21,7 @@ Page({
     }
     const phoneCode = detail.code || '';
     if (!phoneCode) {
-      this.setData({ errorMessage: '微信未返回手机号授权 code，请重试' });
+      this.setData({ errorMessage: '未获取到手机号授权信息，请重试' });
       return;
     }
     this.setData({ submitting: true, errorMessage: '', successMessage: '' });

@@ -6,12 +6,13 @@
     "pages/resume/edit_self/index",
     "pages/resume/credentials/index",
     "pages/resume/engagements/index",
+    "pages/resume/engagement_create/index",
     "pages/resume/engagement_detail/index",
     "pages/meeting_entitlements/index",
     "pages/orders/index"
   ],
   "window": {
-    "navigationBarTitleText": "将了么",
+    "navigationBarTitleText": "讲了么账号服务",
     "navigationBarBackgroundColor": "#ffffff",
     "navigationBarTextStyle": "black",
     "backgroundColor": "#f5f7fb",
@@ -25,18 +26,21 @@
     "list": [
       {
         "pagePath": "pages/home/index",
-        "text": "首页"
+        "text": "服务"
       },
       {
         "pagePath": "pages/resume/index",
-        "text": "简历"
+        "text": "资料"
       },
       {
         "pagePath": "pages/meeting_entitlements/index",
-        "text": "会议权益"
+        "text": "权益"
       }
     ]
   },
   "style": "v2",
+  "navigateToMiniProgramAppIdList": [
+    "wxbd687630cd02ce1d"
+  ],
   "sitemapLocation": "sitemap.json"
 }

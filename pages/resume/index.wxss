@@ -44,7 +44,7 @@
 
 .metric {
   padding: 22rpx 12rpx;
-  border-radius: 20rpx;
+  border-radius: 16rpx;
   background: #f7f9fc;
   text-align: center;
 }

@@ -1,11 +1,3 @@
-.backend-box {
-  margin-top: 24rpx;
-  padding: 22rpx;
-  border-radius: 20rpx;
-  background: #f7f9fc;
-  word-break: break-all;
-}
-
 .register-button {
   margin-top: 24rpx;
 }

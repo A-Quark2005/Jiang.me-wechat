@@ -11,24 +11,44 @@
 }
 
 .entitlement-row,
-.product-card {
+.plan-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20rpx;
   margin-top: 18rpx;
   padding: 24rpx;
-  border-radius: 22rpx;
+  border-radius: 16rpx;
   background: #f7f9fc;
 }
 
-.product-card {
+.plan-card {
   border: 2rpx solid transparent;
 }
 
-.product-selected {
+.plan-selected {
   border-color: #1677ff;
   background: #eef4ff;
+}
+
+.plan-disabled {
+  opacity: 0.55;
+}
+
+.plan-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.plan-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.plan-desc {
+  margin-top: 10rpx;
+  line-height: 1.45;
 }
 
 .row-title {
@@ -42,19 +62,47 @@
   font-weight: 700;
 }
 
+.note-row {
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #eef2f7;
+  color: #475467;
+  line-height: 1.5;
+}
+
+.note-row:last-child {
+  border-bottom: 0;
+}
+
 .buy-bar {
   display: grid;
-  grid-template-columns: 1fr 220rpx;
+  grid-template-columns: minmax(0, 1fr) 220rpx;
   gap: 18rpx;
   align-items: center;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.buy-bar > view {
+  min-width: 0;
 }
 
 .selected-title {
   margin-top: 6rpx;
   font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .buy-button {
+  width: 100%;
+  min-width: 0;
+  max-width: 220rpx;
+  box-sizing: border-box;
   height: 82rpx;
   line-height: 82rpx;
+  margin: 0;
+  padding: 0 12rpx;
+  font-size: 28rpx;
+  justify-self: end;
 }

@@ -1,8 +1,10 @@
 <view class="page">
   <view class="hero">
-    <view class="hero-title">相关履历</view>
-    <view class="hero-subtitle">同一次服务事实，会生成服务者和被服务者两侧的孪生履历。</view>
+    <view class="hero-title">服务履历</view>
+    <view class="hero-subtitle">查看与你相关的服务记录，待确认内容处理后会进入可信资料。</view>
   </view>
+
+  <button class="primary-button action-button" bindtap="createEngagement">新建履历</button>
 
   <view class="tab-row">
     <view
@@ -27,11 +29,11 @@
     <view class="row">
       <view>
         <view class="section-title">{{item.title || '服务履历'}}</view>
-        <view class="section-subtitle">{{item.summary || '后端未返回摘要'}}</view>
+        <view class="section-subtitle">{{item.summary || '暂无摘要'}}</view>
       </view>
       <view class="pill">{{item.status || item.confirmationStatus || '未知'}}</view>
     </view>
-    <view class="detail-line">服务者：{{item.providerName || item.providerProfileName || item.providerProfileId || '未返回'}}</view>
-    <view class="detail-line">被服务者：{{item.receiverName || item.receiverProfileName || item.receiverProfileId || '未返回'}}</view>
+    <view class="detail-line">服务者：{{item.providerName || item.providerProfileName || item.providerProfileId || '暂无'}}</view>
+    <view class="detail-line">被服务者：{{item.receiverName || item.receiverProfileName || item.receiverProfileId || '暂无'}}</view>
   </view>
 </view>

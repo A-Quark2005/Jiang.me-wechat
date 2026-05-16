@@ -1,4 +1,5 @@
 const profileService = require('../../../services/profile');
+const refreshState = require('../../../services/refresh-state');
 
 Page({
   data: {
@@ -6,10 +7,6 @@ Page({
     saving: false,
     errorMessage: '',
     form: {
-      displayName: '',
-      avatar: '',
-      bio: '',
-      tagsText: '',
       selfIntroduction: '',
       visible: true,
     },
@@ -26,10 +23,6 @@ Page({
       this.setData({
         loading: false,
         form: {
-          displayName: resume.displayName || '',
-          avatar: resume.avatar || '',
-          bio: resume.bio || resume.summary || '',
-          tagsText: Array.isArray(resume.tags) ? resume.tags.join('，') : '',
           selfIntroduction: resume.selfIntroduction || '',
           visible: resume.visible !== false,
         },
@@ -56,18 +49,12 @@ Page({
     this.setData({ saving: true, errorMessage: '' });
     try {
       await profileService.updateSelfIntroduction({
-        displayName: form.displayName,
-        avatar: form.avatar,
-        bio: form.bio,
-        tags: String(form.tagsText || '')
-          .split(/[，,]/)
-          .map((item) => item.trim())
-          .filter(Boolean),
         selfIntroduction: form.selfIntroduction,
         visible: form.visible,
       });
       wx.showToast({ title: '已保存', icon: 'success' });
       this.setData({ saving: false });
+      refreshState.mark(['home', 'resume', 'credentials']);
       setTimeout(() => wx.navigateBack(), 500);
     } catch (error) {
       this.setData({
