@@ -1,0 +1,33 @@
+<view class="page">
+  <view class="hero">
+    <view class="hero-title">一键注册</view>
+    <view class="hero-subtitle">授权手机号后，将为你创建账号，并由后端发送 App 邀请短信。</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">手机号授权</view>
+    <view class="section-subtitle">小程序必须由你点击授权手机号，不能静默获取。授权后会直接提交到真实后端。</view>
+
+    <view class="backend-box">
+      <view class="muted small">当前后端</view>
+      <view>{{backendBaseUrl}}</view>
+    </view>
+
+    <view wx:if="{{errorMessage}}" class="error-box">{{errorMessage}}</view>
+    <view wx:if="{{successMessage}}" class="success-box">{{successMessage}}</view>
+
+    <button
+      class="primary-button register-button"
+      open-type="getPhoneNumber"
+      bindgetphonenumber="handleGetPhoneNumber"
+      loading="{{submitting}}"
+      disabled="{{submitting}}"
+    >
+      {{submitting ? '正在注册' : '授权手机号并注册'}}
+    </button>
+
+    <button class="secondary-button register-button" bindtap="goHome" disabled="{{submitting}}">
+      返回首页
+    </button>
+  </view>
+</view>

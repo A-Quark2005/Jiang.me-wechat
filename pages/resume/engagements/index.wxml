@@ -1,0 +1,37 @@
+<view class="page">
+  <view class="hero">
+    <view class="hero-title">相关履历</view>
+    <view class="hero-subtitle">同一次服务事实，会生成服务者和被服务者两侧的孪生履历。</view>
+  </view>
+
+  <view class="tab-row">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="key"
+      class="tab-item {{activeTab === item.key ? 'tab-active' : ''}}"
+      data-tab="{{item.key}}"
+      bindtap="switchTab"
+    >
+      {{item.label}}
+    </view>
+  </view>
+
+  <view wx:if="{{loading}}" class="card">正在读取履历</view>
+  <view wx:elif="{{errorMessage}}" class="card">
+    <view class="error-box">{{errorMessage}}</view>
+    <button class="primary-button action-button" bindtap="loadEngagements">重新加载</button>
+  </view>
+  <view wx:elif="{{visibleItems.length === 0}}" class="empty-box">暂无相关履历</view>
+
+  <view wx:for="{{visibleItems}}" wx:key="id" class="card" data-id="{{item.id}}" bindtap="openDetail">
+    <view class="row">
+      <view>
+        <view class="section-title">{{item.title || '服务履历'}}</view>
+        <view class="section-subtitle">{{item.summary || '后端未返回摘要'}}</view>
+      </view>
+      <view class="pill">{{item.status || item.confirmationStatus || '未知'}}</view>
+    </view>
+    <view class="detail-line">服务者：{{item.providerName || item.providerProfileName || item.providerProfileId || '未返回'}}</view>
+    <view class="detail-line">被服务者：{{item.receiverName || item.receiverProfileName || item.receiverProfileId || '未返回'}}</view>
+  </view>
+</view>

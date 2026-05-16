@@ -1,5 +1,5 @@
 App({
   globalData: {
-    defaultBackendBaseUrl: 'https://api.whkerdb.top',
+    backendBaseUrl: 'https://api.whkerdb.top',
   },
 });

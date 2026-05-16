@@ -1,0 +1,62 @@
+<view class="page page-with-bar">
+  <view class="hero">
+    <view class="hero-title">腾讯会议能力</view>
+    <view class="hero-subtitle">按次、按天、按周、按月灵活购买会议能力。</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="card">正在读取会议权益</view>
+
+  <view wx:elif="{{errorMessage && products.length === 0}}" class="card">
+    <view class="error-box">{{errorMessage}}</view>
+    <button class="primary-button action-button" bindtap="loadPage">重新加载</button>
+  </view>
+
+  <block wx:else>
+    <view class="card">
+      <view class="row">
+        <view>
+          <view class="section-title">当前权益</view>
+          <view class="section-subtitle">来自真实后端 `/api/me/meeting-entitlements`</view>
+        </view>
+        <button class="ghost-button mini-button" bindtap="openOrders">订单</button>
+      </view>
+      <view wx:if="{{entitlements.length === 0}}" class="empty-box">暂无可用会议权益</view>
+      <view wx:for="{{entitlements}}" wx:key="id" class="entitlement-row">
+        <view>
+          <view class="row-title">{{item.name || item.title || '会议权益'}}</view>
+          <view class="muted small">{{item.expiresAt || item.validUntil || '未返回有效期'}}</view>
+        </view>
+        <view class="pill status-ok">{{item.status || '可用'}}</view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="section-title">选择套餐</view>
+      <view class="section-subtitle">商品列表由真实后端返回。</view>
+      <view wx:if="{{products.length === 0}}" class="empty-box">后端暂无会议权益商品</view>
+      <view
+        wx:for="{{products}}"
+        wx:key="id"
+        class="product-card {{item.selected ? 'product-selected' : ''}}"
+        data-id="{{item.viewId}}"
+        bindtap="selectProduct"
+      >
+        <view>
+          <view class="row-title">{{item.viewName}}</view>
+          <view class="muted small">{{item.viewDescription}}</view>
+        </view>
+        <view class="price">{{item.viewPrice}}</view>
+      </view>
+    </view>
+
+    <view wx:if="{{errorMessage}}" class="error-box">{{errorMessage}}</view>
+  </block>
+
+  <view class="bottom-bar buy-bar">
+    <view>
+      <view class="muted small">已选套餐</view>
+      <view class="selected-title">{{selectedProduct.viewName || selectedProduct.name || selectedProduct.title || '请选择套餐'}}</view>
+    </view>
+    <button class="primary-button buy-button" loading="{{paying}}" disabled="{{paying || !selectedProductId}}" bindtap="buySelected">立即购买</button>
+  </view>
+</view>

@@ -1,0 +1,54 @@
+.tappable {
+  transition: opacity 0.16s ease;
+}
+
+.tappable:active {
+  opacity: 0.72;
+}
+
+.action-button {
+  margin-top: 22rpx;
+}
+
+.metric-line {
+  margin-top: 16rpx;
+  color: #344054;
+}
+
+.resume-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18rpx;
+  margin-top: 24rpx;
+}
+
+.metric {
+  padding: 22rpx 12rpx;
+  border-radius: 20rpx;
+  background: #f7f9fc;
+  text-align: center;
+}
+
+.metric-value {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1677ff;
+}
+
+.metric-label {
+  margin-top: 8rpx;
+  color: #667085;
+  font-size: 23rpx;
+}
+
+.task-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 86rpx;
+  border-bottom: 1rpx solid #eef2f7;
+}
+
+.task-row:last-child {
+  border-bottom: 0;
+}

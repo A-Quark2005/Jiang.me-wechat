@@ -1,0 +1,3 @@
+.bottom-bar button {
+  width: 100%;
+}

@@ -1,0 +1,41 @@
+<view class="page page-with-bar">
+  <view wx:if="{{loading}}" class="card">正在读取履历详情</view>
+
+  <view wx:elif="{{errorMessage && !item}}" class="card">
+    <view class="error-box">{{errorMessage}}</view>
+    <button class="primary-button action-button" bindtap="loadDetail">重新加载</button>
+  </view>
+
+  <block wx:else>
+    <view class="hero">
+      <view class="hero-title">{{item.title || '服务履历'}}</view>
+      <view class="hero-subtitle">确认后，这条服务事实会同时进入双方简历。</view>
+    </view>
+
+    <view class="card">
+      <view class="section-title">服务事实</view>
+      <view class="section-subtitle">{{item.summary || '后端未返回摘要'}}</view>
+      <view class="detail-line">服务者：{{item.providerName || item.providerProfileName || item.providerProfileId || '未返回'}}</view>
+      <view class="detail-line">被服务者：{{item.receiverName || item.receiverProfileName || item.receiverProfileId || '未返回'}}</view>
+      <view class="detail-line">来源：{{item.sourceType || '未返回'}}</view>
+      <view class="detail-line">状态：{{item.status || item.confirmationStatus || '未知'}}</view>
+    </view>
+
+    <view class="card">
+      <view class="row">
+        <view>
+          <view class="section-title">公开展示</view>
+          <view class="section-subtitle">只控制你自己简历中的展示状态。</view>
+        </view>
+        <switch checked="{{visible}}" bindchange="toggleVisible" disabled="{{submitting || pending}}" />
+      </view>
+    </view>
+
+    <view wx:if="{{errorMessage}}" class="error-box">{{errorMessage}}</view>
+
+    <view wx:if="{{pending}}" class="bottom-bar button-row">
+      <button class="danger-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="reject">拒绝</button>
+      <button class="primary-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="confirm">确认</button>
+    </view>
+  </block>
+</view>

@@ -1,0 +1,29 @@
+.tab-row {
+  display: flex;
+  gap: 12rpx;
+  margin-top: 24rpx;
+  overflow-x: auto;
+}
+
+.tab-item {
+  flex: 0 0 auto;
+  padding: 14rpx 22rpx;
+  border-radius: 999rpx;
+  color: #475467;
+  background: #ffffff;
+}
+
+.tab-active {
+  color: #ffffff;
+  background: #1677ff;
+}
+
+.action-button {
+  margin-top: 22rpx;
+}
+
+.detail-line {
+  margin-top: 14rpx;
+  color: #475467;
+  font-size: 25rpx;
+}

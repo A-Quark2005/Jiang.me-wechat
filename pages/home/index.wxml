@@ -1,0 +1,75 @@
+<view class="page">
+  <view class="hero">
+    <view class="hero-title">将了么</view>
+    <view class="hero-subtitle">微信内完成注册、会议权益购买和可信简历管理。</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="card">
+    <view class="section-title">正在连接真实后端</view>
+    <view class="section-subtitle">{{backendBaseUrl}}</view>
+  </view>
+
+  <view wx:elif="{{errorMessage}}" class="card">
+    <view class="section-title">加载失败</view>
+    <view class="error-box">{{errorMessage}}</view>
+    <button class="primary-button action-button" bindtap="refresh">重新加载</button>
+    <button class="secondary-button action-button" bindtap="openRegister">重新注册登录</button>
+  </view>
+
+  <block wx:else>
+    <view class="card">
+      <view class="row">
+        <view>
+          <view class="section-title">{{profile.displayName || user.displayName || session.displayName || '已注册用户'}}</view>
+          <view class="section-subtitle">{{phoneText}}</view>
+        </view>
+        <view class="pill status-ok">已注册</view>
+      </view>
+    </view>
+
+    <view class="card tappable" bindtap="openEntitlements">
+      <view class="row">
+        <view>
+          <view class="section-title">会议权益</view>
+          <view class="section-subtitle">{{entitlementSummary.title}}</view>
+          <view class="metric-line">{{entitlementSummary.detail}}</view>
+        </view>
+        <view class="pill {{entitlementSummary.tone === 'ok' ? 'status-ok' : 'status-warn'}}">购买</view>
+      </view>
+    </view>
+
+    <view class="card tappable" bindtap="openResume">
+      <view class="section-title">我的简历</view>
+      <view class="resume-grid">
+        <view class="metric">
+          <view class="metric-value">{{resumeSummary.completion}}%</view>
+          <view class="metric-label">完成度</view>
+        </view>
+        <view class="metric">
+          <view class="metric-value">{{resumeSummary.credentialCount}}</view>
+          <view class="metric-label">官方认证</view>
+        </view>
+        <view class="metric">
+          <view class="metric-value">{{resumeSummary.confirmedCount}}</view>
+          <view class="metric-label">确认履历</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="section-title">待处理</view>
+      <view class="task-row" bindtap="openEngagements">
+        <view>待确认孪生履历</view>
+        <view class="pill {{resumeSummary.pendingCount > 0 ? 'status-warn' : 'status-ok'}}">{{resumeSummary.pendingCount}}</view>
+      </view>
+      <view class="task-row" bindtap="openResume">
+        <view>补充自我介绍</view>
+        <view class="pill {{resumeSummary.needsSelfIntro ? 'status-warn' : 'status-ok'}}">{{resumeSummary.needsSelfIntro ? '待完善' : '已完成'}}</view>
+      </view>
+      <view class="task-row" bindtap="openOrders">
+        <view>订单与权益记录</view>
+        <view class="pill">查看</view>
+      </view>
+    </view>
+  </block>
+</view>

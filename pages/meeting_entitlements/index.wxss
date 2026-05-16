@@ -1,0 +1,60 @@
+.action-button {
+  margin-top: 22rpx;
+}
+
+.mini-button {
+  min-width: 112rpx;
+  height: 64rpx;
+  line-height: 64rpx;
+  padding: 0 20rpx;
+  font-size: 24rpx;
+}
+
+.entitlement-row,
+.product-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  margin-top: 18rpx;
+  padding: 24rpx;
+  border-radius: 22rpx;
+  background: #f7f9fc;
+}
+
+.product-card {
+  border: 2rpx solid transparent;
+}
+
+.product-selected {
+  border-color: #1677ff;
+  background: #eef4ff;
+}
+
+.row-title {
+  font-weight: 700;
+  color: #182033;
+}
+
+.price {
+  color: #1677ff;
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.buy-bar {
+  display: grid;
+  grid-template-columns: 1fr 220rpx;
+  gap: 18rpx;
+  align-items: center;
+}
+
+.selected-title {
+  margin-top: 6rpx;
+  font-weight: 700;
+}
+
+.buy-button {
+  height: 82rpx;
+  line-height: 82rpx;
+}

@@ -1,9 +1,185 @@
 page {
+  min-height: 100vh;
   background: #f5f7fb;
-  color: #1f2430;
+  color: #182033;
   font-size: 28rpx;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+}
+
+view,
+text,
+button,
+input,
+textarea {
+  box-sizing: border-box;
 }
 
 button {
+  border-radius: 20rpx;
+  font-size: 28rpx;
+}
+
+button::after {
+  border: 0;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 28rpx;
+}
+
+.page-with-bar {
+  padding-bottom: 156rpx;
+}
+
+.hero {
+  padding: 34rpx 30rpx;
+  border-radius: 28rpx;
+  color: #ffffff;
+  background: linear-gradient(135deg, #1677ff 0%, #18a058 100%);
+}
+
+.hero-title {
+  font-size: 42rpx;
+  font-weight: 700;
+}
+
+.hero-subtitle {
+  margin-top: 12rpx;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.card {
+  margin-top: 24rpx;
+  padding: 28rpx;
   border-radius: 24rpx;
+  background: #ffffff;
+  box-shadow: 0 10rpx 28rpx rgba(28, 38, 63, 0.06);
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #182033;
+}
+
+.section-subtitle {
+  margin-top: 8rpx;
+  color: #667085;
+  line-height: 1.5;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.muted {
+  color: #667085;
+}
+
+.small {
+  font-size: 24rpx;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  color: #155eef;
+  background: #eef4ff;
+  font-size: 23rpx;
+}
+
+.status-ok {
+  color: #067647;
+  background: #ecfdf3;
+}
+
+.status-warn {
+  color: #b54708;
+  background: #fffaeb;
+}
+
+.status-danger {
+  color: #b42318;
+  background: #fef3f2;
+}
+
+.primary-button {
+  color: #ffffff;
+  background: #1677ff;
+}
+
+.secondary-button {
+  color: #182033;
+  background: #eef2f7;
+}
+
+.ghost-button {
+  color: #1677ff;
+  background: #eef4ff;
+}
+
+.danger-button {
+  color: #ffffff;
+  background: #d92d20;
+}
+
+.field {
+  margin-top: 24rpx;
+}
+
+.field-label {
+  margin-bottom: 12rpx;
+  color: #475467;
+  font-size: 24rpx;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  min-height: 88rpx;
+  padding: 22rpx 24rpx;
+  border-radius: 18rpx;
+  background: #f3f6fb;
+  color: #182033;
+}
+
+.textarea {
+  min-height: 220rpx;
+  line-height: 1.55;
+}
+
+.error-box {
+  margin-top: 24rpx;
+  padding: 22rpx;
+  border-radius: 20rpx;
+  color: #b42318;
+  background: #fef3f2;
+  line-height: 1.5;
+}
+
+.empty-box {
+  margin-top: 20rpx;
+  padding: 30rpx;
+  border-radius: 22rpx;
+  color: #667085;
+  background: #f7f9fc;
+  text-align: center;
+}
+
+.bottom-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  padding: 20rpx 28rpx 34rpx;
+  background: #ffffff;
+  box-shadow: 0 -8rpx 24rpx rgba(28, 38, 63, 0.08);
 }

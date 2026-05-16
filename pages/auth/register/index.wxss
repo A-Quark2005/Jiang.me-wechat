@@ -1,0 +1,20 @@
+.backend-box {
+  margin-top: 24rpx;
+  padding: 22rpx;
+  border-radius: 20rpx;
+  background: #f7f9fc;
+  word-break: break-all;
+}
+
+.register-button {
+  margin-top: 24rpx;
+}
+
+.success-box {
+  margin-top: 24rpx;
+  padding: 22rpx;
+  border-radius: 20rpx;
+  color: #067647;
+  background: #ecfdf3;
+  line-height: 1.5;
+}

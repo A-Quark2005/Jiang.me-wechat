@@ -1,38 +1,17 @@
-# 微信手机号授权小程序
+# 将了么小程序
 
-这个目录承载安卓原生登录流程配套的小程序授权页。
+这是独立业务小程序，不再作为安卓 `bindingTicket` 手机号绑定页使用。
 
-## 目标
+## 当前能力
 
-- 接收 App 拉起时带入的 `bindingTicket`
-- 在小程序内执行 `wx.login`
-- 使用 `getPhoneNumber` 获取一次性 `code`
-- 调用后端 `POST /api/auth/phone/direct-bind`
-- 让 App 侧继续轮询 `bindingTicket`，完成登录闭环
+- 微信手机号授权注册：调用真实后端 `/api/auth/wechat-mini-program/login` 和 `/api/auth/wechat-mini-program/register`。
+- 首页：读取 `/api/bootstrap`、`/api/me/capabilities`、`/api/me/meeting-entitlements`。
+- 会议权益：读取商品、创建小程序支付订单、调用 `wx.requestPayment`。
+- 简历：管理官方认证、自我介绍、孪生服务履历。
 
-## 目录
+## 约定
 
-- `app.js`：小程序入口
-- `app.json`：页面注册
-- `pages/auth/bind_phone/`：手机号授权页
-- `utils/request.js`：后端请求封装
-
-## 当前约定
-
-- 小程序页面路径固定为 `pages/auth/bind_phone/index`
-- 安卓端会按这个路径拉起小程序
-- 后端默认请求域名为 `https://api.whkerdb.top`
-
-## 发布前检查
-
-1. 小程序后台把 `https://api.whkerdb.top` 配到合法 request 域名
-2. 小程序与 App 登录使用的微信开放平台账号属于同一主体
-3. 页面路径保持为 `pages/auth/bind_phone/index`
-4. 发布正式版后，安卓端 `WECHAT_MINI_PROGRAM_TYPE` 保持 `0`
-
-## 调试
-
-- 微信开发者工具导入 `wechat_mini_program/`
-- `project.config.json` 已写入小程序 `appid`
-- 开发者工具里可以直接打开页面：
-  - `pages/auth/bind_phone/index?bindingTicket=xxx&backendBaseUrl=https%3A%2F%2Fapi.whkerdb.top`
+- 默认后端地址：`https://api.whkerdb.top`，集中配置在 `app.js`。
+- 除注册登录外，请求都会携带 `Authorization: Bearer <token>`。
+- 成功响应只接受 `{ ok: true, data }`。
+- 不使用本地模拟业务数据；后端接口未就绪时页面直接展示真实错误。

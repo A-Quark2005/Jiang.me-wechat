@@ -1,0 +1,43 @@
+<view class="page page-with-bar">
+  <view class="card">
+    <view class="section-title">自我介绍</view>
+    <view class="section-subtitle">这部分由你自己维护，公开后会出现在你的简历中。</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="card">正在读取</view>
+
+  <view wx:else class="card">
+    <view class="field">
+      <view class="field-label">昵称</view>
+      <input class="input" value="{{form.displayName}}" data-field="displayName" bindinput="updateField" placeholder="请输入昵称" />
+    </view>
+    <view class="field">
+      <view class="field-label">头像地址</view>
+      <input class="input" value="{{form.avatar}}" data-field="avatar" bindinput="updateField" placeholder="请输入头像 URL" />
+    </view>
+    <view class="field">
+      <view class="field-label">一句话简介</view>
+      <input class="input" value="{{form.bio}}" data-field="bio" bindinput="updateField" placeholder="例如：在线数学辅导与会议协作" />
+    </view>
+    <view class="field">
+      <view class="field-label">标签，用逗号分隔</view>
+      <input class="input" value="{{form.tagsText}}" data-field="tagsText" bindinput="updateField" placeholder="数学，线上教学，项目辅导" />
+    </view>
+    <view class="field">
+      <view class="field-label">自我介绍</view>
+      <textarea class="textarea" value="{{form.selfIntroduction}}" data-field="selfIntroduction" bindinput="updateField" placeholder="介绍你的服务方向、经验和合作方式" />
+    </view>
+    <view class="field row">
+      <view>
+        <view class="field-label">公开展示</view>
+        <view class="muted small">关闭后不会展示在公开简历中</view>
+      </view>
+      <switch checked="{{form.visible}}" bindchange="updateVisible" />
+    </view>
+    <view wx:if="{{errorMessage}}" class="error-box">{{errorMessage}}</view>
+  </view>
+
+  <view class="bottom-bar">
+    <button class="primary-button" loading="{{saving}}" disabled="{{saving || loading}}" bindtap="save">保存</button>
+  </view>
+</view>

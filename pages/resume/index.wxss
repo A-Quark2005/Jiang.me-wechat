@@ -1,0 +1,62 @@
+.action-button {
+  margin-top: 22rpx;
+}
+
+.mini-button {
+  min-width: 132rpx;
+  height: 64rpx;
+  line-height: 64rpx;
+  padding: 0 22rpx;
+  font-size: 24rpx;
+}
+
+.list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  padding: 22rpx 0;
+  border-bottom: 1rpx solid #eef2f7;
+}
+
+.list-row:last-child {
+  border-bottom: 0;
+}
+
+.row-title {
+  color: #182033;
+  font-weight: 600;
+}
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 18rpx;
+}
+
+.resume-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18rpx;
+  margin-top: 24rpx;
+}
+
+.metric {
+  padding: 22rpx 12rpx;
+  border-radius: 20rpx;
+  background: #f7f9fc;
+  text-align: center;
+}
+
+.metric-value {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1677ff;
+}
+
+.metric-label {
+  margin-top: 8rpx;
+  color: #667085;
+  font-size: 23rpx;
+}
