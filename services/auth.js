@@ -32,18 +32,20 @@ async function loginWithMiniProgram() {
   return result;
 }
 
-async function registerWithPhoneCode(phoneCode) {
-  const miniLoginCode = await wxLogin();
+async function bindPhoneWithCode(phoneCode) {
   const result = await request({
-    path: '/api/auth/wechat-mini-program/register',
+    path: '/api/auth/wechat-mini-program/phone',
     method: 'POST',
-    auth: false,
-    data: {
-      miniLoginCode,
-      phoneCode,
-    },
+    data: { phoneCode },
   });
-  sessionStore.saveSession(result);
+  const record = sessionStore.getSessionRecord();
+  if (record) {
+    sessionStore.saveSession({
+      session: record.session,
+      user: result.user || record.user,
+      profile: result.profile || record.profile,
+    });
+  }
   return result;
 }
 
@@ -53,8 +55,8 @@ function logout() {
 }
 
 module.exports = {
+  bindPhoneWithCode,
   loginWithMiniProgram,
   logout,
-  registerWithPhoneCode,
   wxLogin,
 };

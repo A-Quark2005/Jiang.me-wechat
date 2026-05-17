@@ -1,0 +1,66 @@
+<view class="page">
+  <view class="hero">
+    <view class="hero-title">激活腾讯会议身份</view>
+    <view class="hero-subtitle">使用会议权益前，需要用微信手机号同步并激活腾讯会议企业账号。</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="card">
+    <view class="section-title">正在检查激活状态</view>
+    <view class="section-subtitle">请稍候。</view>
+  </view>
+
+  <block wx:else>
+    <view class="card">
+      <view class="row">
+        <view>
+          <view class="section-title">腾讯会议账号</view>
+          <view class="section-subtitle">状态：{{activation.statusText}}</view>
+        </view>
+        <view class="pill {{activation.status === 'active' ? 'status-ok' : 'status-warn'}}">{{activation.statusText}}</view>
+      </view>
+      <view class="note-row">手机号：{{activation.phoneMasked || '未授权'}}</view>
+      <view class="note-row">腾讯会议 ID：{{activation.tencentMeetingUserId || '待创建'}}</view>
+    </view>
+
+    <view class="card">
+      <view class="section-title">完成激活</view>
+      <view class="section-subtitle">激活短信由腾讯会议发送。收到短信后，请按短信提示完成账号激活。</view>
+
+      <view wx:if="{{errorMessage}}" class="error-box">{{errorMessage}}</view>
+      <view wx:if="{{successMessage}}" class="success-box">{{successMessage}}</view>
+
+      <button
+        wx:if="{{activation.needsPhone}}"
+        class="primary-button activation-button"
+        open-type="getPhoneNumber"
+        bindgetphonenumber="handleGetPhoneNumber"
+        loading="{{bindingPhone}}"
+        disabled="{{bindingPhone}}"
+      >
+        {{bindingPhone ? '正在发送' : '授权手机号并发送短信'}}
+      </button>
+
+      <button
+        wx:elif="{{activation.needsActivation}}"
+        class="primary-button activation-button"
+        bindtap="resendInvite"
+        loading="{{sending}}"
+        disabled="{{sending}}"
+      >
+        {{sending ? '正在发送' : '重发激活短信'}}
+      </button>
+
+      <button
+        wx:else
+        class="primary-button activation-button"
+        bindtap="goBack"
+      >
+        返回继续使用
+      </button>
+
+      <button class="secondary-button activation-button" bindtap="loadActivation" disabled="{{sending || bindingPhone}}">
+        刷新状态
+      </button>
+    </view>
+  </block>
+</view>

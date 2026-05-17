@@ -1,7 +1,8 @@
 {
   "pages": [
     "pages/home/index",
-    "pages/auth/register/index",
+    "pages/meeting_activation/index",
+    "pages/meeting_create/index",
     "pages/resume/index",
     "pages/resume/edit_self/index",
     "pages/resume/credentials/index",

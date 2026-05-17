@@ -12,6 +12,26 @@ function getCapabilities() {
   return request({ path: '/api/me/capabilities' });
 }
 
+function getTencentMeetingActivation() {
+  return request({ path: '/api/tencent-meeting/activation' });
+}
+
+function sendTencentMeetingActivationInvite() {
+  return request({
+    path: '/api/tencent-meeting/activation/invite',
+    method: 'POST',
+  });
+}
+
+function createTencentMeeting(input) {
+  const payload = typeof input === 'string' ? { subject: input } : (input || {});
+  return request({
+    path: '/api/tencent-meeting/meetings',
+    method: 'POST',
+    data: payload,
+  });
+}
+
 function createWechatMiniProgramOrder(productId) {
   return request({
     path: '/api/payments/wechat-mini-program/orders',
@@ -87,6 +107,7 @@ function openPasswordlessSign(signParams) {
 }
 
 module.exports = {
+  createTencentMeeting,
   createWechatMiniProgramOrder,
   createPayPerUseDeduction,
   confirmPasswordlessContract,
@@ -94,9 +115,11 @@ module.exports = {
   getEntitlements,
   getOrder,
   getOrders,
+  getTencentMeetingActivation,
   getPasswordlessContractStatus,
   getProducts,
   openPasswordlessSign,
   preparePasswordlessContract,
   requestPayment,
+  sendTencentMeetingActivationInvite,
 };

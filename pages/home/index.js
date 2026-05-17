@@ -17,7 +17,7 @@ function formatPhone(user, profile) {
     (user && (user.phone || user.phoneMasked || user.mobile)) ||
     (profile && (profile.phone || profile.phoneMasked)) ||
     '';
-  return phone || '手机号已绑定';
+  return phone || '未授权手机号';
 }
 
 function resolveEntitlementSummary(entitlements) {
@@ -88,10 +88,6 @@ Page({
     this.setData({ loading: true, errorMessage: '' });
     try {
       const loginResult = await auth.loginWithMiniProgram();
-      if (!loginResult || !loginResult.registered) {
-        wx.redirectTo({ url: '/pages/auth/register/index' });
-        return;
-      }
       const app = getApp();
       const pendingInviteToken =
         app && app.globalData ? app.globalData.pendingEngagementInviteToken : '';
@@ -134,16 +130,16 @@ Page({
     refreshState.touch(PAGE_KEY);
   },
 
-  openRegister() {
-    wx.navigateTo({ url: '/pages/auth/register/index' });
-  },
-
   openResume() {
     wx.switchTab({ url: '/pages/resume/index' });
   },
 
   openEntitlements() {
     wx.switchTab({ url: '/pages/meeting_entitlements/index' });
+  },
+
+  createMeeting() {
+    wx.navigateTo({ url: '/pages/meeting_create/index' });
   },
 
   openEngagements() {

@@ -1,0 +1,50 @@
+<view class="page meeting-page">
+  <view class="meeting-hero">
+    <view class="meeting-hero-title">轻松预定会议</view>
+  </view>
+
+  <view class="schedule-card">
+    <view class="field-label">会议主题</view>
+    <input
+      class="subject-input"
+      value="{{subject}}"
+      bindinput="onSubjectInput"
+      placeholder="请输入会议主题"
+      maxlength="50"
+    />
+
+    <view class="field-label time-label">会议时间</view>
+    <view class="time-row">
+      <view class="time-column">
+        <picker mode="time" value="{{startTime}}" bindchange="onStartTimeChange">
+          <view class="time-value">{{startTime}}</view>
+        </picker>
+        <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange">
+          <view class="date-value">{{startDateLabel}}</view>
+        </picker>
+      </view>
+
+      <view class="time-arrow">›</view>
+
+      <view class="time-column right">
+        <picker mode="time" value="{{endTime}}" bindchange="onEndTimeChange">
+          <view class="time-value">{{endTime}}</view>
+        </picker>
+        <picker mode="date" value="{{endDate}}" bindchange="onEndDateChange">
+          <view class="date-value">{{endDateLabel}}</view>
+        </picker>
+      </view>
+    </view>
+
+    <view wx:if="{{errorMessage}}" class="error-box">{{errorMessage}}</view>
+
+    <button
+      class="primary-button reserve-button"
+      bindtap="submit"
+      loading="{{submitting}}"
+      disabled="{{submitting}}"
+    >
+      {{submitting ? '正在预定' : '立即预定'}}
+    </button>
+  </view>
+</view>

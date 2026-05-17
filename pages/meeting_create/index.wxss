@@ -1,0 +1,88 @@
+.meeting-page {
+  min-height: 100vh;
+  background: #f5f7fb;
+}
+
+.meeting-hero {
+  height: 330rpx;
+  padding-top: 92rpx;
+  background: linear-gradient(135deg, #0066ff 0%, #0487ff 68%, #1054d8 100%);
+  text-align: center;
+  color: #ffffff;
+}
+
+.meeting-hero-title {
+  font-size: 42rpx;
+  font-weight: 500;
+}
+
+.schedule-card {
+  position: relative;
+  margin: -70rpx 48rpx 0;
+  padding: 48rpx 38rpx 42rpx;
+  border-radius: 20rpx;
+  background: #ffffff;
+  box-shadow: 0 20rpx 48rpx rgba(17, 25, 40, 0.08);
+}
+
+.field-label {
+  font-size: 31rpx;
+  font-weight: 600;
+  color: #1f2329;
+}
+
+.subject-input {
+  height: 84rpx;
+  margin-top: 18rpx;
+  border-bottom: 1rpx solid #d9dde5;
+  color: #1f2329;
+  font-size: 30rpx;
+}
+
+.subject-input::placeholder {
+  color: #b5bcc9;
+}
+
+.time-label {
+  margin-top: 44rpx;
+}
+
+.time-row {
+  display: flex;
+  align-items: center;
+  margin-top: 28rpx;
+  padding-bottom: 34rpx;
+  border-bottom: 1rpx solid #edf0f5;
+}
+
+.time-column {
+  flex: 1;
+}
+
+.time-column.right {
+  text-align: right;
+}
+
+.time-value {
+  font-size: 58rpx;
+  line-height: 1.1;
+  color: #24262b;
+}
+
+.date-value {
+  margin-top: 14rpx;
+  font-size: 26rpx;
+  color: #1f2329;
+}
+
+.time-arrow {
+  width: 74rpx;
+  text-align: center;
+  color: #c1c7d0;
+  font-size: 60rpx;
+  font-weight: 200;
+}
+
+.reserve-button {
+  margin-top: 48rpx;
+}

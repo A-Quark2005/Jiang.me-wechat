@@ -145,6 +145,15 @@ Page({
     });
   },
 
+  async ensureTencentMeetingActivated() {
+    const activation = await service.getTencentMeetingActivation();
+    if (!activation || activation.status !== 'active') {
+      wx.navigateTo({ url: '/pages/meeting_activation/index' });
+      return false;
+    }
+    return true;
+  },
+
   async buySelected() {
     if (this.data.paying) {
       return;
@@ -154,8 +163,12 @@ Page({
       wx.showToast({ title: '请选择权益', icon: 'none' });
       return;
     }
+    const activated = await this.ensureTencentMeetingActivated();
+    if (!activated) {
+      return;
+    }
     if (selectedPlan.requiresPasswordlessPayment) {
-      await this.openPasswordlessContract();
+      await this.openPasswordlessContract(true);
       return;
     }
     const productId = selectedPlan.product ? productIdOf(selectedPlan.product) : '';
@@ -195,7 +208,13 @@ Page({
     wx.navigateTo({ url: '/pages/orders/index' });
   },
 
-  async openPasswordlessContract() {
+  async openPasswordlessContract(skipActivationCheck) {
+    if (!skipActivationCheck) {
+      const activated = await this.ensureTencentMeetingActivated();
+      if (!activated) {
+        return;
+      }
+    }
     this.setData({ paying: true, errorMessage: '' });
     try {
       const result = await service.preparePasswordlessContract();

@@ -13,7 +13,6 @@
     <view class="section-title">加载失败</view>
     <view class="error-box">{{errorMessage}}</view>
     <button class="primary-button action-button" bindtap="refresh">重新加载</button>
-    <button class="secondary-button action-button" bindtap="openRegister">重新注册登录</button>
   </view>
 
   <block wx:else>
@@ -23,7 +22,7 @@
           <view class="section-title">{{profile.displayName || user.displayName || session.displayName || '已注册用户'}}</view>
           <view class="section-subtitle">{{phoneText}}</view>
         </view>
-        <view class="pill status-ok">已注册</view>
+        <view class="pill status-ok">已登录</view>
       </view>
     </view>
 
@@ -36,6 +35,15 @@
         </view>
         <view class="pill {{entitlementSummary.tone === 'ok' ? 'status-ok' : 'status-warn'}}">{{entitlementSummary.tone === 'ok' ? '可用' : '去开通'}}</view>
       </view>
+    </view>
+
+    <view class="meeting-action">
+      <button
+        class="primary-button create-meeting-button"
+        bindtap="createMeeting"
+      >
+        创建会议
+      </button>
     </view>
 
     <view class="card tappable" bindtap="openResume">
