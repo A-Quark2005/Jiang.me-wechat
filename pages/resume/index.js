@@ -20,10 +20,16 @@ function arrayFrom(value, keys) {
 
 function splitEngagements(raw) {
   const items = arrayFrom(raw, ['items', 'engagements']);
+  const pending = items.filter((item) =>
+    String(item.status || item.confirmationStatus || '').toLowerCase().includes('pending') ||
+    item.requiresMyConfirmation === true ||
+    item.waitingForOtherConfirmation === true ||
+    Boolean(item.pendingChange),
+  );
   return {
     provided: items.filter((item) => String(item.side || item.kind || '').includes('provider') || String(item.kind || '').includes('provided')),
     received: items.filter((item) => String(item.side || item.kind || '').includes('receiver') || String(item.kind || '').includes('received') || String(item.kind || '').includes('purchased')),
-    pending: items.filter((item) => String(item.status || item.confirmationStatus || '').toLowerCase().includes('pending')),
+    pending,
   };
 }
 

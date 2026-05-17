@@ -12,3 +12,11 @@
   grid-template-columns: 1fr 1fr;
   gap: 18rpx;
 }
+
+.action-card {
+  margin-bottom: 120rpx;
+}
+
+.action-row {
+  gap: 18rpx;
+}

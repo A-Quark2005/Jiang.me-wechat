@@ -17,7 +17,12 @@ function sideOf(item) {
 }
 
 function isPending(item) {
-  return String(item.status || item.confirmationStatus || '').toLowerCase().includes('pending');
+  return (
+    String(item.status || item.confirmationStatus || '').toLowerCase().includes('pending') ||
+    item.requiresMyConfirmation === true ||
+    item.waitingForOtherConfirmation === true ||
+    Boolean(item.pendingChange)
+  );
 }
 
 Page({

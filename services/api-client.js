@@ -35,8 +35,9 @@ function handleUnauthorized(statusCode) {
 
 function request(options) {
   const { path, method = 'GET', data, auth = true } = options || {};
+  const hasBody = data !== undefined && data !== null;
   const header = {
-    'content-type': 'application/json',
+    'content-type': hasBody ? 'application/json' : 'application/x-www-form-urlencoded',
   };
   const token = sessionStore.getAccessToken();
   if (auth && token) {
@@ -44,10 +45,9 @@ function request(options) {
   }
 
   return new Promise((resolve, reject) => {
-    wx.request({
+    const requestOptions = {
       url: buildUrl(path),
       method,
-      data,
       header,
       success(response) {
         const statusCode = response.statusCode || 0;
@@ -66,7 +66,11 @@ function request(options) {
       fail(error) {
         reject(new Error(error && error.errMsg ? `网络请求失败：${error.errMsg}` : '网络请求失败'));
       },
-    });
+    };
+    if (hasBody) {
+      requestOptions.data = data;
+    }
+    wx.request(requestOptions);
   });
 }
 

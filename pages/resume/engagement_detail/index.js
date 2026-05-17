@@ -10,6 +10,19 @@ function isPending(item) {
   return String(item.status || item.confirmationStatus || '').toLowerCase().includes('pending');
 }
 
+function needsMyConfirmation(item) {
+  return Boolean(item && item.requiresMyConfirmation);
+}
+
+function waitingForOtherConfirmation(item) {
+  if (!item) return false;
+  if (item.waitingForOtherConfirmation === true) return true;
+  if (item.pendingChange) {
+    return item.pendingChange.waitingForOtherConfirmation === true;
+  }
+  return isPending(item) && item.requiresMyConfirmation !== true;
+}
+
 Page({
   data: {
     id: '',
@@ -19,10 +32,16 @@ Page({
     errorMessage: '',
     item: null,
     invite: null,
-    owner: null,
-    pending: false,
+    needsMyConfirmation: false,
+    waitingForOtherConfirmation: false,
+    heroSubtitle: '',
     visible: true,
     inviteMode: false,
+    editing: false,
+    editForm: {
+      title: '',
+      detailText: '',
+    },
   },
 
   onLoad(options) {
@@ -54,8 +73,17 @@ Page({
       this.setData({
         loading: false,
         item,
-        pending: isPending(item),
+        invite: item.invite || null,
+        needsMyConfirmation: needsMyConfirmation(item),
+        waitingForOtherConfirmation: waitingForOtherConfirmation(item),
+        heroSubtitle: this.buildHeroSubtitle(item, false),
         visible: item.visible !== false,
+        editForm: {
+          title: item.title || '',
+          detailText: Array.isArray(item.detailLines)
+            ? item.detailLines.join('\n')
+            : '',
+        },
       });
     } catch (error) {
       this.setData({
@@ -77,8 +105,9 @@ Page({
         loading: false,
         item,
         invite: raw.invite || null,
-        owner: raw.owner || null,
-        pending: true,
+        needsMyConfirmation: true,
+        waitingForOtherConfirmation: false,
+        heroSubtitle: this.buildHeroSubtitle(item, true),
       });
     } catch (error) {
       this.setData({
@@ -103,6 +132,108 @@ Page({
     await this.submitAction(() => profileService.rejectEngagement(this.data.id), '已拒绝');
   },
 
+  buildHeroSubtitle(item, inviteMode) {
+    if (item && item.pendingChange) {
+      return item.pendingChange.type === 'delete'
+        ? '对方邀请你确认删除这条服务履历。'
+        : '对方邀请你确认这条服务履历的修改内容。';
+    }
+    return inviteMode
+      ? '对方邀请你确认这条服务履历。确认后，它会进入双方可信资料。'
+      : '确认后，这条服务记录会进入双方可信资料。';
+  },
+
+  onShareAppMessage() {
+    const invite = this.data.invite;
+    if (invite && invite.token) {
+      return {
+        title: invite.title || '邀请你确认服务履历',
+        path: invite.path,
+      };
+    }
+    const item = this.data.item || {};
+    return {
+      title: item.pendingChange ? '邀请你确认履历变更' : '邀请你确认服务履历',
+      path: `/pages/resume/engagement_detail/index?id=${encodeURIComponent(this.data.id || item.id || '')}`,
+    };
+  },
+
+  async shareConfirmation() {
+    if (this.data.invite && this.data.invite.token) {
+      return;
+    }
+    if (!this.data.item || this.data.item.invite) {
+      this.setData({ invite: this.data.item ? this.data.item.invite || null : null });
+      return;
+    }
+    try {
+      const invite = await profileService.getEngagementInvite(this.data.id);
+      this.setData({ invite: invite || null });
+    } catch (error) {
+      this.setData({
+        errorMessage: error && error.message ? error.message : '邀请加载失败',
+      });
+    }
+  },
+
+  startEdit() {
+    if (!this.data.item || this.data.inviteMode || this.data.waitingForOtherConfirmation || this.data.needsMyConfirmation) return;
+    this.setData({
+      editing: true,
+      editForm: {
+        title: this.data.item.title || '',
+        detailText: Array.isArray(this.data.item.detailLines)
+          ? this.data.item.detailLines.join('\n')
+          : '',
+      },
+    });
+  },
+
+  cancelEdit() {
+    this.setData({ editing: false, errorMessage: '' });
+  },
+
+  updateEditField(event) {
+    const field = event.currentTarget.dataset.field;
+    this.setData({ [`editForm.${field}`]: event.detail.value });
+  },
+
+  async submitEdit() {
+    const form = this.data.editForm;
+    const title = String(form.title || '').trim();
+    if (!title) {
+      this.setData({ errorMessage: '请填写标题' });
+      return;
+    }
+    const detailLines = String(form.detailText || '')
+      .split('\n')
+      .map((item) => item.trim())
+      .filter(Boolean);
+    await this.submitAction(
+      () => profileService.requestEngagementUpdate(this.data.id, { title, detailLines }),
+      '修改已提交',
+    );
+    this.setData({ editing: false });
+  },
+
+  requestDelete() {
+    if (!this.data.item || this.data.inviteMode || this.data.waitingForOtherConfirmation || this.data.needsMyConfirmation) return;
+    const confirmed = String(this.data.item.status || '').toLowerCase() === 'confirmed';
+    wx.showModal({
+      title: '删除履历',
+      content: confirmed ? '删除已确认履历需要对方确认。确认提交删除申请吗？' : '这条履历尚未确认，删除后不会再展示。确认删除吗？',
+      confirmText: confirmed ? '提交删除申请' : '删除',
+      confirmColor: '#d92d20',
+      success: async (result) => {
+        if (!result.confirm) return;
+        await this.submitAction(
+          () => profileService.requestEngagementDelete(this.data.id),
+          confirmed ? '删除申请已提交' : '已删除',
+        );
+      },
+    });
+  },
+
   async toggleVisible(event) {
     const visible = event.detail.value;
     await this.submitAction(() => profileService.updateEngagementVisibility(this.data.id, visible), visible ? '已公开' : '已隐藏');
@@ -111,16 +242,20 @@ Page({
   async submitAction(action, toastTitle) {
     this.setData({ submitting: true, errorMessage: '' });
     try {
-      await action();
+      const result = await action();
       wx.showToast({ title: toastTitle, icon: 'success' });
       this.setData({ submitting: false });
       refreshState.mark(['home', 'resume', 'engagements']);
       if (this.data.inviteMode) {
-      wx.redirectTo({ url: '/pages/resume/engagements/index?tab=pending' });
+        wx.redirectTo({ url: '/pages/resume/engagements/index?tab=pending' });
         const app = getApp();
         if (app && app.globalData) {
           app.globalData.pendingEngagementInviteToken = '';
         }
+        return;
+      }
+      if (result && result.status === 'archived') {
+        wx.redirectTo({ url: '/pages/resume/engagements/index?tab=all' });
         return;
       }
       await this.loadDetail();

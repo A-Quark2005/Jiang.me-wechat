@@ -79,6 +79,21 @@ function updateEngagementVisibility(id, visible) {
   });
 }
 
+function requestEngagementUpdate(id, payload) {
+  return request({
+    path: `/api/me/resume/engagements/${encodeURIComponent(id)}`,
+    method: 'PATCH',
+    data: payload,
+  });
+}
+
+function requestEngagementDelete(id) {
+  return request({
+    path: `/api/me/resume/engagements/${encodeURIComponent(id)}`,
+    method: 'DELETE',
+  });
+}
+
 module.exports = {
   acceptEngagementInvite,
   confirmEngagement,
@@ -89,6 +104,8 @@ module.exports = {
   getResume,
   previewEngagementInvite,
   rejectEngagement,
+  requestEngagementDelete,
+  requestEngagementUpdate,
   updateEngagementVisibility,
   updateResume,
   updateSelfIntroduction,

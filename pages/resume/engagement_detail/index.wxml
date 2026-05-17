@@ -9,17 +9,24 @@
   <block wx:else>
     <view class="hero">
       <view class="hero-title">{{item.title || '服务履历'}}</view>
-      <view class="hero-subtitle">{{inviteMode ? '对方邀请你确认这条服务履历。确认后，它会进入双方可信资料。' : '确认后，这条服务记录会进入双方可信资料。'}}</view>
+      <view class="hero-subtitle">{{heroSubtitle}}</view>
     </view>
 
     <view class="card">
       <view class="section-title">服务事实</view>
       <view class="section-subtitle">{{item.summary || '暂无摘要'}}</view>
-      <view wx:if="{{owner}}" class="detail-line">发起人：{{owner.displayName || owner.userId || '暂无'}}</view>
       <view class="detail-line">服务者：{{item.providerName || item.providerProfileName || item.providerProfileId || '暂无'}}</view>
       <view class="detail-line">被服务者：{{item.receiverName || item.receiverProfileName || item.receiverProfileId || '暂无'}}</view>
       <view class="detail-line">来源：{{item.sourceType || '暂无'}}</view>
       <view class="detail-line">状态：{{item.status || item.confirmationStatus || '未知'}}</view>
+    </view>
+
+    <view wx:if="{{item.pendingChange}}" class="card">
+      <view class="section-title">待确认变更</view>
+      <view class="section-subtitle">这条履历有一方发起了修改或删除申请，需要另一方确认后才会生效。</view>
+      <view class="detail-line">类型：{{item.pendingChange.type === 'delete' ? '删除申请' : '修改申请'}}</view>
+      <view class="detail-line">申请人：{{item.pendingChange.requesterDisplayName || '未知'}}</view>
+      <view class="detail-line" wx:if="{{item.pendingChange.title}}">新标题：{{item.pendingChange.title}}</view>
     </view>
 
     <view class="card">
@@ -28,15 +35,43 @@
           <view class="section-title">公开展示</view>
           <view class="section-subtitle">只控制你自己可信资料中的展示状态。</view>
         </view>
-        <switch checked="{{visible}}" bindchange="toggleVisible" disabled="{{submitting || pending || inviteMode}}" />
+        <switch checked="{{visible}}" bindchange="toggleVisible" disabled="{{submitting || needsMyConfirmation || waitingForOtherConfirmation || inviteMode}}" />
+      </view>
+    </view>
+
+    <view wx:if="{{editing}}" class="card">
+      <view class="section-title">修改履历</view>
+      <view class="section-subtitle">{{item.status === 'confirmed' ? '已确认履历提交后需要对方确认才会生效。' : '未确认履历可以直接修改。'}}</view>
+      <view class="field">
+        <view class="field-label">标题</view>
+        <input class="input" value="{{editForm.title}}" data-field="title" bindinput="updateEditField" placeholder="请输入标题" />
+      </view>
+      <view class="field">
+        <view class="field-label">详情</view>
+        <textarea class="textarea" value="{{editForm.detailText}}" data-field="detailText" bindinput="updateEditField" placeholder="可分行填写详情" />
+      </view>
+      <view class="row action-row">
+        <button class="ghost-button" bindtap="cancelEdit" disabled="{{submitting}}">取消</button>
+        <button class="primary-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submitEdit">提交修改申请</button>
       </view>
     </view>
 
     <view wx:if="{{errorMessage}}" class="error-box">{{errorMessage}}</view>
 
-    <view wx:if="{{pending}}" class="bottom-bar button-row">
+    <view class="card action-card">
+      <view class="row action-row">
+        <button class="ghost-button" bindtap="startEdit" disabled="{{submitting || inviteMode || needsMyConfirmation || waitingForOtherConfirmation}}">修改</button>
+        <button class="danger-button" bindtap="requestDelete" disabled="{{submitting || inviteMode || needsMyConfirmation || waitingForOtherConfirmation}}">删除</button>
+      </view>
+    </view>
+
+    <view wx:if="{{needsMyConfirmation}}" class="bottom-bar button-row">
       <button wx:if="{{!inviteMode}}" class="danger-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="reject">拒绝</button>
       <button class="primary-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="confirm">确认</button>
+    </view>
+
+    <view wx:elif="{{waitingForOtherConfirmation}}" class="bottom-bar">
+      <button class="primary-button" open-type="share" bindtap="shareConfirmation">发给微信联系人确认</button>
     </view>
   </block>
 </view>
