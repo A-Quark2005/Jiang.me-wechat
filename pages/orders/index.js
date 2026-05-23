@@ -108,7 +108,7 @@ Page({
   },
 
   onShow() {
-    if (!loginGuard.guardPage('/pages/orders/index')) {
+    if (!loginGuard.guardPage('/pages/orders/index', { requireRegistration: true })) {
       return;
     }
     if (!this.data.hasLoaded || refreshState.consume(PAGE_KEY) || refreshState.isExpired(PAGE_KEY, CACHE_MAX_AGE_MS)) {

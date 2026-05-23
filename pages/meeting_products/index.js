@@ -3,6 +3,7 @@ const dashboardCache = require('../../services/dashboard-cache');
 const refreshState = require('../../services/refresh-state');
 const displayFormatters = require('../../services/display-formatters');
 const loginGuard = require('../../services/login-guard');
+const tencentMeetingAccess = require('../../services/tencent-meeting-access');
 
 const PAGE_KEY = 'meeting_products';
 const CACHE_MAX_AGE_MS = 5 * 60 * 1000;
@@ -61,26 +62,6 @@ function buildProductCards(products) {
   }));
 }
 
-/**
- * Decide whether purchase must be blocked and redirected to the activation
- * page before continuing.
- *
- * @param {object} activation Normalized activation state.
- * @returns {boolean} True when login or phone binding is incomplete.
- */
-function shouldBlockForActivation(activation) {
-  if (!activation) {
-    return true;
-  }
-  if (!activation.isLoggedIn) {
-    return true;
-  }
-  if (activation.needsPhone) {
-    return true;
-  }
-  return false;
-}
-
 Page({
   data: {
     loading: true,
@@ -92,7 +73,7 @@ Page({
   },
 
   onShow() {
-    if (!loginGuard.guardPage('/pages/meeting_products/index')) {
+    if (!loginGuard.guardPage('/pages/meeting_products/index', { requireRegistration: true })) {
       return;
     }
     if (!this.data.hasLoaded || refreshState.consume(PAGE_KEY) || refreshState.isExpired(PAGE_KEY, CACHE_MAX_AGE_MS)) {
@@ -141,12 +122,9 @@ Page({
     }
     this.setData({ paying: true, errorMessage: '' });
     try {
-      const activation = displayFormatters.normalizeMeetingActivationState(
-        await service.getTencentMeetingActivation(),
-      );
-      if (shouldBlockForActivation(activation)) {
+      const ready = await tencentMeetingAccess.ensureReady({ targetUrl: '/pages/meeting_products/index' });
+      if (!ready) {
         this.setData({ paying: false });
-        wx.navigateTo({ url: '/pages/meeting_activation/index' });
         return;
       }
       const order = await service.createWechatMiniProgramOrder(productId);

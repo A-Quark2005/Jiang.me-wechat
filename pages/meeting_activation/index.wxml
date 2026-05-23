@@ -8,33 +8,22 @@
 
   <view class="activation-panel">
     <view wx:if="{{loading}}" class="surface-card">
-      <view class="section-title">{{loggedIn ? '正在检查腾讯会议状态' : '请稍候'}}</view>
+      <view class="section-title">正在检查腾讯会议状态</view>
     </view>
 
     <block wx:else>
-      <view wx:if="{{showPanelCopy}}" class="activation-panel-copy {{registrationRequired ? 'activation-panel-copy-center' : ''}}">
+      <view wx:if="{{showPanelCopy}}" class="activation-panel-copy">
         <view class="section-title">{{panelTitleText}}</view>
         <view class="section-subtitle activation-panel-subtitle">{{panelSubtitleText}}</view>
       </view>
 
       <button
-        wx:if="{{registrationRequired}}"
-        class="primary-button activation-main-button"
-        open-type="getPhoneNumber"
-        bindgetphonenumber="handleRegisterPhoneNumber"
-        loading="{{bindingPhone || submittingLogin}}"
-        disabled="{{bindingPhone || submittingLogin}}"
-      >
-        {{primaryButtonText}}
-      </button>
-
-      <button
-        wx:elif="{{activation.needsPhone}}"
+        wx:if="{{activation.needsPhone}}"
         class="primary-button activation-main-button"
         open-type="getPhoneNumber"
         bindgetphonenumber="handleGetPhoneNumber"
-        loading="{{bindingPhone || submittingLogin}}"
-        disabled="{{bindingPhone || submittingLogin}}"
+        loading="{{bindingPhone}}"
+        disabled="{{bindingPhone}}"
       >
         {{primaryButtonText}}
       </button>
@@ -43,8 +32,8 @@
         wx:elif="{{activation.needsActivation}}"
         class="primary-button activation-main-button"
         bindtap="resendInvite"
-        loading="{{sending || submittingLogin}}"
-        disabled="{{sending || submittingLogin}}"
+        loading="{{sending}}"
+        disabled="{{sending}}"
       >
         {{primaryButtonText}}
       </button>
@@ -53,18 +42,9 @@
         wx:else
         class="primary-button activation-main-button"
         bindtap="handlePrimaryAction"
-        loading="{{submittingLogin}}"
-        disabled="{{submittingLogin}}"
       >
         {{primaryButtonText}}
       </button>
-
-      <view wx:if="{{!loggedIn && !registrationRequired}}" class="activation-login-hint">未注册手机号将自动注册</view>
-
-      <view class="agreement-row" bindtap="toggleAgreement">
-        <view class="agreement-checkbox {{agreementCheckedClass}}">{{agreementCheckmark}}</view>
-        <view class="agreement-text">登录即表示同意 <text class="agreement-link">《用户服务协议》</text> 和 <text class="agreement-link">《隐私政策》</text></view>
-      </view>
 
       <view wx:if="{{successMessage}}" class="success-box">{{successMessage}}</view>
       <view wx:if="{{errorMessage}}" class="error-box">{{errorMessage}}</view>

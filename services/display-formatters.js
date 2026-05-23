@@ -169,7 +169,7 @@ function normalizeMeetingActivationStatusText(value) {
   if (text === 'inactive') return '待启用';
   if (text === 'not_registered') return '待创建';
   if (text === 'disabled') return '未启用';
-  if (text === 'not_logged_in') return '未登录';
+  if (text === 'not_logged_in') return '暂时无法读取账号';
   return String(value || '').trim() || '待确认';
 }
 

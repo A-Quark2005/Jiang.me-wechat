@@ -47,6 +47,18 @@
         <view class="entitlements-divider"></view>
       </view>
 
+      <view class="entitlements-recommend-card tappable" bindtap="openHourPurchase">
+        <image class="entitlements-recommend-icon-image" src="/assets/ui/card-ticket-icon.svg" mode="aspectFit"></image>
+        <view class="row-main">
+          <view class="entitlements-recommend-title">购买小时卡</view>
+          <view class="entitlements-recommend-meta">按小时购买，¥2.50/小时</view>
+        </view>
+        <view class="entitlements-recommend-action">
+          <text>去购买</text>
+          <image class="entitlements-arrow-icon" src="/assets/ui/arrow-light.svg" mode="aspectFit"></image>
+        </view>
+      </view>
+
       <view class="entitlements-recommend-card tappable" bindtap="openProducts">
         <image class="entitlements-recommend-icon-image" src="/assets/ui/card-ticket-icon.svg" mode="aspectFit"></image>
         <view class="row-main">

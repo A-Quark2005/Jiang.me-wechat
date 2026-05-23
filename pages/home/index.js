@@ -5,6 +5,8 @@ const refreshState = require('../../services/refresh-state');
 const heroLayout = require('../../services/hero-layout');
 const loginGuard = require('../../services/login-guard');
 const displayFormatters = require('../../services/display-formatters');
+const tencentMeetingAccess = require('../../services/tencent-meeting-access');
+const wechatProfile = require('../../services/wechat-profile');
 
 const PAGE_KEY = 'home';
 const CACHE_MAX_AGE_MS = 5 * 60 * 1000;
@@ -99,6 +101,40 @@ function formatPhone(user, profile) {
   return displayFormatters.formatPhoneText(phone, { fallback: '未授权手机号' });
 }
 
+function resolveWechatProfile() {
+  return wechatProfile.getProfile() || {};
+}
+
+function mergeDisplayProfile(user, profile) {
+  const localWechatProfile = resolveWechatProfile();
+  const displayName =
+    localWechatProfile.nickname ||
+    profile.displayName ||
+    user.displayName ||
+    (sessionStore.getSession() && sessionStore.getSession().displayName) ||
+    '';
+  return {
+    displayName,
+    avatarUrl: localWechatProfile.avatarUrl || profile.avatarUrl || user.avatarUrl || '',
+  };
+}
+
+function buildWechatProfileState(profile) {
+  const source = profile || resolveWechatProfile();
+  const displayName = source.nickname || '';
+  const avatarUrl = source.avatarUrl || '';
+  return {
+    displayNameText: displayName || '请填写昵称',
+    avatarUrl,
+    avatarText: String(displayName || '讲').trim().slice(0, 1) || '讲',
+    needsWechatProfile: !displayName || !avatarUrl,
+  };
+}
+
+function isCompleteWechatProfile(profile) {
+  return Boolean(profile && profile.nickname && profile.avatarUrl);
+}
+
 function resolveEntitlementSummary(entitlements) {
   const list = safeArray(entitlements && (entitlements.items || entitlements.entitlements || entitlements));
   const active = list.find((item) => String(item.status || '').toLowerCase() === 'active') || list[0];
@@ -123,53 +159,9 @@ function resolveEntitlementSummary(entitlements) {
         ? `剩余 ${remaining} 次`
         : durationHours && isHourPass
           ? `${durationHours}小时权益`
-        : '已开通 · 可立即使用',
+          : '已开通 · 可立即使用',
     tone: 'ok',
   };
-}
-
-/**
- * Check whether the current user already owns a valid unlimited duration card.
- *
- * @param {any} entitlementsRaw Entitlements API response.
- * @returns {boolean} True when an active duration entitlement exists.
- */
-function hasActiveUnlimitedCard(entitlementsRaw) {
-  const entitlements = safeArray(entitlementsRaw && (entitlementsRaw.items || entitlementsRaw.entitlements || entitlementsRaw));
-  return entitlements.some((item) => {
-    const status = String(item && item.status ? item.status : '').toLowerCase();
-    const type = String(item && item.type ? item.type : '').toLowerCase();
-    return status === 'active' && (type === 'duration' || type === 'hour_pass');
-  });
-}
-
-/**
- * Render the hour-pass display price for the UI stepper.
- *
- * @param {number|string} hours Selected hours.
- * @returns {string} Display price text.
- */
-function hourPriceText(hours) {
-  return `￥${(Number(hours || 0) * 0.5).toFixed(1)}`;
-}
-
-/**
- * Determine whether activation state requires jumping to the activation page.
- *
- * @param {object} activation Normalized activation state.
- * @returns {boolean} True when login or phone binding is still missing.
- */
-function needsActivationPageBlock(activation) {
-  if (!activation) {
-    return true;
-  }
-  if (!activation.isLoggedIn) {
-    return true;
-  }
-  if (activation.needsPhone) {
-    return true;
-  }
-  return false;
 }
 
 function resolveResumeSummary(resume, credentials, engagements) {
@@ -338,6 +330,11 @@ Page({
     profile: null,
     phoneText: '',
     avatarText: '讲',
+    avatarUrl: '',
+    needsWechatProfile: true,
+    showWechatProfileModal: false,
+    profileDraftNickname: '',
+    profileDraftAvatarUrl: '',
     entitlementSummary: null,
     resumeSummary: null,
     backendBaseUrl: '',
@@ -359,11 +356,6 @@ Page({
     endDateLabel: '',
     submitting: false,
     submitButtonText: '立即预定',
-    paying: false,
-    showHourPassModal: false,
-    hourPassHours: 1,
-    hourPassDisplayPriceText: '￥0.5',
-    continuingAfterPayment: false,
   },
 
   onLoad() {
@@ -382,6 +374,8 @@ Page({
       ...buildLabels(nextData),
       ...heroLayout.buildHeroLayoutData(),
     });
+    this.setData(buildWechatProfileState());
+    this.promptWechatProfileIfNeeded();
     const cached = recentCache(cachedDashboard(), CACHE_MAX_AGE_MS);
     if (cached) {
       this.setData({
@@ -392,8 +386,13 @@ Page({
     }
   },
 
-  onShow() {
-    if (!loginGuard.isLoggedIn()) {
+  async onShow() {
+    const loggedIn = await loginGuard.ensureLoggedInAsync({
+      targetUrl: '/pages/home/index',
+      navigateAfterLogin: false,
+      showError: false,
+    });
+    if (!loggedIn) {
       this.enterGuestMode();
       return;
     }
@@ -410,14 +409,13 @@ Page({
       user: null,
       profile: null,
       phoneText: '点击登录后授权手机号',
-      avatarText: '讲',
-      displayNameText: '游客模式',
+      ...buildWechatProfileState(),
       entitlementSummary: {
         title: '当前会议权益',
-        detail: '未登录 · 登录后查看权益与购卡',
+        detail: '暂时无法读取账号 · 请稍后刷新',
         tone: 'warn',
       },
-      entitlementActionText: '去登录',
+      entitlementActionText: '刷新',
       resumeSummary: null,
       guestMode: true,
       activation: null,
@@ -473,7 +471,8 @@ Page({
     primeDerivedCaches(dashboard);
     const user = (bootstrap && bootstrap.me) || (sessionRecord && sessionRecord.user) || {};
     const profile = (bootstrap && bootstrap.profile) || (sessionRecord && sessionRecord.profile) || {};
-    const displayName = profile.displayName || user.displayName || sessionStore.getSession() && sessionStore.getSession().displayName || '';
+    const displayProfile = mergeDisplayProfile(user, profile);
+    const displayName = displayProfile.displayName;
     const entitlementSummary = resolveEntitlementSummary(entitlements);
     const nextViewState = {
       session: sessionStore.getSession(),
@@ -481,6 +480,8 @@ Page({
       profile,
       phoneText: formatPhone(user, profile),
       avatarText: String(displayName || '讲').trim().slice(0, 1) || '讲',
+      avatarUrl: displayProfile.avatarUrl,
+      needsWechatProfile: !displayName || !displayProfile.avatarUrl,
       displayNameText: displayName || '用户昵称',
       entitlementSummary,
       entitlementActionText: entitlementSummary.tone === 'ok' ? '去查看' : '去开通',
@@ -496,6 +497,7 @@ Page({
       loading: false,
       ...nextViewState,
     });
+    this.promptWechatProfileIfNeeded();
     saveCachedDashboard(nextViewState);
     warmSecondaryCaches();
     refreshState.touch(PAGE_KEY);
@@ -507,10 +509,63 @@ Page({
     }, { viaTab: true });
   },
 
+  onChooseAvatar(event) {
+    const avatarUrl = event.detail && event.detail.avatarUrl;
+    const profile = wechatProfile.saveAvatarUrl(avatarUrl);
+    if (profile) {
+      this.setData(buildWechatProfileState(profile));
+    }
+  },
+
+  onNicknameInput(event) {
+    const nickname = event.detail && event.detail.value;
+    const profile = wechatProfile.saveNickname(nickname);
+    if (profile) {
+      this.setData(buildWechatProfileState(profile));
+    }
+  },
+
+  promptWechatProfileIfNeeded() {
+    const profile = wechatProfile.getProfile();
+    if (isCompleteWechatProfile(profile)) {
+      return;
+    }
+    this.setData({
+      showWechatProfileModal: true,
+      profileDraftNickname: profile && profile.nickname ? profile.nickname : '',
+      profileDraftAvatarUrl: profile && profile.avatarUrl ? profile.avatarUrl : '',
+    });
+  },
+
+  onProfileModalChooseAvatar(event) {
+    const avatarUrl = event.detail && event.detail.avatarUrl;
+    if (!avatarUrl) return;
+    this.setData({ profileDraftAvatarUrl: avatarUrl });
+  },
+
+  onProfileModalNicknameInput(event) {
+    this.setData({ profileDraftNickname: event.detail.value });
+  },
+
+  confirmWechatProfile() {
+    const nickname = String(this.data.profileDraftNickname || '').trim();
+    const avatarUrl = String(this.data.profileDraftAvatarUrl || '').trim();
+    if (!nickname || !avatarUrl) {
+      wx.showToast({ title: '请填写昵称并选择头像', icon: 'none' });
+      return;
+    }
+    wechatProfile.saveNickname(nickname);
+    const profile = wechatProfile.saveAvatarUrl(avatarUrl);
+    this.setData({
+      showWechatProfileModal: false,
+      ...buildWechatProfileState(profile),
+    });
+  },
+
   openEntitlements() {
     loginGuard.guardAction('/pages/meeting_entitlements/index', () => {
       wx.switchTab({ url: '/pages/meeting_entitlements/index' });
-    }, { viaTab: true });
+    }, { viaTab: true, requireRegistration: true });
   },
 
   createMeeting() {
@@ -600,10 +655,6 @@ Page({
    * @returns {Promise<void>} Resolves after the booking flow completes.
    */
   async submit() {
-    if (!loginGuard.isLoggedIn()) {
-      loginGuard.redirectToLogin({ targetUrl: '/pages/home/index' });
-      return;
-    }
     const fallbackDisplayName = String(this.data.displayNameText || '用户昵称').trim() || '用户昵称';
     const subject = this.data.subject.trim() || `${fallbackDisplayName} 预定的会议`;
     const start = toTimestamp(this.data.startDate, this.data.startTime);
@@ -615,42 +666,9 @@ Page({
 
     this.setData({ submitting: true, errorMessage: '', submitButtonText: '正在预定' });
     try {
-      const entitlements = await entitlementsService.getEntitlements();
-      if (!hasActiveUnlimitedCard(entitlements)) {
-        this.setData({
-          submitting: false,
-          submitButtonText: '立即预定',
-          continuingAfterPayment: true,
-          showHourPassModal: true,
-        });
-        return;
-      }
-      const activation = displayFormatters.normalizeMeetingActivationState(
-        await entitlementsService.getTencentMeetingActivation(),
-      );
-      if (needsActivationPageBlock(activation)) {
+      const ready = await tencentMeetingAccess.ensureReady({ targetUrl: '/pages/home/index' });
+      if (!ready) {
         this.setData({ submitting: false, submitButtonText: '立即预定' });
-        wx.navigateTo({ url: '/pages/meeting_activation/index' });
-        return;
-      }
-      if (activation.isPendingActivation) {
-        this.setData({
-          submitting: false,
-          submitButtonText: '立即预定',
-          errorMessage: '腾讯会议账号待激活，请查看短信或激活链接后再预定会议。',
-        });
-        wx.showModal({
-          title: '请先完成激活',
-          content: '腾讯会议账号待激活，请查看短信或激活链接完成启用后，再继续预定会议。',
-          confirmText: '重发链接',
-          cancelText: '知道了',
-          success: async (result) => {
-            if (!result.confirm) {
-              return;
-            }
-            await this.resendActivationInvite();
-          },
-        });
         return;
       }
       this.setData({ submitButtonText: '正在创建会议' });
@@ -705,7 +723,6 @@ Page({
       this.setData({
         submitting: false,
         submitButtonText: '立即预定',
-        continuingAfterPayment: false,
         errorMessage: activationPending
           ? '腾讯会议账号待激活，请查看短信或激活链接后再预定会议。'
           : rawMessage,
@@ -719,119 +736,6 @@ Page({
         });
       }
     }
-  },
-
-  /**
-   * Close the hour-pass purchase modal.
-   *
-   * @returns {void}
-   */
-  closeHourPassModal() {
-    if (this.data.paying) {
-      return;
-    }
-    this.setData({
-      showHourPassModal: false,
-      continuingAfterPayment: false,
-    });
-  },
-
-  /**
-   * Decrease selected hour-pass hours.
-   *
-   * @returns {void}
-   */
-  decreaseHourPassHours() {
-    const nextHours = Math.max(1, Number(this.data.hourPassHours || 1) - 1);
-    this.setData({
-      hourPassHours: nextHours,
-      hourPassDisplayPriceText: hourPriceText(nextHours),
-    });
-  },
-
-  /**
-   * Increase selected hour-pass hours.
-   *
-   * @returns {void}
-   */
-  increaseHourPassHours() {
-    const nextHours = Math.min(24, Number(this.data.hourPassHours || 1) + 1);
-    this.setData({
-      hourPassHours: nextHours,
-      hourPassDisplayPriceText: hourPriceText(nextHours),
-    });
-  },
-
-  /**
-   * Purchase an hour pass and continue the scheduling flow on the home page.
-   *
-   * @returns {Promise<void>} Resolves after payment handling finishes.
-   */
-  async confirmHourPassPurchase() {
-    if (this.data.paying) {
-      return;
-    }
-    const selectedHours = Number(this.data.hourPassHours || 1);
-    this.setData({
-      paying: true,
-      errorMessage: '',
-      submitButtonText: '等待支付',
-    });
-    try {
-      const order = await entitlementsService.createWechatMiniProgramOrder('meeting-hour-pass', {
-        hours: selectedHours,
-      });
-      if (!order || !order.paymentParams) {
-        throw new Error('小时会员支付参数异常，请稍后重试');
-      }
-      await entitlementsService.requestPayment(order.paymentParams);
-      if (order.orderId) {
-        await entitlementsService.syncPaymentStatus(order.orderId);
-      }
-      refreshState.mark(['home', 'entitlements', 'orders']);
-      this.setData({
-        paying: false,
-        showHourPassModal: false,
-      });
-      if (this.data.continuingAfterPayment) {
-        await this.loadAuthenticatedDashboard();
-        await this.submit();
-        return;
-      }
-      wx.showToast({ title: '购买成功', icon: 'success' });
-    } catch (error) {
-      const message = error && error.message ? error.message : '小时会员购买失败';
-      const canceled = String(message || '').toLowerCase().includes('cancel');
-      this.setData({
-        paying: false,
-        submitButtonText: '立即预定',
-        errorMessage: canceled ? '' : message,
-      });
-      if (canceled) {
-        return;
-      }
-      wx.showModal({
-        title: '购买失败',
-        content: message,
-        showCancel: false,
-      });
-    }
-  },
-
-  /**
-   * Open the advanced meeting-card purchase page from the hour-pass modal.
-   *
-   * @returns {void}
-   */
-  openMeetingProducts() {
-    if (this.data.paying) {
-      return;
-    }
-    this.setData({
-      showHourPassModal: false,
-      continuingAfterPayment: false,
-    });
-    wx.switchTab({ url: '/pages/meeting_entitlements/index' });
   },
 
   noop() {},
@@ -874,7 +778,7 @@ Page({
   openOrders() {
     loginGuard.guardAction('/pages/orders/index', () => {
       wx.navigateTo({ url: '/pages/orders/index' });
-    });
+    }, { requireRegistration: true });
   },
 
   refresh() {

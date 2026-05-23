@@ -86,6 +86,7 @@
 }
 
 .home-avatar {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -93,6 +94,8 @@
   height: 68rpx;
   border-radius: 999px;
   flex-shrink: 0;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .home-avatar-image {
@@ -100,10 +103,24 @@
   height: 68rpx;
 }
 
+.home-avatar-fallback {
+  width: 68rpx;
+  height: 68rpx;
+  border-radius: 999px;
+  text-align: center;
+  font-size: 28rpx;
+  line-height: 68rpx;
+  color: #ffffff;
+}
+
 .home-profile-name {
   font-size: 28rpx;
   line-height: 34rpx;
   color: #ffffff;
+}
+
+.home-profile-copy {
+  position: relative;
 }
 
 .home-profile-pending-row {
@@ -287,10 +304,10 @@
   border-radius: 8rpx;
 }
 
-.hour-pass-modal-mask {
+.wechat-profile-modal-mask {
   position: fixed;
   inset: 0;
-  z-index: 40;
+  z-index: 60;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -298,108 +315,79 @@
   background: rgba(0, 0, 0, 0.42);
 }
 
-.hour-pass-modal {
+.wechat-profile-modal {
   width: 100%;
   max-width: 640rpx;
-  padding: 36rpx 28rpx 28rpx;
+  padding: 40rpx 32rpx 32rpx;
   border-radius: 16rpx;
   background: #ffffff;
+  box-sizing: border-box;
 }
 
-.hour-pass-title {
+.wechat-profile-title {
   font-size: 32rpx;
   line-height: 44rpx;
-  font-weight: 600;
   color: #111827;
-}
-
-.hour-pass-subtitle {
-  margin-top: 12rpx;
-  font-size: 24rpx;
-  line-height: 36rpx;
-  color: #6b7280;
-}
-
-.hour-pass-stepper {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20rpx;
-  margin-top: 28rpx;
-}
-
-.hour-pass-stepper-button {
-  width: 88rpx;
-  height: 88rpx;
-  margin: 0;
-  border-radius: 16rpx;
-  background: #eef5ff;
-  color: #0071fe;
-  font-size: 44rpx;
-  line-height: 88rpx;
-}
-
-.hour-pass-stepper-value {
-  flex: 1;
   text-align: center;
 }
 
-.hour-pass-hours {
-  font-size: 32rpx;
-  line-height: 44rpx;
-  color: #111827;
-}
-
-.hour-pass-price {
+.wechat-profile-subtitle {
   margin-top: 8rpx;
   font-size: 24rpx;
-  line-height: 34rpx;
+  line-height: 36rpx;
+  color: #6b7280;
+  text-align: center;
+}
+
+.wechat-profile-avatar-button {
+  width: 128rpx;
+  height: 128rpx;
+  margin: 32rpx auto 0;
+  padding: 0;
+  border-radius: 999rpx;
+  overflow: hidden;
+  background: #eef5ff;
+}
+
+.wechat-profile-avatar-button::after {
+  border: 0;
+}
+
+.wechat-profile-avatar-image,
+.wechat-profile-avatar-placeholder {
+  width: 128rpx;
+  height: 128rpx;
+}
+
+.wechat-profile-avatar-placeholder {
+  font-size: 28rpx;
+  line-height: 128rpx;
   color: #0071fe;
+  text-align: center;
 }
 
-.hour-pass-desc {
-  margin-top: 24rpx;
-  font-size: 22rpx;
-  line-height: 34rpx;
-  color: #8f9bb3;
-}
-
-.hour-pass-actions {
-  display: flex;
-  gap: 20rpx;
-  margin-top: 28rpx;
-}
-
-.hour-pass-cancel,
-.hour-pass-confirm {
-  flex: 1;
+.wechat-profile-nickname-input {
   height: 80rpx;
-  margin: 0;
-  border-radius: 12rpx;
+  margin-top: 28rpx;
+  padding: 0 24rpx;
+  border: 1rpx solid #d9e2f2;
+  border-radius: 8rpx;
+  background: #f8fbff;
   font-size: 28rpx;
   line-height: 80rpx;
+  color: #111827;
+  box-sizing: border-box;
 }
 
-.hour-pass-cancel {
-  background: #eef2f7;
-  color: #4b5563;
-}
-
-.hour-pass-confirm {
+.wechat-profile-confirm {
+  width: 100%;
+  height: 80rpx;
+  margin-top: 28rpx;
+  border-radius: 8rpx;
   background: #0071fe;
   color: #ffffff;
-}
-
-.hour-pass-link-button {
-  width: 100%;
-  height: 72rpx;
-  margin-top: 16rpx;
-  border: 1rpx solid #cfe0ff;
-  border-radius: 12rpx;
-  background: #f7fbff;
-  color: #0071fe;
-  font-size: 26rpx;
-  line-height: 72rpx;
+  font-size: 30rpx;
+  line-height: 80rpx;
 }
 
 .home-reset-button {

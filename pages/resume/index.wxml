@@ -11,10 +11,15 @@
 
   <block wx:else>
     <view class="profile-stack">
-      <view wx:if="{{showPendingActivationNotice}}" class="surface-card resume-pending-card">
-        <view class="section-title">腾讯会议待激活</view>
-        <view class="section-subtitle">{{pendingActivationText}}</view>
-        <button class="secondary-button resume-pending-button" loading="{{sendingActivationInvite}}" bindtap="resendActivationInvite">重发激活链接</button>
+      <view class="surface-card account-card">
+        <view class="account-avatar tappable" bindtap="openWechatProfileEditor">
+          <image wx:if="{{avatarUrl}}" class="account-avatar-image" src="{{avatarUrl}}" mode="aspectFill"></image>
+          <view wx:else class="account-avatar-fallback">{{avatarText}}</view>
+        </view>
+        <view class="account-copy">
+          <view class="account-name tappable" bindtap="openWechatProfileEditor">{{displayNameText}}</view>
+          <view class="account-tier {{accountTierClass}}">{{accountTierText}}</view>
+        </view>
       </view>
 
       <view class="surface-card intro-card tappable" bindtap="openEditSelf">
@@ -75,7 +80,35 @@
         </view>
       </view>
 
-      <button class="primary-button public-home-button" bindtap="openPublicProfile">查看对外主页</button>
+    </view>
+
+    <view wx:if="{{showWechatProfileModal}}" class="wechat-profile-modal-mask" catchtouchmove="noop" bindtap="closeWechatProfileEditor">
+      <view class="wechat-profile-modal" catchtap="noop">
+        <view class="wechat-profile-header">
+          <view class="wechat-profile-title">编辑资料</view>
+          <view class="wechat-profile-close" bindtap="closeWechatProfileEditor">
+            <view class="wechat-profile-close-line"></view>
+            <view class="wechat-profile-close-line wechat-profile-close-line-alt"></view>
+          </view>
+        </view>
+        <view class="wechat-profile-avatar-picker">
+          <image wx:if="{{profileDraftAvatarUrl}}" class="wechat-profile-avatar-image" src="{{profileDraftAvatarUrl}}" mode="aspectFill"></image>
+          <view wx:else class="wechat-profile-avatar-placeholder">头像</view>
+          <view class="wechat-profile-avatar-badge">编辑</view>
+          <button class="wechat-profile-avatar-native-button" open-type="chooseAvatar" bindchooseavatar="onProfileModalChooseAvatar"></button>
+        </view>
+        <view class="wechat-profile-field">
+          <view class="wechat-profile-label">昵称</view>
+          <input
+            class="wechat-profile-nickname-input"
+            type="nickname"
+            value="{{profileDraftNickname}}"
+            bindinput="onProfileModalNicknameInput"
+            placeholder="请输入昵称"
+          />
+        </view>
+        <button class="wechat-profile-confirm" bindtap="confirmWechatProfile" loading="{{savingWechatProfile}}">保存</button>
+      </view>
     </view>
   </block>
 </view>

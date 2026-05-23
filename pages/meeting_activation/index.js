@@ -98,45 +98,7 @@ function buildActivationViewState(rawActivation) {
     activationConfiguredText: activation.configuredText,
     activationPhoneText: activation.phoneText,
     activationUserIdText: activation.userIdText,
-    showPanelCopy: !activation.isLoggedIn,
-  };
-}
-
-/**
- * Build the guest registration prompt shown after mini-program login says the account is not registered yet.
- *
- * @returns {object} Page state for the registration prompt.
- */
-function buildRegistrationPromptState() {
-  const guestActivation = displayFormatters.normalizeMeetingActivationState({
-    status: 'registration_required',
-    needsPhone: true,
-    needsActivation: false,
-  });
-  return {
-    activation: {
-      ...guestActivation,
-      statusMeta: {
-        title: '请先授权手机号完成注册',
-        detail: '当前账号还未完成手机号注册，请先授权手机号再继续。',
-        actionText: '授权手机号并注册',
-        tone: 'warn',
-      },
-    },
-    loading: false,
-    hasLoaded: false,
-    loggedIn: false,
-    registrationRequired: true,
-    primaryButtonText: '授权手机号并注册',
-    panelTitleText: '授权手机号完成注册',
-    panelSubtitleText: '当前账号还未注册，请先授权手机号继续。',
-    brandTaglineText: '腾讯会议，会开会',
     showPanelCopy: true,
-    activationConfiguredText: '待注册',
-    activationPhoneText: '注册时获取',
-    activationUserIdText: '待创建',
-    successMessage: '',
-    errorMessage: '',
   };
 }
 
@@ -145,23 +107,17 @@ Page({
     loading: true,
     hasLoaded: false,
     redirectTarget: '',
-    loggedIn: false,
-    registrationRequired: false,
     sending: false,
     bindingPhone: false,
-    submittingLogin: false,
     activation: null,
     errorMessage: '',
     successMessage: '',
-    agreed: false,
     mascotUrl: '/assets/ui/jlm-transparent.png',
-    primaryButtonText: '登录',
-    panelTitleText: '登录讲了么账号',
-    panelSubtitleText: '登录后即可继续查看权益、资料和预定会议。',
+    primaryButtonText: '检查腾讯会议状态',
+    panelTitleText: '检查腾讯会议状态',
+    panelSubtitleText: '请确认当前账号接入状态。',
     brandTaglineText: '腾讯会议，会开会',
-    showPanelCopy: false,
-    agreementCheckedClass: '',
-    agreementCheckmark: '',
+    showPanelCopy: true,
     activationConfiguredText: '未启用',
     activationPhoneText: '当前无需提供',
     activationUserIdText: '待创建',
@@ -177,39 +133,22 @@ Page({
     });
   },
 
-  onShow() {
-    const loggedIn = loginGuard.isLoggedIn();
-    this.setData({ loggedIn });
+  async onShow() {
+    const loggedIn = await loginGuard.ensureLoggedInAsync({
+      targetUrl: '/pages/meeting_activation/index',
+      navigateAfterLogin: false,
+    });
     if (!loggedIn) {
-      const guestActivation = displayFormatters.normalizeMeetingActivationState({
-        status: 'not_logged_in',
-        needsPhone: false,
-        needsActivation: false,
-      });
       this.setData({
         loading: false,
-        hasLoaded: false,
-        activation: {
-          ...guestActivation,
-          statusMeta: {
-            title: '请先登录讲了么账号',
-            detail: '未登录时仅可浏览首页，进入权益、资料、预定等页面前需要先完成登录。',
-            actionText: '登录讲了么账号',
-            tone: 'warn',
-          },
-        },
-        primaryButtonText: '登录',
-        panelTitleText: '登录讲了么账号',
-        panelSubtitleText: '',
-        brandTaglineText: '腾讯会议，会开会',
-        showPanelCopy: false,
-        registrationRequired: false,
-        activationConfiguredText: '待登录',
-        activationPhoneText: '登录后获取',
-        activationUserIdText: '待创建',
-        successMessage: '',
+        hasLoaded: true,
         errorMessage: '',
-        submittingLogin: false,
+        ...buildActivationViewState({
+          configured: true,
+          status: 'inactive',
+          needsPhone: true,
+          needsActivation: true,
+        }),
       });
       return;
     }
@@ -286,52 +225,7 @@ Page({
   },
 
   async handlePrimaryAction() {
-    if (!this.data.loggedIn) {
-      if (!this.data.agreed) {
-        this.setData({ errorMessage: '请先勾选并同意相关协议' });
-        return;
-      }
-      this.setData({ submittingLogin: true, errorMessage: '', successMessage: '' });
-      try {
-        const loginResult = await auth.loginWithMiniProgram();
-        const hasSession =
-          loginResult &&
-          (loginResult.session || loginResult.token || loginResult.accessToken);
-        if (!hasSession) {
-          if (loginResult && (loginResult.registrationRequired || loginResult.result === 'registration_required')) {
-            this.setData({
-              ...buildRegistrationPromptState(),
-              submittingLogin: false,
-            });
-            return;
-          }
-          throw new Error('登录未返回有效会话');
-        }
-        this.setData({ loggedIn: true, registrationRequired: false, submittingLogin: false });
-        refreshState.mark(['home', 'entitlements', 'resume', 'orders', 'meeting_products', 'engagements']);
-        const targetUrl = loginGuard.normalizeUrl(this.data.redirectTarget);
-        if (targetUrl && targetUrl !== loginGuard.LOGIN_PAGE) {
-          if (loginGuard.isTabPage(targetUrl)) {
-            wx.switchTab({ url: targetUrl });
-          } else {
-            wx.redirectTo({ url: targetUrl });
-          }
-          return;
-        }
-        await this.loadActivation(true);
-      } catch (error) {
-        this.setData({
-          submittingLogin: false,
-          errorMessage: error && error.message ? error.message : '登录失败，请稍后重试',
-        });
-      }
-      return;
-    }
     const activation = this.data.activation || {};
-    if (!this.data.agreed) {
-      this.setData({ errorMessage: '请先勾选并同意相关协议' });
-      return;
-    }
     if (activation.needsPhone) {
       this.setData({ errorMessage: '请使用手机号授权按钮继续。' });
       return;
@@ -347,40 +241,6 @@ Page({
     await this.loadActivation(true);
   },
 
-  async handleRegisterPhoneNumber(event) {
-    const detail = event.detail || {};
-    if (detail.errMsg && !String(detail.errMsg).includes('ok')) {
-      this.setData({ errorMessage: '需要授权手机号后才能继续注册' });
-      return;
-    }
-    const phoneCode = detail.code || '';
-    if (!phoneCode) {
-      this.setData({ errorMessage: '未获取到手机号授权信息，请重试' });
-      return;
-    }
-    this.setData({ bindingPhone: true, errorMessage: '', successMessage: '' });
-    try {
-      await auth.bindPhoneWithCode(phoneCode);
-      this.setData({ bindingPhone: false, loggedIn: true, registrationRequired: false });
-      refreshState.mark(['home', 'entitlements', 'resume', 'orders', 'meeting_products', 'engagements']);
-      const targetUrl = loginGuard.normalizeUrl(this.data.redirectTarget);
-      if (targetUrl && targetUrl !== loginGuard.LOGIN_PAGE) {
-        if (loginGuard.isTabPage(targetUrl)) {
-          wx.switchTab({ url: targetUrl });
-        } else {
-          wx.redirectTo({ url: targetUrl });
-        }
-        return;
-      }
-      await this.loadActivation(true);
-    } catch (error) {
-      this.setData({
-        bindingPhone: false,
-        errorMessage: error && error.message ? error.message : '手机号注册失败，请稍后重试',
-      });
-    }
-  },
-
   goBack() {
     wx.navigateBack({
       fail() {
@@ -389,13 +249,4 @@ Page({
     });
   },
 
-  toggleAgreement() {
-    const agreed = !this.data.agreed;
-    this.setData({
-      agreed,
-      agreementCheckedClass: agreed ? 'agreement-checkbox-on' : '',
-      agreementCheckmark: agreed ? '✓' : '',
-      errorMessage: '',
-    });
-  },
 });

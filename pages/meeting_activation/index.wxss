@@ -102,58 +102,9 @@
   color: #ffffff;
 }
 
-.activation-login-hint {
-  margin-top: 12rpx;
-  font-size: 24rpx;
-  line-height: 36rpx;
-  color: #8f96a3;
-  text-align: center;
-}
-
 .activation-panel-copy-center .section-title,
 .activation-panel-copy-center .activation-panel-subtitle {
   text-align: center;
-}
-
-.agreement-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 16rpx;
-  width: 654rpx;
-  margin-top: 72rpx;
-  margin-left: 16rpx;
-}
-
-.agreement-checkbox {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32rpx;
-  height: 32rpx;
-  margin-top: 2rpx;
-  border: 2rpx solid #cccccc;
-  border-radius: 8rpx;
-  box-sizing: border-box;
-  color: #ffffff;
-  font-size: 20rpx;
-  line-height: 1;
-  background: #ffffff;
-}
-
-.agreement-checkbox-on {
-  background: #0071fe;
-  border-color: #0071fe;
-}
-
-.agreement-text {
-  flex: 1;
-  font-size: 24rpx;
-  line-height: 38rpx;
-  color: #999999;
-}
-
-.agreement-link {
-  color: #0071fe;
 }
 
 .surface-card {

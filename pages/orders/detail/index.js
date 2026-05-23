@@ -182,7 +182,7 @@ Page({
   },
 
   onLoad(options) {
-    if (!loginGuard.guardPage('/pages/orders/detail/index')) {
+    if (!loginGuard.guardPage('/pages/orders/detail/index', { requireRegistration: true })) {
       return;
     }
     const orderId = decodeURIComponent((options && options.id) || '');
@@ -191,7 +191,7 @@ Page({
   },
 
   onShow() {
-    loginGuard.guardPage('/pages/orders/detail/index');
+    loginGuard.guardPage('/pages/orders/detail/index', { requireRegistration: true });
   },
 
   async loadDetail() {

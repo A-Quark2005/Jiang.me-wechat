@@ -3,6 +3,7 @@
     "pages/home/index",
     "pages/meeting_activation/index",
     "pages/meeting_create/index",
+    "pages/meeting_hour_purchase/index",
     "pages/resume/index",
     "pages/resume/edit_self/index",
     "pages/resume/credentials/index",

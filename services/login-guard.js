@@ -1,6 +1,8 @@
+const auth = require('./auth');
 const sessionStore = require('./session-store');
 
-const LOGIN_PAGE = '/pages/meeting_activation/index';
+const ACTIVATION_PAGE = '/pages/meeting_activation/index';
+const LOGIN_PAGE = ACTIVATION_PAGE;
 const HOME_PAGE = '/pages/home/index';
 const TAB_PAGES = [
   '/pages/home/index',
@@ -59,29 +61,104 @@ function currentRouteUrl() {
  */
 function buildLoginUrl(targetUrl) {
   const normalizedTarget = normalizeUrl(targetUrl);
-  if (!normalizedTarget || normalizedTarget === LOGIN_PAGE) {
-    return LOGIN_PAGE;
+  if (!normalizedTarget || normalizedTarget === ACTIVATION_PAGE) {
+    return ACTIVATION_PAGE;
   }
-  return `${LOGIN_PAGE}?redirect=${encodeURIComponent(normalizedTarget)}`;
+  return `${ACTIVATION_PAGE}?redirect=${encodeURIComponent(normalizedTarget)}`;
+}
+
+function hasUsableSession(result) {
+  return Boolean(
+    isLoggedIn() ||
+    (result && (result.session || result.token || result.accessToken))
+  );
+}
+
+function needsRegistration(result) {
+  return Boolean(
+    result &&
+    (
+      result.result === 'registration_required' ||
+      result.needsPhone === true
+    )
+  );
+}
+
+function navigateToTarget(targetUrl, viaTab) {
+  const normalizedTarget = normalizeUrl(targetUrl) || HOME_PAGE;
+  if (normalizedTarget === ACTIVATION_PAGE) {
+    wx.navigateTo({ url: ACTIVATION_PAGE });
+    return;
+  }
+  if (isTabPage(normalizedTarget)) {
+    wx.switchTab({ url: normalizedTarget });
+    return;
+  }
+  if (viaTab) {
+    wx.navigateTo({ url: normalizedTarget });
+    return;
+  }
+  wx.redirectTo({ url: normalizedTarget });
+}
+
+function showAutoLoginError(error) {
+  wx.showModal({
+    title: '账号读取失败',
+    content: error && error.message ? error.message : '暂时无法读取账号，请稍后重试。',
+    showCancel: false,
+  });
 }
 
 /**
- * Navigate unauthenticated users to the login/activation page.
+ * Ensure a mini-program session exists by automatically running the WeChat login flow.
  *
- * @param {object} options Redirect options.
+ * @param {object} options Guard options.
  * @param {string} options.targetUrl Route to return to after login.
  * @param {boolean} options.viaTab Whether the guard was triggered from a tab page.
- * @returns {boolean} Always false so callers can short-circuit.
+ * @param {boolean} options.navigateAfterLogin Whether to navigate to target after login.
+ * @param {boolean} options.showError Whether to show a modal on login failure.
+ * @returns {Promise<boolean>} True when logged in.
  */
-function redirectToLogin(options) {
+async function ensureLoggedInAsync(options) {
   const config = options || {};
   const targetUrl = config.targetUrl || currentRouteUrl() || HOME_PAGE;
-  const loginUrl = buildLoginUrl(targetUrl);
-  if (config.viaTab) {
-    wx.navigateTo({ url: loginUrl });
-  } else {
-    wx.redirectTo({ url: loginUrl });
+  if (isLoggedIn()) {
+    return true;
   }
+  try {
+    const result = await auth.loginWithMiniProgram();
+    if (needsRegistration(result)) {
+      if (config.requireRegistration === true && normalizeUrl(targetUrl) !== ACTIVATION_PAGE) {
+        wx.navigateTo({ url: buildLoginUrl(targetUrl) });
+      }
+      return false;
+    }
+    if (!hasUsableSession(result)) {
+      throw new Error('暂时无法读取账号。');
+    }
+    if (config.navigateAfterLogin !== false) {
+      navigateToTarget(targetUrl, Boolean(config.viaTab));
+    }
+    return true;
+  } catch (error) {
+    if (config.showError !== false) {
+      showAutoLoginError(error);
+    }
+    return false;
+  }
+}
+
+/**
+ * Automatically log in unauthenticated users.
+ *
+ * @param {object} options Redirect options.
+ * @returns {boolean} Always false so legacy callers can short-circuit while login continues.
+ */
+function redirectToLogin(options) {
+  ensureLoggedInAsync({
+    ...(options || {}),
+    requireRegistration: true,
+  });
   return false;
 }
 
@@ -97,7 +174,8 @@ function ensureLoggedIn(options) {
   if (isLoggedIn()) {
     return true;
   }
-  return redirectToLogin(options);
+  ensureLoggedInAsync(options);
+  return false;
 }
 
 /**
@@ -147,15 +225,18 @@ function isTabPage(url) {
 }
 
 module.exports = {
+  ACTIVATION_PAGE,
   HOME_PAGE,
   LOGIN_PAGE,
   buildLoginUrl,
   currentRouteUrl,
+  ensureLoggedInAsync,
   ensureLoggedIn,
   guardAction,
   guardPage,
   isLoggedIn,
   isTabPage,
+  needsRegistration,
   normalizeUrl,
   redirectToLogin,
 };

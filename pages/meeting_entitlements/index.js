@@ -3,6 +3,7 @@ const dashboardCache = require('../../services/dashboard-cache');
 const refreshState = require('../../services/refresh-state');
 const displayFormatters = require('../../services/display-formatters');
 const loginGuard = require('../../services/login-guard');
+const tencentMeetingAccess = require('../../services/tencent-meeting-access');
 
 const PAGE_KEY = 'entitlements';
 const CACHE_MAX_AGE_MS = 5 * 60 * 1000;
@@ -43,26 +44,6 @@ function billingModeOf(product) {
   if (productId === 'meeting-month-pass') return 'month_pass';
   if (productId === 'meeting-recording-pack') return 'recording_pack';
   return String(product.billingMode || product.mode || product.type || product.code || productLabel(product)).toLowerCase();
-}
-
-/**
- * Decide whether the current activation state truly requires redirecting to the
- * activation page before the current action can continue.
- *
- * @param {object} activation Normalized activation state.
- * @returns {boolean} True when login or phone binding is still missing.
- */
-function shouldBlockForActivation(activation) {
-  if (!activation) {
-    return true;
-  }
-  if (!activation.isLoggedIn) {
-    return true;
-  }
-  if (activation.needsPhone) {
-    return true;
-  }
-  return false;
 }
 
 /**
@@ -199,7 +180,7 @@ Page({
   },
 
   onShow() {
-    if (!loginGuard.guardPage('/pages/meeting_entitlements/index', { viaTab: true })) {
+    if (!loginGuard.guardPage('/pages/meeting_entitlements/index', { viaTab: true, requireRegistration: true })) {
       return;
     }
     if (!this.data.hasLoaded || refreshState.consume(PAGE_KEY) || refreshState.isExpired(PAGE_KEY, CACHE_MAX_AGE_MS)) {
@@ -269,14 +250,7 @@ Page({
   },
 
   async ensureTencentMeetingActivated() {
-    const activation = displayFormatters.normalizeMeetingActivationState(
-      await service.getTencentMeetingActivation(),
-    );
-    if (shouldBlockForActivation(activation)) {
-      wx.navigateTo({ url: '/pages/meeting_activation/index' });
-      return false;
-    }
-    return true;
+    return tencentMeetingAccess.ensureReady({ targetUrl: '/pages/meeting_entitlements/index' });
   },
 
   async buySelected() {
@@ -363,6 +337,10 @@ Page({
 
   openProducts() {
     wx.navigateTo({ url: '/pages/meeting_products/index' });
+  },
+
+  openHourPurchase() {
+    wx.navigateTo({ url: '/pages/meeting_hour_purchase/index' });
   },
 
   async openPasswordlessContract(skipActivationCheck) {

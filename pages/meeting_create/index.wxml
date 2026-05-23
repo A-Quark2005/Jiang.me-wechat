@@ -15,7 +15,8 @@
 
       <view class="home-profile meeting-create-profile">
         <view class="home-avatar">
-          <image class="home-avatar-image" src="/assets/ui/avatar-home.svg" mode="aspectFit"></image>
+          <image wx:if="{{avatarUrl}}" class="home-avatar-image" src="{{avatarUrl}}" mode="aspectFill"></image>
+          <view wx:else class="home-avatar-fallback">{{avatarText}}</view>
         </view>
         <view class="home-profile-copy">
           <view class="home-profile-name">{{displayNameText}}</view>
@@ -96,27 +97,4 @@
     </view>
   </view>
 
-  <view wx:if="{{showHourPassModal}}" class="hour-pass-modal-mask" catchtap="closeHourPassModal">
-    <view class="hour-pass-modal" catchtap="noop">
-      <view class="hour-pass-title">购买小时会员后继续预定</view>
-      <view class="hour-pass-subtitle">你可以直接购买小时会员继续，也可以去选择高级会议卡。</view>
-
-      <view class="hour-pass-stepper">
-        <button class="hour-pass-stepper-button" bindtap="decreaseHourPassHours" disabled="{{paying || hourPassHours <= 1}}">-</button>
-        <view class="hour-pass-stepper-value">
-          <view class="hour-pass-hours">{{hourPassHours}} 小时</view>
-          <view class="hour-pass-price">{{hourPassDisplayPriceText}}</view>
-        </view>
-        <button class="hour-pass-stepper-button" bindtap="increaseHourPassHours" disabled="{{paying || hourPassHours >= 24}}">+</button>
-      </view>
-
-      <view class="hour-pass-desc">展示价按 0.5 元/小时计算，当前测试支付仍按后端 0.01 元下单。</view>
-
-      <view class="hour-pass-actions">
-        <button class="hour-pass-cancel" bindtap="closeHourPassModal" disabled="{{paying}}">取消</button>
-        <button class="hour-pass-confirm" bindtap="confirmHourPassPurchase" loading="{{paying}}" disabled="{{paying}}">支付并继续</button>
-      </view>
-      <button class="hour-pass-link-button" bindtap="openMeetingProducts" disabled="{{paying}}">去买高级会议卡</button>
-    </view>
-  </view>
 </view>

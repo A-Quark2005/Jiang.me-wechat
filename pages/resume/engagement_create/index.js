@@ -41,7 +41,7 @@ Page({
   },
 
   onLoad() {
-    loginGuard.guardPage('/pages/resume/engagement_create/index');
+    loginGuard.guardPage('/pages/resume/engagement_create/index', { requireRegistration: true });
   },
 
   /**
@@ -50,7 +50,7 @@ Page({
    * @returns {void}
    */
   onShow() {
-    loginGuard.guardPage('/pages/resume/engagement_create/index');
+    loginGuard.guardPage('/pages/resume/engagement_create/index', { requireRegistration: true });
   },
 
   /**

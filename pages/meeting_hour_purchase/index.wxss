@@ -1,0 +1,96 @@
+.hour-page {
+  min-height: 100vh;
+  padding: 24rpx 16px calc(32rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+.hour-card {
+  padding: 32rpx 28rpx;
+  border-radius: 16rpx;
+  background: #ffffff;
+  border: 1rpx solid #ebebeb;
+}
+
+.hour-title {
+  font-size: 34rpx;
+  line-height: 1.4;
+  color: #333333;
+  font-weight: 600;
+}
+
+.hour-subtitle {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  line-height: 1.5;
+  color: #6b7280;
+}
+
+.hour-form {
+  margin-top: 40rpx;
+}
+
+.hour-label {
+  font-size: 26rpx;
+  line-height: 1.4;
+  color: #333333;
+}
+
+.hour-input-row {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  margin-top: 18rpx;
+}
+
+.hour-stepper {
+  width: 88rpx;
+  height: 88rpx;
+  padding: 0;
+  border-radius: 16rpx;
+  background: #eef5ff;
+  color: #0071fe;
+  font-size: 34rpx;
+  line-height: 88rpx;
+}
+
+.hour-input {
+  flex: 1;
+  height: 88rpx;
+  border-radius: 16rpx;
+  background: #f7f8fa;
+  text-align: center;
+  font-size: 34rpx;
+  color: #333333;
+}
+
+.hour-hint {
+  margin-top: 14rpx;
+  font-size: 22rpx;
+  line-height: 1.5;
+  color: #9ca3af;
+}
+
+.hour-price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 40rpx;
+  padding-top: 28rpx;
+  border-top: 1rpx solid #f0f2f5;
+}
+
+.hour-price-label {
+  font-size: 26rpx;
+  color: #333333;
+}
+
+.hour-price-value {
+  font-size: 40rpx;
+  line-height: 1.2;
+  color: #0071fe;
+  font-weight: 600;
+}
+
+.hour-submit {
+  margin-top: 42rpx;
+}

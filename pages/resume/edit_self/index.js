@@ -24,7 +24,7 @@ Page({
    * @returns {Promise<void>} Promise resolved after the initial fetch.
    */
   onLoad() {
-    if (!loginGuard.guardPage('/pages/resume/edit_self/index')) {
+    if (!loginGuard.guardPage('/pages/resume/edit_self/index', { requireRegistration: true })) {
       return;
     }
     this.loadResume();
@@ -36,7 +36,7 @@ Page({
    * @returns {void}
    */
   onShow() {
-    loginGuard.guardPage('/pages/resume/edit_self/index');
+    loginGuard.guardPage('/pages/resume/edit_self/index', { requireRegistration: true });
   },
 
   /**

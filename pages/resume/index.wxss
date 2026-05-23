@@ -10,12 +10,239 @@
   padding-top: 36rpx;
 }
 
-.resume-pending-card {
-  margin-bottom: 0;
+.account-card {
+  display: flex;
+  align-items: center;
+  min-height: 148rpx;
+  gap: 24rpx;
 }
 
-.resume-pending-button {
-  margin-top: 20rpx;
+.account-avatar {
+  width: 96rpx;
+  height: 96rpx;
+  flex: 0 0 96rpx;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #eef4ff;
+}
+
+.account-avatar-image,
+.account-avatar-fallback {
+  width: 96rpx;
+  height: 96rpx;
+}
+
+.account-avatar-image {
+  display: block;
+}
+
+.account-avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0071fe;
+  font-size: 40rpx;
+  font-weight: 700;
+}
+
+.account-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.account-name {
+  overflow: hidden;
+  color: #152033;
+  font-size: 34rpx;
+  font-weight: 700;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-tier {
+  margin-top: 10rpx;
+  font-size: 26rpx;
+  line-height: 1.4;
+}
+
+.account-tier-premium {
+  color: #0071fe;
+}
+
+.account-tier-standard {
+  color: #7d8799;
+}
+
+.wechat-profile-modal-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx 32rpx calc(40rpx + env(safe-area-inset-bottom));
+  background: rgba(0, 0, 0, 0.42);
+}
+
+.wechat-profile-modal {
+  width: 100%;
+  max-width: 620rpx;
+  padding: 30rpx 32rpx 32rpx;
+  border-radius: 24rpx;
+  background: #ffffff;
+  box-shadow: 0 24rpx 80rpx rgba(21, 32, 51, 0.22);
+  box-sizing: border-box;
+}
+
+.wechat-profile-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56rpx;
+}
+
+.wechat-profile-title {
+  color: #111827;
+  font-size: 32rpx;
+  font-weight: 600;
+  line-height: 48rpx;
+  text-align: center;
+}
+
+.wechat-profile-close {
+  position: absolute;
+  top: 2rpx;
+  right: -4rpx;
+  display: block;
+  width: 48rpx;
+  height: 48rpx;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #f4f6fa;
+  line-height: 1;
+}
+
+.wechat-profile-close-line {
+  position: absolute;
+  left: 14rpx;
+  top: 23rpx;
+  width: 20rpx;
+  height: 2rpx;
+  border-radius: 999rpx;
+  background: #8a94a6;
+  transform: rotate(45deg);
+}
+
+.wechat-profile-close-line-alt {
+  transform: rotate(-45deg);
+}
+
+.wechat-profile-avatar-picker {
+  position: relative;
+  display: block;
+  width: 152rpx;
+  height: 152rpx;
+  margin: 34rpx auto 0;
+  padding: 6rpx;
+  overflow: hidden;
+  border: 2rpx solid #dbe8ff;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 8rpx 24rpx rgba(0, 113, 254, 0.14);
+  line-height: 1;
+}
+
+.wechat-profile-avatar-native-button {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  line-height: 1;
+  opacity: 0;
+}
+
+.wechat-profile-avatar-native-button::after {
+  border: 0;
+}
+
+.wechat-profile-avatar-image,
+.wechat-profile-avatar-placeholder {
+  width: 136rpx;
+  height: 136rpx;
+  border-radius: 50%;
+}
+
+.wechat-profile-avatar-placeholder {
+  background: #eef5ff;
+  color: #0071fe;
+  font-size: 28rpx;
+  line-height: 136rpx;
+  text-align: center;
+}
+
+.wechat-profile-avatar-badge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 40rpx;
+  background: rgba(21, 32, 51, 0.64);
+  color: #ffffff;
+  font-size: 20rpx;
+  line-height: 40rpx;
+  text-align: center;
+}
+
+.wechat-profile-field {
+  margin-top: 34rpx;
+}
+
+.wechat-profile-label {
+  margin-bottom: 12rpx;
+  color: #333333;
+  font-size: 26rpx;
+  font-weight: 500;
+  line-height: 36rpx;
+}
+
+.wechat-profile-nickname-input {
+  width: 100%;
+  height: 88rpx;
+  padding: 0 26rpx;
+  border: 1rpx solid #d9e2f2;
+  border-radius: 8rpx;
+  background: #f7faff;
+  color: #111827;
+  font-size: 30rpx;
+  line-height: 88rpx;
+  box-sizing: border-box;
+}
+
+.wechat-profile-confirm {
+  width: 100%;
+  height: 88rpx;
+  margin-top: 32rpx;
+  border-radius: 8rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  line-height: 88rpx;
+}
+
+.wechat-profile-confirm {
+  background: #0071fe;
+  color: #ffffff;
 }
 
 .intro-card {
@@ -63,8 +290,3 @@
   height: 15.98px;
 }
 
-.public-home-button {
-  width: 100%;
-  height: 96rpx;
-  margin-top: 8rpx;
-}

@@ -2,8 +2,8 @@ const profileService = require('../../services/profile');
 const refreshState = require('../../services/refresh-state');
 const apiClient = require('../../services/api-client');
 const loginGuard = require('../../services/login-guard');
-const meetingEntitlementsService = require('../../services/meeting-entitlements');
-const displayFormatters = require('../../services/display-formatters');
+const sessionStore = require('../../services/session-store');
+const wechatProfile = require('../../services/wechat-profile');
 
 const PAGE_KEY = 'resume';
 const CACHE_MAX_AGE_MS = 5 * 60 * 1000;
@@ -37,16 +37,6 @@ function splitEngagements(raw) {
   };
 }
 
-function profileDisplayUrl(resume) {
-  const candidates = [
-    resume && resume.publicProfileUrl,
-    resume && resume.profileUrl,
-    resume && resume.shareUrl,
-    resume && resume.externalProfileUrl,
-  ];
-  return candidates.find((item) => typeof item === 'string' && item.trim()) || '';
-}
-
 function cachedResumePage() {
   return wx.getStorageSync('jiangleme.page.resume.summary') || null;
 }
@@ -65,21 +55,25 @@ function recentCache(record, maxAgeMs) {
   return record.data || null;
 }
 
-/**
- * Build the pending-activation notice block state for the resume page.
- *
- * @param {object} rawActivation Raw activation payload from backend.
- * @returns {{activation: object, showPendingActivationNotice: boolean, pendingActivationText: string}} Page state fragment.
- */
-function buildPendingActivationState(rawActivation) {
-  const activation = displayFormatters.normalizeMeetingActivationState(rawActivation);
-  const showPendingActivationNotice = Boolean(activation && activation.isPendingActivation);
+function buildAccountInfo(resume) {
+  const session = sessionStore.getSession() || {};
+  const localWechatProfile = wechatProfile.getProfile();
+  const source = resume || {};
+  const displayName =
+    localWechatProfile.nickname ||
+    source.displayName ||
+    session.displayName ||
+    '用户昵称';
+  const avatarUrl = localWechatProfile.avatarUrl || source.avatarUrl || '';
+  const accountTier = source.accountTier || 'standard';
+  const accountTierText = source.accountTierText || (accountTier === 'premium' ? '高级账号' : '普通账号');
   return {
-    activation,
-    showPendingActivationNotice,
-    pendingActivationText: showPendingActivationNotice
-      ? '腾讯会议企业号待激活，请先查看短信或激活链接。'
-      : '',
+    displayNameText: displayName,
+    avatarUrl,
+    avatarText: String(displayName || '讲').trim().slice(0, 1) || '讲',
+    accountTier,
+    accountTierText,
+    accountTierClass: accountTier === 'premium' ? 'account-tier-premium' : 'account-tier-standard',
   };
 }
 
@@ -95,12 +89,17 @@ Page({
       received: [],
       pending: [],
     },
-    publicProfileUrl: '',
     selfIntroductionText: '暂无自我介绍',
-    activation: null,
-    showPendingActivationNotice: false,
-    pendingActivationText: '',
-    sendingActivationInvite: false,
+    displayNameText: '用户昵称',
+    avatarUrl: '',
+    avatarText: '讲',
+    accountTier: 'standard',
+    accountTierText: '普通账号',
+    accountTierClass: 'account-tier-standard',
+    showWechatProfileModal: false,
+    savingWechatProfile: false,
+    profileDraftNickname: '',
+    profileDraftAvatarUrl: '',
   },
 
   onLoad() {
@@ -120,9 +119,8 @@ Page({
         engagementGroups: splitEngagements(
           dashboard.data.resume.relatedExperiences || dashboard.data.resume.engagements,
         ),
-        publicProfileUrl: profileDisplayUrl(dashboard.data.resume),
         selfIntroductionText: dashboard.data.resume.selfIntroduction || '暂无自我介绍',
-        ...buildPendingActivationState(dashboard.data.activation),
+        ...buildAccountInfo(dashboard.data.resume),
       });
     }
     const cached = recentCache(cachedResumePage(), CACHE_MAX_AGE_MS);
@@ -152,10 +150,7 @@ Page({
       this.setData({ errorMessage: '' });
     }
     try {
-      const [resume, rawActivation] = await Promise.all([
-        profileService.getResume({ forceRefresh }),
-        meetingEntitlementsService.getTencentMeetingActivation({ forceRefresh }),
-      ]);
+      const resume = await profileService.getResume({ forceRefresh });
       const nextState = {
         resume,
         credentials: arrayFrom(
@@ -165,9 +160,8 @@ Page({
         engagementGroups: splitEngagements(
           resume && (resume.relatedExperiences || resume.engagements),
         ),
-        publicProfileUrl: profileDisplayUrl(resume),
         selfIntroductionText: resume.selfIntroduction || '暂无自我介绍',
-        ...buildPendingActivationState(rawActivation),
+        ...buildAccountInfo(resume),
       };
       this.setData({
         loading: false,
@@ -201,41 +195,72 @@ Page({
     wx.navigateTo({ url: '/pages/resume/engagement_create/index' });
   },
 
-  openPublicProfile() {
-    const url = this.data.publicProfileUrl;
-    if (!url) {
-      wx.showToast({ title: '暂无对外主页', icon: 'none' });
-      return;
-    }
-    wx.setClipboardData({ data: url });
+  openWechatProfileEditor() {
+    const profile = wechatProfile.getProfile() || {};
+    this.setData({
+      showWechatProfileModal: true,
+      profileDraftNickname: profile.nickname || this.data.displayNameText || '',
+      profileDraftAvatarUrl: profile.avatarUrl || this.data.avatarUrl || '',
+    });
   },
 
-  /**
-   * Re-send Tencent Meeting activation invite from the resume page.
-   *
-   * @returns {Promise<void>} Resolves after the invite request completes.
-   */
-  async resendActivationInvite() {
-    if (this.data.sendingActivationInvite) {
+  closeWechatProfileEditor() {
+    if (this.data.savingWechatProfile) return;
+    this.setData({ showWechatProfileModal: false });
+  },
+
+  noop() {},
+
+  onProfileModalChooseAvatar(event) {
+    const avatarUrl = event.detail && event.detail.avatarUrl;
+    if (!avatarUrl) return;
+    this.setData({ profileDraftAvatarUrl: avatarUrl });
+  },
+
+  onProfileModalNicknameInput(event) {
+    this.setData({ profileDraftNickname: event.detail.value });
+  },
+
+  async confirmWechatProfile() {
+    const nickname = String(this.data.profileDraftNickname || '').trim();
+    const avatarUrl = String(this.data.profileDraftAvatarUrl || '').trim();
+    if (!nickname || !avatarUrl) {
+      wx.showToast({ title: '请填写昵称并选择头像', icon: 'none' });
       return;
     }
-    this.setData({ sendingActivationInvite: true, errorMessage: '' });
+    if (this.data.savingWechatProfile) return;
+    this.setData({ savingWechatProfile: true });
     try {
-      const result = await meetingEntitlementsService.sendTencentMeetingActivationInvite();
+      wechatProfile.saveNickname(nickname);
+      wechatProfile.saveAvatarUrl(avatarUrl);
+      const resume = await profileService.updateResume({ displayName: nickname });
+      const nextState = {
+        resume,
+        credentials: arrayFrom(
+          resume && (resume.certifiedQualifications || resume.credentials),
+          ['items', 'credentials'],
+        ).slice(0, 3),
+        engagementGroups: splitEngagements(
+          resume && (resume.relatedExperiences || resume.engagements),
+        ),
+        selfIntroductionText: resume.selfIntroduction || '暂无自我介绍',
+        ...buildAccountInfo(resume),
+      };
+      this.setData({
+        ...nextState,
+        showWechatProfileModal: false,
+        savingWechatProfile: false,
+      });
+      saveCachedResumePage(nextState);
+      apiClient.primeCache('resume_portfolio', resume);
+      refreshState.mark(['home']);
+      wx.showToast({ title: '已保存', icon: 'success' });
+    } catch (error) {
+      this.setData({ savingWechatProfile: false });
       wx.showToast({
-        title: result && result.inviteMessage ? result.inviteMessage : '激活链接已重发',
+        title: error && error.message ? error.message : '保存失败',
         icon: 'none',
       });
-      refreshState.mark(['home', 'entitlements', 'resume']);
-      await this.loadResume(true);
-    } catch (error) {
-      wx.showModal({
-        title: '发送失败',
-        content: error && error.message ? error.message : '激活链接发送失败',
-        showCancel: false,
-      });
-    } finally {
-      this.setData({ sendingActivationInvite: false });
     }
   },
 });

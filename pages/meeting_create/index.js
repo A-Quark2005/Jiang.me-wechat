@@ -1,10 +1,11 @@
 const service = require('../../services/meeting-entitlements');
-const dashboardCache = require('../../services/dashboard-cache');
 const refreshState = require('../../services/refresh-state');
 const sessionStore = require('../../services/session-store');
 const displayFormatters = require('../../services/display-formatters');
 const heroLayout = require('../../services/hero-layout');
 const loginGuard = require('../../services/login-guard');
+const tencentMeetingAccess = require('../../services/tencent-meeting-access');
+const wechatProfile = require('../../services/wechat-profile');
 
 /**
  * Left-pad numeric date and time fragments.
@@ -103,45 +104,6 @@ function normalizeList(raw, keys) {
 }
 
 /**
- * Check whether the current user already owns a valid unlimited duration card.
- *
- * @param {any} entitlementsRaw Entitlements API response.
- * @returns {boolean} True when an active duration entitlement exists.
- */
-function hasActiveUnlimitedCard(entitlementsRaw) {
-  const entitlements = normalizeList(entitlementsRaw, ['items', 'entitlements']);
-  return entitlements.some((item) => {
-    const status = String(item && item.status ? item.status : '').toLowerCase();
-    const type = String(item && item.type ? item.type : '').toLowerCase();
-    return status === 'active' && (type === 'duration' || type === 'hour_pass');
-  });
-}
-
-function hourPriceText(hours) {
-  return `￥${(Number(hours || 0) * 0.5).toFixed(1)}`;
-}
-
-/**
- * Determine whether activation state is a hard blocker that requires jumping to
- * the activation page instead of staying on the current UI.
- *
- * @param {object} activation Normalized activation state.
- * @returns {boolean} True when the user must complete login or phone binding first.
- */
-function needsActivationPageBlock(activation) {
-  if (!activation) {
-    return true;
-  }
-  if (!activation.isLoggedIn) {
-    return true;
-  }
-  if (activation.needsPhone) {
-    return true;
-  }
-  return false;
-}
-
-/**
  * Normalize display name and phone fragments for the meeting create hero.
  *
  * @returns {{displayNameText: string, phoneText: string, avatarText: string}} User-facing profile labels.
@@ -151,7 +113,9 @@ function buildProfileSummary() {
   const session = sessionStore.getSession() || {};
   const user = record.user || {};
   const profile = record.profile || {};
+  const localWechatProfile = wechatProfile.getProfile() || {};
   const displayName =
+    localWechatProfile.nickname ||
     profile.displayName ||
     user.displayName ||
     session.displayName ||
@@ -168,6 +132,7 @@ function buildProfileSummary() {
     displayNameText: displayName,
     phoneText: phone,
     avatarText: String(displayName || '讲').trim().slice(0, 1) || '讲',
+    avatarUrl: localWechatProfile.avatarUrl || profile.avatarUrl || user.avatarUrl || '',
   };
 }
 
@@ -270,20 +235,16 @@ Page({
     displayNameText: '用户昵称',
     phoneText: '未授权手机号',
     avatarText: '讲',
+    avatarUrl: '',
     mascotUrl: '/assets/ui/jlm-figma-home.png',
     entitlementSummaryTitle: '当前会议权益',
     entitlementSummaryDetail: '未开通 · 可按需购买',
     entitlementActionText: '去开通',
     heroSafeTopPx: 0,
-    paying: false,
-    showHourPassModal: false,
-    hourPassHours: 1,
-    hourPassDisplayPriceText: '￥0.5',
-    continuingAfterPayment: false,
   },
 
   onLoad() {
-    if (!loginGuard.guardPage('/pages/meeting_create/index')) {
+    if (!loginGuard.guardPage('/pages/meeting_create/index', { requireRegistration: true })) {
       return;
     }
     const now = new Date();
@@ -309,7 +270,7 @@ Page({
   },
 
   onShow() {
-    loginGuard.guardPage('/pages/meeting_create/index');
+    loginGuard.guardPage('/pages/meeting_create/index', { requireRegistration: true });
   },
 
   onStartDateChange(event) {
@@ -408,36 +369,9 @@ Page({
 
     this.setData({ submitting: true, errorMessage: '', submitButtonText: '正在预定' });
     try {
-      const entitlements = await service.getEntitlements();
-      if (!hasActiveUnlimitedCard(entitlements)) {
-        this.setData({
-          submitting: false,
-          submitButtonText: '立即预定',
-          continuingAfterPayment: true,
-          showHourPassModal: true,
-        });
-        return;
-      }
-      const activation = displayFormatters.normalizeMeetingActivationState(
-        await service.getTencentMeetingActivation(),
-      );
-      if (needsActivationPageBlock(activation)) {
+      const ready = await tencentMeetingAccess.ensureReady({ targetUrl: '/pages/meeting_create/index' });
+      if (!ready) {
         this.setData({ submitting: false, submitButtonText: '立即预定' });
-        wx.navigateTo({ url: '/pages/meeting_activation/index' });
-        return;
-      }
-      if (activation.isPendingActivation) {
-        this.setData({
-          submitting: false,
-          submitButtonText: '立即预定',
-          errorMessage: '腾讯会议账号待激活，请查看短信或激活链接后再预定会议。',
-        });
-        wx.showModal({
-          title: '请先完成激活',
-          content: '腾讯会议账号待激活，请查看短信或激活链接完成启用后，再继续预定会议。',
-          confirmText: '知道了',
-          showCancel: false,
-        });
         return;
       }
       this.setData({ submitButtonText: '正在创建会议' });
@@ -492,7 +426,6 @@ Page({
       this.setData({
         submitting: false,
         submitButtonText: '立即预定',
-        continuingAfterPayment: false,
         errorMessage: activationPending
           ? '腾讯会议账号待激活，请查看短信或激活链接后再预定会议。'
           : rawMessage,
@@ -508,83 +441,4 @@ Page({
     }
   },
 
-  closeHourPassModal() {
-    if (this.data.paying) {
-      return;
-    }
-    this.setData({
-      showHourPassModal: false,
-      continuingAfterPayment: false,
-    });
-  },
-
-  decreaseHourPassHours() {
-    const nextHours = Math.max(1, Number(this.data.hourPassHours || 1) - 1);
-    this.setData({
-      hourPassHours: nextHours,
-      hourPassDisplayPriceText: hourPriceText(nextHours),
-    });
-  },
-
-  increaseHourPassHours() {
-    const nextHours = Math.min(24, Number(this.data.hourPassHours || 1) + 1);
-    this.setData({
-      hourPassHours: nextHours,
-      hourPassDisplayPriceText: hourPriceText(nextHours),
-    });
-  },
-
-  async confirmHourPassPurchase() {
-    if (this.data.paying) {
-      return;
-    }
-    const selectedHours = Number(this.data.hourPassHours || 1);
-    this.setData({
-      paying: true,
-      errorMessage: '',
-      submitButtonText: '等待支付',
-    });
-    try {
-      const order = await service.createWechatMiniProgramOrder('meeting-hour-pass', {
-        hours: selectedHours,
-      });
-      if (!order || !order.paymentParams) {
-        throw new Error('小时会员支付参数异常，请稍后重试');
-      }
-      await service.requestPayment(order.paymentParams);
-      if (order.orderId) {
-        await service.syncPaymentStatus(order.orderId);
-        const orderDetail = await service.getOrder(order.orderId);
-        dashboardCache.invalidateDashboardRelated();
-        dashboardCache.primeOrders([orderDetail]);
-      }
-      refreshState.mark(['home', 'entitlements', 'orders']);
-      this.setData({
-        paying: false,
-        showHourPassModal: false,
-      });
-      if (this.data.continuingAfterPayment) {
-        await this.loadEntitlementSummary();
-        await this.submit();
-        return;
-      }
-      wx.showToast({ title: '购买成功', icon: 'success' });
-    } catch (error) {
-      const message = error && error.message ? error.message : '小时会员购买失败';
-      const canceled = String(message || '').toLowerCase().includes('cancel');
-      this.setData({
-        paying: false,
-        submitButtonText: '立即预定',
-        errorMessage: canceled ? '' : message,
-      });
-      if (canceled) {
-        return;
-      }
-      wx.showModal({
-        title: '购买失败',
-        content: message,
-        showCancel: false,
-      });
-    }
-  },
 });

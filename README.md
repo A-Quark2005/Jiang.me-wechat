@@ -4,10 +4,9 @@
 
 ## 当前能力
 
-- 微信登录进入小程序：调用真实后端 `/api/auth/wechat-mini-program/login` 创建或复用轻账号。
-- 腾讯会议激活：使用具体会议权益前进入激活页，通过 `/api/auth/wechat-mini-program/phone` 授权手机号，并调用 `/api/tencent-meeting/activation/invite` 发送腾讯会议激活短信。
-- 首页：读取 `/api/bootstrap`、`/api/me/capabilities`、`/api/me/meeting-entitlements`。
-- 会议权益：读取商品、创建小程序支付订单、调用 `wx.requestPayment`。
+- 微信登录进入小程序。
+- 腾讯会议激活。
+- 会议权益：读取商品、创建小程序支付订单。
 - 简历：管理官方认证、自我介绍、孪生服务履历。
 
 ## 约定

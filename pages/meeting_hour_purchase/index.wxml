@@ -1,0 +1,23 @@
+<view class="page page-plain hour-page">
+  <view class="hour-card">
+    <view class="hour-title">购买小时卡</view>
+    <view class="hour-subtitle">按实际需要购买腾讯会议时长</view>
+
+    <view class="hour-form">
+      <view class="hour-label">所需小时数</view>
+      <view class="hour-input-row">
+        <button class="hour-stepper" bindtap="decreaseHours">-</button>
+        <input class="hour-input" type="number" value="{{hours}}" bindinput="onHoursInput"></input>
+        <button class="hour-stepper" bindtap="increaseHours">+</button>
+      </view>
+      <view class="hour-hint">¥2.50 / 小时，至少购买 1 小时</view>
+    </view>
+
+    <view class="hour-price-row">
+      <view class="hour-price-label">应付金额</view>
+      <view class="hour-price-value">¥{{amountText}}</view>
+    </view>
+
+    <button class="primary-button hour-submit" loading="{{paying}}" bindtap="buyHours">立即购买</button>
+  </view>
+</view>
