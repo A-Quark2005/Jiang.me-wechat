@@ -1,7 +1,13 @@
 const { request } = require('./api-client');
 
-function getResume() {
-  return request({ path: '/api/me/resume' });
+function getResume(options) {
+  const requestOptions = options || {};
+  return request({
+    path: '/api/me/resume',
+    cacheKey: 'resume_portfolio',
+    maxAgeMs: 60 * 1000,
+    forceRefresh: Boolean(requestOptions.forceRefresh),
+  });
 }
 
 function updateResume(payload) {
@@ -20,12 +26,24 @@ function updateSelfIntroduction(payload) {
   });
 }
 
-function getCredentials() {
-  return request({ path: '/api/me/resume/credentials' });
+function getCredentials(options) {
+  const requestOptions = options || {};
+  return request({
+    path: '/api/me/resume/credentials',
+    cacheKey: 'resume_credentials',
+    maxAgeMs: 60 * 1000,
+    forceRefresh: Boolean(requestOptions.forceRefresh),
+  });
 }
 
-function getEngagements() {
-  return request({ path: '/api/me/resume/engagements' });
+function getEngagements(options) {
+  const requestOptions = options || {};
+  return request({
+    path: '/api/me/resume/engagements',
+    cacheKey: 'resume_engagements',
+    maxAgeMs: 60 * 1000,
+    forceRefresh: Boolean(requestOptions.forceRefresh),
+  });
 }
 
 function createEngagement(payload) {

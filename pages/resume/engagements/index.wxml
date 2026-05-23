@@ -1,16 +1,13 @@
-<view class="page">
-  <view class="hero">
-    <view class="hero-title">服务履历</view>
-    <view class="hero-subtitle">查看与你相关的服务记录，待确认内容处理后会进入可信资料。</view>
+<view class="page engagements-page">
+  <view class="engagements-top-action">
+    <view class="engagements-create-link tappable" bindtap="createEngagement">新建</view>
   </view>
 
-  <button class="primary-button action-button" bindtap="createEngagement">新建履历</button>
-
-  <view class="tab-row">
+  <view class="segmented-strip engagements-tabs">
     <view
       wx:for="{{tabs}}"
       wx:key="key"
-      class="tab-item {{activeTab === item.key ? 'tab-active' : ''}}"
+      class="segment-chip tappable {{item.className}}"
       data-tab="{{item.key}}"
       bindtap="switchTab"
     >
@@ -18,22 +15,23 @@
     </view>
   </view>
 
-  <view wx:if="{{loading}}" class="card">正在读取履历</view>
-  <view wx:elif="{{errorMessage}}" class="card">
+  <view wx:if="{{loading}}" class="surface-card">正在读取履历</view>
+  <view wx:elif="{{errorMessage}}" class="surface-card">
     <view class="error-box">{{errorMessage}}</view>
     <button class="primary-button action-button" bindtap="loadEngagements">重新加载</button>
   </view>
   <view wx:elif="{{visibleItems.length === 0}}" class="empty-box">暂无相关履历</view>
 
-  <view wx:for="{{visibleItems}}" wx:key="id" class="card" data-id="{{item.id}}" bindtap="openDetail">
-    <view class="row">
-      <view>
-        <view class="section-title">{{item.title || '服务履历'}}</view>
-        <view class="section-subtitle">{{item.summary || '暂无摘要'}}</view>
+  <view wx:else class="engagements-list">
+    <view wx:for="{{visibleItems}}" wx:key="id" class="engagement-card tappable" data-id="{{item.id}}" bindtap="openDetail">
+      <view class="engagement-main">
+        <view class="engagement-title">{{item.titleText}}</view>
+        <view class="engagement-meta"><text class="engagement-meta-primary">{{item.metaPrefixText}}</text> · {{item.counterpartNameText}} · {{item.monthText}}</view>
       </view>
-      <view class="pill">{{item.status || item.confirmationStatus || '未知'}}</view>
+      <view class="engagement-side">
+        <view class="pill {{item.statusClass}}">{{item.statusLabel}}</view>
+        <image class="engagement-arrow-icon" src="/assets/ui/engagement-arrow.svg" mode="aspectFit"></image>
+      </view>
     </view>
-    <view class="detail-line">服务者：{{item.providerName || item.providerProfileName || item.providerProfileId || '暂无'}}</view>
-    <view class="detail-line">被服务者：{{item.receiverName || item.receiverProfileName || item.receiverProfileId || '暂无'}}</view>
   </view>
 </view>

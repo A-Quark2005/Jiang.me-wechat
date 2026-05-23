@@ -1,3 +1,4 @@
 {
-  "navigationBarTitleText": "讲了么"
+  "navigationBarTitleText": "讲了么",
+  "navigationStyle": "custom"
 }

@@ -1,5 +1,7 @@
 const profileService = require('../../../services/profile');
 const refreshState = require('../../../services/refresh-state');
+const dashboardCache = require('../../../services/dashboard-cache');
+const loginGuard = require('../../../services/login-guard');
 
 Page({
   data: {
@@ -8,6 +10,15 @@ Page({
     errorMessage: '',
     invite: null,
     createdEngagementId: '',
+    kindProvidedClass: 'segment-active',
+    kindReceivedClass: '',
+    kindProvidedChecked: true,
+    kindReceivedChecked: false,
+    saveButtonDisabled: false,
+    helperTitleText: '填写服务事实并邀请对方确认',
+    helperBodyText: '确认后的履历会进入双方可信资料，可作为正式服务记录展示。',
+    inviteReadyText: '微信邀请已生成，发送给对方后即可确认这条履历。',
+    submitLabelText: '生成微信邀请',
     form: {
       kind: 'provided_service',
       title: '',
@@ -29,9 +40,45 @@ Page({
     };
   },
 
+  onLoad() {
+    loginGuard.guardPage('/pages/resume/engagement_create/index');
+  },
+
+  /**
+   * Guard the page again after foreground restores.
+   *
+   * @returns {void}
+   */
+  onShow() {
+    loginGuard.guardPage('/pages/resume/engagement_create/index');
+  },
+
+  /**
+   * Return to the previous resume-related page.
+   *
+   * @returns {void}
+   */
+  goBack() {
+    wx.navigateBack({
+      fail() {
+        wx.redirectTo({ url: '/pages/resume/engagements/index?tab=provided' });
+      },
+    });
+  },
+
   changeKind(event) {
+    const kind = event.detail.value === 'received' ? 'purchased_service' : 'provided_service';
     this.setData({
-      'form.kind': event.detail.value === 'received' ? 'purchased_service' : 'provided_service',
+      'form.kind': kind,
+      kindProvidedClass: kind === 'provided_service' ? 'segment-active' : '',
+      kindReceivedClass: kind === 'purchased_service' ? 'segment-active' : '',
+      kindProvidedChecked: kind === 'provided_service',
+      kindReceivedChecked: kind === 'purchased_service',
+      helperTitleText: kind === 'provided_service' ? '填写你提供过的服务事实' : '填写你接受过的服务事实',
+      helperBodyText:
+        kind === 'provided_service'
+          ? '邀请对方确认后，这条服务记录会展示在双方可信资料中。'
+          : '邀请服务方确认后，这条被服务记录会展示在双方可信资料中。',
     });
   },
 
@@ -58,6 +105,7 @@ Page({
         title: form.title,
         detailLines,
       });
+      dashboardCache.invalidateDashboardRelated();
       const invite = created && created.invite ? created.invite : null;
       wx.showToast({ title: '已生成邀请', icon: 'success' });
       refreshState.mark(['resume', 'engagements', 'home']);
@@ -65,10 +113,14 @@ Page({
         saving: false,
         invite,
         createdEngagementId: created && created.id ? created.id : '',
+        saveButtonDisabled: true,
+        submitLabelText: '邀请已生成',
       });
     } catch (error) {
       this.setData({
         saving: false,
+        saveButtonDisabled: false,
+        submitLabelText: '生成微信邀请',
         errorMessage: error && error.message ? error.message : '履历创建失败',
       });
     }

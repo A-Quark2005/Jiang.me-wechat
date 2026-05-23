@@ -1,29 +1,90 @@
-.tab-row {
+.engagements-page {
+  padding-top: 12rpx;
+}
+
+.engagements-top-action {
   display: flex;
-  gap: 12rpx;
-  margin-top: 24rpx;
-  overflow-x: auto;
+  justify-content: flex-end;
+  padding-top: 6rpx;
 }
 
-.tab-item {
-  flex: 0 0 auto;
-  padding: 14rpx 22rpx;
-  border-radius: 999rpx;
-  color: #475467;
+.engagements-create-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 88rpx;
+  padding: 0 8rpx;
+  font-size: 28rpx;
+  line-height: 1.4;
+  color: #0071fe;
+}
+
+.engagements-tabs {
+  margin: 0 -32rpx;
+  padding: 12rpx 16rpx 10rpx;
   background: #ffffff;
+  border-bottom: 1rpx solid #f3f4f6;
 }
 
-.tab-active {
-  color: #ffffff;
-  background: #1677ff;
+.engagements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  padding-top: 16rpx;
 }
 
-.action-button {
-  margin-top: 22rpx;
+.engagement-card {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  min-height: 144rpx;
+  padding: 26rpx 28rpx;
+  border-radius: 16rpx;
+  background: #ffffff;
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.06);
 }
 
-.detail-line {
-  margin-top: 14rpx;
-  color: #475467;
-  font-size: 25rpx;
+.engagement-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.engagement-title {
+  font-size: 30rpx;
+  line-height: 1.5;
+  font-weight: 500;
+  color: #333333;
+}
+
+.engagement-meta {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  line-height: 1.5;
+  color: #a9b4cc;
+}
+
+.engagement-meta-primary {
+  color: #0071fe;
+}
+
+.engagement-side {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex-shrink: 0;
+}
+
+.engagement-arrow {
+  font-size: 30rpx;
+}
+
+.engagement-arrow-icon {
+  width: 15.98px;
+  height: 15.98px;
+  flex-shrink: 0;
+}
+
+.engagement-status-pending {
+  color: #f59e0b;
+  background: #fff4d6;
 }

@@ -1,0 +1,30 @@
+<view class="page page-plain products-page">
+  <view wx:if="{{loading}}" class="surface-card">
+    <view class="section-title">正在读取卡券</view>
+  </view>
+
+  <view wx:elif="{{errorMessage && productCards.length === 0}}" class="surface-card">
+    <view class="error-box">{{errorMessage}}</view>
+    <button class="primary-button action-button" bindtap="loadProducts">重新加载</button>
+  </view>
+
+  <view wx:else class="products-list">
+    <view wx:for="{{productCards}}" wx:key="id" class="product-card">
+      <view class="product-icon-wrap">
+        <image class="product-icon-image" src="/assets/ui/card-ticket-icon.svg" mode="aspectFit"></image>
+      </view>
+      <view class="product-main">
+        <view class="product-title">{{item.title}}</view>
+        <view wx:for="{{item.features}}" wx:key="*this" class="product-feature">{{item}}</view>
+      </view>
+      <view class="product-side">
+        <view class="product-price"><text class="product-price-unit">{{item.priceUnitText}}</text><text class="product-price-value">{{item.priceValueText}}</text></view>
+        <view class="product-buy tappable" data-id="{{item.id}}" bindtap="buyProduct">
+          <text>购买</text>
+          <image class="product-buy-icon" src="/assets/ui/arrow-light.svg" mode="aspectFit"></image>
+        </view>
+      </view>
+    </view>
+    <view wx:if="{{errorMessage}}" class="error-box">{{errorMessage}}</view>
+  </view>
+</view>

@@ -1,9 +1,105 @@
-.action-button {
-  margin-top: 22rpx;
+.orders-page {
+  padding-top: 0;
+  padding-bottom: 24rpx;
 }
 
-.detail-line {
-  margin-top: 14rpx;
-  color: #475467;
-  font-size: 25rpx;
+.tab-strip {
+  display: flex;
+  gap: 16rpx;
+  margin: 0 -32rpx;
+  padding: 16rpx 32rpx;
+  background: #ffffff;
+  border-bottom: 1rpx solid #f3f4f6;
+}
+
+.tab-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 176rpx;
+  height: 68rpx;
+  padding: 0 24rpx;
+  border-radius: 8rpx;
+  background: #f0f0f0;
+  text-align: center;
+  font-size: 26rpx;
+  line-height: 1.4;
+  color: #666666;
+}
+
+.tab-chip-active {
+  background: #0071fe;
+  color: #ffffff;
+}
+
+.muted-chip {
+  color: #666666;
+}
+
+.order-card {
+  min-height: 160rpx;
+  margin-top: 16rpx;
+  padding: 18rpx 32rpx;
+  border: 1rpx solid #ebebeb;
+  box-shadow: none;
+  border-radius: 16rpx;
+}
+
+.ticket-icon {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 24rpx;
+  background: transparent;
+}
+
+.ticket-icon-expired {
+  background: transparent;
+}
+
+.ticket-icon-image {
+  width: 88rpx;
+  height: 88rpx;
+}
+
+.order-side {
+  display: flex;
+  min-width: 108rpx;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6rpx;
+}
+
+.order-price {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  line-height: 1;
+  font-weight: 600;
+  color: #333333;
+}
+
+.order-price-unit {
+  font-size: 20rpx;
+  line-height: 34rpx;
+}
+
+.order-price-value {
+  font-size: 28px;
+  line-height: 42rpx;
+}
+
+.order-status {
+  font-size: 24rpx;
+  line-height: 1.5;
+  color: #0071fe;
+}
+
+.order-status-expired {
+  color: #b0b8c9;
+}
+
+.order-chevron {
+  font-size: 32rpx;
+  line-height: 1;
+  color: #c7ced9;
 }

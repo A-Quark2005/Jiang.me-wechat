@@ -1,19 +1,46 @@
 const profileService = require('../../../services/profile');
 const refreshState = require('../../../services/refresh-state');
+const dashboardCache = require('../../../services/dashboard-cache');
+const displayFormatters = require('../../../services/display-formatters');
+const loginGuard = require('../../../services/login-guard');
 
+/**
+ * Normalize engagement payloads from profile APIs into a flat list.
+ *
+ * @param {any} raw Raw API response.
+ * @returns {Array<object>} Engagement items.
+ */
 function normalizeList(raw) {
   if (Array.isArray(raw)) return raw;
   return (raw && (raw.items || raw.engagements)) || [];
 }
 
+/**
+ * Determine whether the engagement remains in a pending state.
+ *
+ * @param {object} item Engagement item.
+ * @returns {boolean} Pending status flag.
+ */
 function isPending(item) {
   return String(item.status || item.confirmationStatus || '').toLowerCase().includes('pending');
 }
 
+/**
+ * Determine whether the current user still needs to confirm the engagement.
+ *
+ * @param {object} item Engagement item.
+ * @returns {boolean} True when my confirmation is required.
+ */
 function needsMyConfirmation(item) {
   return Boolean(item && item.requiresMyConfirmation);
 }
 
+/**
+ * Determine whether the engagement is waiting on the other party.
+ *
+ * @param {object} item Engagement item.
+ * @returns {boolean} True when another user must confirm.
+ */
 function waitingForOtherConfirmation(item) {
   if (!item) return false;
   if (item.waitingForOtherConfirmation === true) return true;
@@ -21,6 +48,40 @@ function waitingForOtherConfirmation(item) {
     return item.pendingChange.waitingForOtherConfirmation === true;
   }
   return isPending(item) && item.requiresMyConfirmation !== true;
+}
+
+/**
+ * Resolve the counterpart name for the engagement detail card.
+ *
+ * @param {object} item Engagement item.
+ * @returns {string} Counterpart display name.
+ */
+function counterpartNameOf(item) {
+  return item.providerName || item.providerProfileName || item.providerProfileId || item.receiverName || item.receiverProfileName || item.receiverProfileId || '未知';
+}
+
+/**
+ * Resolve the main time label for the engagement detail card.
+ *
+ * @param {object} item Engagement item.
+ * @returns {string} Display time text.
+ */
+function timeTextOf(item) {
+  return displayFormatters.formatEngagementRange(item);
+}
+
+/**
+ * Resolve the engagement type label shown in the fact card.
+ *
+ * @param {object} item Engagement item.
+ * @returns {string} Type label.
+ */
+function typeLabelOf(item) {
+  const side = String(item.side || item.kind || item.role || '').toLowerCase();
+  if (side.includes('receive') || side.includes('receiver') || side.includes('purchased')) {
+    return '被服务方';
+  }
+  return '服务方';
 }
 
 Page({
@@ -38,6 +99,15 @@ Page({
     visible: true,
     inviteMode: false,
     editing: false,
+    detailText: '',
+    detailTitleText: '服务履历',
+    detailStatusText: '已确认',
+    detailStatusClass: 'status-ok',
+    typeLabelText: '服务方',
+    counterpartNameText: '未知',
+    startedAtDisplayText: '暂无时间',
+    disableEditActions: false,
+    bottomActionDisabled: false,
     editForm: {
       title: '',
       detailText: '',
@@ -46,6 +116,9 @@ Page({
 
   onLoad(options) {
     const inviteToken = decodeURIComponent(options.inviteToken || '');
+    if (!inviteToken && !loginGuard.guardPage('/pages/resume/engagement_detail/index')) {
+      return;
+    }
     this.setData({
       id: decodeURIComponent(options.id || ''),
       inviteToken,
@@ -59,6 +132,12 @@ Page({
       this.loadInvite();
     } else {
       this.loadDetail();
+    }
+  },
+
+  onShow() {
+    if (!this.data.inviteMode) {
+      loginGuard.guardPage('/pages/resume/engagement_detail/index');
     }
   },
 
@@ -78,11 +157,20 @@ Page({
         waitingForOtherConfirmation: waitingForOtherConfirmation(item),
         heroSubtitle: this.buildHeroSubtitle(item, false),
         visible: item.visible !== false,
+        detailText: this.buildDetailText(item),
+        detailTitleText: item.title || '服务履历',
+        detailStatusText: needsMyConfirmation(item) ? '待确认' : '已确认',
+        detailStatusClass: needsMyConfirmation(item) ? 'status-warn' : 'status-ok',
+        typeLabelText: typeLabelOf(item),
+        counterpartNameText: counterpartNameOf(item),
+        startedAtDisplayText: timeTextOf(item),
+        disableEditActions: Boolean(this.data.inviteMode || waitingForOtherConfirmation(item) || needsMyConfirmation(item)),
+        bottomActionDisabled: Boolean(this.data.submitting || this.data.inviteMode || waitingForOtherConfirmation(item) || needsMyConfirmation(item)),
         editForm: {
           title: item.title || '',
           detailText: Array.isArray(item.detailLines)
             ? item.detailLines.join('\n')
-            : '',
+            : this.buildDetailText(item),
         },
       });
     } catch (error) {
@@ -108,6 +196,15 @@ Page({
         needsMyConfirmation: true,
         waitingForOtherConfirmation: false,
         heroSubtitle: this.buildHeroSubtitle(item, true),
+        detailText: this.buildDetailText(item),
+        detailTitleText: item.title || '服务履历',
+        detailStatusText: '待确认',
+        detailStatusClass: 'status-warn',
+        typeLabelText: typeLabelOf(item),
+        counterpartNameText: counterpartNameOf(item),
+        startedAtDisplayText: timeTextOf(item),
+        disableEditActions: true,
+        bottomActionDisabled: true,
       });
     } catch (error) {
       this.setData({
@@ -141,6 +238,14 @@ Page({
     return inviteMode
       ? '对方邀请你确认这条服务履历。确认后，它会进入双方可信资料。'
       : '确认后，这条服务记录会进入双方可信资料。';
+  },
+
+  buildDetailText(item) {
+    if (!item) return '暂无服务内容';
+    if (Array.isArray(item.detailLines) && item.detailLines.length) {
+      return item.detailLines.join('，');
+    }
+    return item.summary || item.description || item.detailText || '暂无服务内容';
   },
 
   onShareAppMessage() {
@@ -240,11 +345,12 @@ Page({
   },
 
   async submitAction(action, toastTitle) {
-    this.setData({ submitting: true, errorMessage: '' });
+    this.setData({ submitting: true, errorMessage: '', bottomActionDisabled: true });
     try {
       const result = await action();
+      dashboardCache.invalidateDashboardRelated();
       wx.showToast({ title: toastTitle, icon: 'success' });
-      this.setData({ submitting: false });
+      this.setData({ submitting: false, bottomActionDisabled: false });
       refreshState.mark(['home', 'resume', 'engagements']);
       if (this.data.inviteMode) {
         wx.redirectTo({ url: '/pages/resume/engagements/index?tab=pending' });
@@ -262,8 +368,17 @@ Page({
     } catch (error) {
       this.setData({
         submitting: false,
+        bottomActionDisabled: false,
         errorMessage: error && error.message ? error.message : '操作失败',
       });
     }
+  },
+
+  goBack() {
+    wx.navigateBack({
+      fail: () => {
+        wx.redirectTo({ url: '/pages/resume/engagements/index' });
+      },
+    });
   },
 });

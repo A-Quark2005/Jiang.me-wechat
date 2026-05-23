@@ -1,5 +1,10 @@
 const sessionStore = require('./session-store');
 
+const API_CACHE_PREFIX = 'jiangleme.api-cache.';
+const PAGE_CACHE_PREFIX = 'jiangleme.page.';
+const memoryCache = {};
+const inFlightRequests = {};
+
 function backendBaseUrl() {
   const app = getApp();
   const configured = app && app.globalData && app.globalData.backendBaseUrl;
@@ -9,6 +14,119 @@ function backendBaseUrl() {
 function buildUrl(path) {
   const normalizedPath = String(path || '');
   return `${backendBaseUrl()}${normalizedPath.startsWith('/') ? '' : '/'}${normalizedPath}`;
+}
+
+/**
+ * Build a stable cache storage key for one API payload bucket.
+ *
+ * @param cacheKey Logical cache key.
+ * @returns Namespaced storage key string.
+ */
+function buildCacheStorageKey(cacheKey) {
+  return `${API_CACHE_PREFIX}${String(cacheKey || '').trim()}`;
+}
+
+/**
+ * Read a cached API payload from memory/storage if it is still fresh.
+ *
+ * @param cacheKey Logical cache key.
+ * @param maxAgeMs Freshness window in milliseconds.
+ * @returns Cached payload or null.
+ */
+function readCachedPayload(cacheKey, maxAgeMs) {
+  const normalizedKey = String(cacheKey || '').trim();
+  if (!normalizedKey || !maxAgeMs || maxAgeMs <= 0) {
+    return null;
+  }
+  const now = Date.now();
+  const memoryEntry = memoryCache[normalizedKey];
+  if (memoryEntry && now - memoryEntry.savedAt <= maxAgeMs) {
+    return memoryEntry.data;
+  }
+  const storageKey = buildCacheStorageKey(normalizedKey);
+  const stored = wx.getStorageSync(storageKey);
+  if (!stored || typeof stored !== 'object') {
+    return null;
+  }
+  const savedAt = Number(stored.savedAt || 0);
+  if (!savedAt || now - savedAt > maxAgeMs) {
+    return null;
+  }
+  memoryCache[normalizedKey] = {
+    savedAt,
+    data: stored.data,
+  };
+  return stored.data;
+}
+
+/**
+ * Persist a successful GET payload into memory/storage cache.
+ *
+ * @param cacheKey Logical cache key.
+ * @param data Response payload to cache.
+ */
+function writeCachedPayload(cacheKey, data) {
+  const normalizedKey = String(cacheKey || '').trim();
+  if (!normalizedKey) {
+    return;
+  }
+  const entry = {
+    savedAt: Date.now(),
+    data,
+  };
+  memoryCache[normalizedKey] = entry;
+  wx.setStorageSync(buildCacheStorageKey(normalizedKey), entry);
+}
+
+/**
+ * Prime one cache bucket with already available payload data.
+ *
+ * @param cacheKey Logical cache key.
+ * @param data Payload to write into cache.
+ */
+function primeCache(cacheKey, data) {
+  if (data === undefined) {
+    return;
+  }
+  writeCachedPayload(cacheKey, data);
+}
+
+/**
+ * Remove one or more cached API payloads.
+ *
+ * @param cacheKeys Cache key or cache key list to clear.
+ */
+function invalidateCaches(cacheKeys) {
+  const keys = Array.isArray(cacheKeys) ? cacheKeys : [cacheKeys];
+  keys
+    .map((item) => String(item || '').trim())
+    .filter(Boolean)
+    .forEach((key) => {
+      delete memoryCache[key];
+      wx.removeStorageSync(buildCacheStorageKey(key));
+    });
+}
+
+/**
+ * Clear all in-memory and persistent API caches.
+ *
+ * @returns {void}
+ */
+function resetCacheState() {
+  Object.keys(memoryCache).forEach((key) => {
+    delete memoryCache[key];
+  });
+  Object.keys(inFlightRequests).forEach((key) => {
+    delete inFlightRequests[key];
+  });
+  const storageInfo = wx.getStorageInfoSync();
+  const keys = Array.isArray(storageInfo && storageInfo.keys) ? storageInfo.keys : [];
+  keys
+    .filter((key) => {
+      const normalizedKey = String(key || '');
+      return normalizedKey.startsWith(API_CACHE_PREFIX) || normalizedKey.startsWith(PAGE_CACHE_PREFIX);
+    })
+    .forEach((key) => wx.removeStorageSync(key));
 }
 
 function parseError(response) {
@@ -34,8 +152,37 @@ function handleUnauthorized(statusCode) {
 }
 
 function request(options) {
-  const { path, method = 'GET', data, auth = true } = options || {};
+  const {
+    path,
+    method = 'GET',
+    data,
+    auth = true,
+    cacheKey = '',
+    maxAgeMs = 0,
+    forceRefresh = false,
+  } = options || {};
   const hasBody = data !== undefined && data !== null;
+  const normalizedMethod = String(method || 'GET').toUpperCase();
+  const normalizedCacheKey = String(cacheKey || '').trim();
+  const requestKey = JSON.stringify({
+    path: buildUrl(path),
+    method: normalizedMethod,
+    auth: Boolean(auth),
+    data: hasBody ? data : null,
+  });
+  if (
+    normalizedMethod === 'GET' &&
+    normalizedCacheKey &&
+    !forceRefresh
+  ) {
+    const cached = readCachedPayload(normalizedCacheKey, maxAgeMs);
+    if (cached !== null) {
+      return Promise.resolve(cached);
+    }
+  }
+  if (inFlightRequests[requestKey]) {
+    return inFlightRequests[requestKey];
+  }
   const header = {
     'content-type': hasBody ? 'application/json' : 'application/x-www-form-urlencoded',
   };
@@ -44,16 +191,19 @@ function request(options) {
     header.Authorization = `Bearer ${token}`;
   }
 
-  return new Promise((resolve, reject) => {
+  const pendingRequest = new Promise((resolve, reject) => {
     const requestOptions = {
       url: buildUrl(path),
-      method,
+      method: normalizedMethod,
       header,
       success(response) {
         const statusCode = response.statusCode || 0;
         if (statusCode >= 200 && statusCode < 300) {
           const body = response.data || {};
           if (body.ok === true) {
+            if (normalizedMethod === 'GET' && normalizedCacheKey) {
+              writeCachedPayload(normalizedCacheKey, body.data);
+            }
             resolve(body.data);
             return;
           }
@@ -71,10 +221,17 @@ function request(options) {
       requestOptions.data = data;
     }
     wx.request(requestOptions);
+  }).finally(() => {
+    delete inFlightRequests[requestKey];
   });
+  inFlightRequests[requestKey] = pendingRequest;
+  return pendingRequest;
 }
 
 module.exports = {
   backendBaseUrl,
+  invalidateCaches,
+  primeCache,
+  resetCacheState,
   request,
 };

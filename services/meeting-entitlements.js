@@ -1,19 +1,43 @@
 const { request } = require('./api-client');
 
-function getProducts() {
-  return request({ path: '/api/tencent-meeting/entitlement-products' });
+function getProducts(options) {
+  const requestOptions = options || {};
+  return request({
+    path: '/api/tencent-meeting/entitlement-products',
+    cacheKey: 'meeting_products',
+    maxAgeMs: 10 * 60 * 1000,
+    forceRefresh: Boolean(requestOptions.forceRefresh),
+  });
 }
 
-function getEntitlements() {
-  return request({ path: '/api/me/meeting-entitlements' });
+function getEntitlements(options) {
+  const requestOptions = options || {};
+  return request({
+    path: '/api/me/meeting-entitlements',
+    cacheKey: 'meeting_entitlements',
+    maxAgeMs: 60 * 1000,
+    forceRefresh: Boolean(requestOptions.forceRefresh),
+  });
 }
 
-function getCapabilities() {
-  return request({ path: '/api/me/capabilities' });
+function getCapabilities(options) {
+  const requestOptions = options || {};
+  return request({
+    path: '/api/me/capabilities',
+    cacheKey: 'me_capabilities',
+    maxAgeMs: 60 * 1000,
+    forceRefresh: Boolean(requestOptions.forceRefresh),
+  });
 }
 
-function getTencentMeetingActivation() {
-  return request({ path: '/api/tencent-meeting/activation' });
+function getTencentMeetingActivation(options) {
+  const requestOptions = options || {};
+  return request({
+    path: '/api/tencent-meeting/activation',
+    cacheKey: 'meeting_activation',
+    maxAgeMs: 60 * 1000,
+    forceRefresh: Boolean(requestOptions.forceRefresh),
+  });
 }
 
 function sendTencentMeetingActivationInvite() {
@@ -32,16 +56,25 @@ function createTencentMeeting(input) {
   });
 }
 
-function createWechatMiniProgramOrder(productId) {
+function createWechatMiniProgramOrder(productId, purchaseOptions) {
   return request({
     path: '/api/payments/wechat-mini-program/orders',
     method: 'POST',
-    data: { productId },
+    data: {
+      productId,
+      purchaseOptions: purchaseOptions || undefined,
+    },
   });
 }
 
-function getPasswordlessContractStatus() {
-  return request({ path: '/api/payments/wechat-mini-program/passwordless-contract' });
+function getPasswordlessContractStatus(options) {
+  const requestOptions = options || {};
+  return request({
+    path: '/api/payments/wechat-mini-program/passwordless-contract',
+    cacheKey: 'passwordless_contract',
+    maxAgeMs: 60 * 1000,
+    forceRefresh: Boolean(requestOptions.forceRefresh),
+  });
 }
 
 function preparePasswordlessContract() {
@@ -66,8 +99,21 @@ function createPayPerUseDeduction() {
   });
 }
 
-function getOrders() {
-  return request({ path: '/api/payments' });
+function syncPaymentStatus(orderId) {
+  return request({
+    path: `/api/payments/${encodeURIComponent(orderId)}/sync-status`,
+    method: 'POST',
+  });
+}
+
+function getOrders(options) {
+  const requestOptions = options || {};
+  return request({
+    path: '/api/payments',
+    cacheKey: 'payment_orders',
+    maxAgeMs: 60 * 1000,
+    forceRefresh: Boolean(requestOptions.forceRefresh),
+  });
 }
 
 function getOrder(orderId) {
@@ -122,4 +168,5 @@ module.exports = {
   preparePasswordlessContract,
   requestPayment,
   sendTencentMeetingActivationInvite,
+  syncPaymentStatus,
 };

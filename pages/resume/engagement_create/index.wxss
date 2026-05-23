@@ -1,35 +1,72 @@
-.bottom-bar button {
-  width: 100%;
+.engagement-create-page {
+  padding-top: 0;
 }
 
-.segmented {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16rpx;
+.engagement-create-tabs {
+  position: fixed;
+  top: calc(88rpx + env(safe-area-inset-top));
+  left: 0;
+  right: 0;
+  z-index: 19;
+  padding: 16rpx 16rpx 14rpx;
+  background: #ffffff;
+  border-bottom: 1rpx solid #f3f4f6;
 }
 
-.segment {
-  display: flex;
+.engagement-create-strip {
+  padding: 0;
+}
+
+.engagement-create-chip {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10rpx;
-  min-height: 88rpx;
-  border-radius: 14rpx;
-  color: #475467;
-  background: #f3f6fb;
+  min-width: 158rpx;
+  height: 68rpx;
+  padding: 0 24rpx;
+  border-radius: 8rpx;
+  background: #f0f0f0;
+  color: #666666;
+  font-size: 26rpx;
+  line-height: 1.4;
 }
 
-.segment-active {
-  color: #155eef;
-  background: #eef4ff;
+.engagement-create-chip radio {
+  display: none;
 }
 
-.segment radio {
-  transform: scale(.78);
+.engagement-create-form-card {
+  margin-top: 106rpx;
 }
 
-.picker-value {
-  display: flex;
-  align-items: center;
-  color: #182033;
+.engagement-create-tip-card {
+  margin-top: 16rpx;
+  min-height: 228rpx;
+}
+
+.engagement-create-input {
+  min-height: 84rpx;
+  padding: 0 0 12rpx;
+  font-size: 28rpx;
+  line-height: 1.5;
+}
+
+.engagement-create-textarea {
+  min-height: 240rpx;
+  padding-top: 8rpx;
+  font-size: 28rpx;
+}
+
+.engagement-create-success {
+  margin-top: 18rpx;
+}
+
+.engagement-create-invite-actions {
+  margin-top: 8rpx;
+}
+
+.bottom-bar button {
+  width: 100%;
+  height: 96rpx;
+  border-radius: 8rpx;
 }

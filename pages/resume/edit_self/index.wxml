@@ -1,20 +1,15 @@
-<view class="page page-with-bar">
-  <view class="card">
-    <view class="section-title">自我介绍</view>
-    <view class="section-subtitle">这部分由你自己维护，公开后会出现在你的可信资料中。</view>
-  </view>
+<view class="page page-with-bar edit-self-page">
+  <view wx:if="{{loading}}" class="surface-card">正在读取</view>
 
-  <view wx:if="{{loading}}" class="card">正在读取</view>
-
-  <view wx:else class="card">
-    <view class="field">
+  <view wx:else class="surface-card edit-self-card">
+    <view class="field edit-self-field">
       <view class="field-label">自我介绍</view>
-      <textarea class="textarea" value="{{form.selfIntroduction}}" data-field="selfIntroduction" bindinput="updateField" placeholder="介绍你的服务方向、经验和合作方式" />
+      <textarea class="textarea edit-self-textarea" value="{{form.selfIntroduction}}" data-field="selfIntroduction" bindinput="updateField" placeholder="介绍你的服务方向、经验和合作方式" />
     </view>
-    <view class="field row">
-      <view>
+    <view class="field row edit-self-switch-row">
+      <view class="row-main">
         <view class="field-label">公开展示</view>
-        <view class="muted small">关闭后不会展示在公开资料中</view>
+        <view class="row-meta">关闭后不会展示在公开资料中</view>
       </view>
       <switch checked="{{form.visible}}" bindchange="updateVisible" />
     </view>
@@ -22,6 +17,6 @@
   </view>
 
   <view class="bottom-bar">
-    <button class="primary-button" loading="{{saving}}" disabled="{{saving || loading}}" bindtap="save">保存</button>
+    <button class="primary-button" loading="{{saving}}" disabled="{{saveButtonDisabled}}" bindtap="save">保存</button>
   </view>
 </view>

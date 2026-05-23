@@ -1,82 +1,135 @@
-<view class="page">
-  <view class="hero">
-    <view class="hero-title">账号服务中心</view>
-    <view class="hero-subtitle">管理账号、可信资料和会议权益。安卓 APP 内的会议体验将继续使用腾讯会议原生能力。</view>
+<view class="page page-plain home-page">
+  <view class="home-hero" style="padding-top: {{heroSafeTopPx}}px;">
+    <view class="home-hero-art">
+      <image class="hero-logo-bg" src="/assets/ui/tencent_meeting_logo_bg.svg" mode="aspectFit"></image>
+      <image class="home-mascot" src="{{mascotUrl}}" mode="aspectFit"></image>
+    </view>
+
+    <view class="home-content-shell home-hero-shell">
+      <view class="home-brand">
+        <view class="home-brand-copy">
+          <view class="home-brand-name">讲了么</view>
+          <view class="home-brand-tagline">腾讯会议，官方授权</view>
+        </view>
+      </view>
+
+      <view class="home-profile">
+        <view class="home-avatar">
+          <image class="home-avatar-image" src="/assets/ui/avatar-home.svg" mode="aspectFit"></image>
+        </view>
+        <view class="home-profile-copy">
+          <view class="home-profile-name">{{displayNameText}}</view>
+          <view wx:if="{{showPendingActivationNotice}}" class="home-profile-pending-row">
+            <view class="home-profile-pending-text">{{pendingActivationText}}</view>
+            <button class="home-profile-pending-button" loading="{{sendingActivationInvite}}" bindtap="resendActivationInvite">重发链接</button>
+          </view>
+          <view class="home-profile-phone">{{phoneText}}</view>
+        </view>
+      </view>
+    </view>
   </view>
 
-  <view wx:if="{{loading}}" class="card">
+  <view wx:if="{{loading}}" class="surface-card">
     <view class="section-title">正在同步账号状态</view>
-    <view class="section-subtitle">请稍候，正在读取你的资料和权益。</view>
+    <view class="section-subtitle">请稍候。</view>
   </view>
 
-  <view wx:elif="{{errorMessage}}" class="card">
+  <view wx:elif="{{errorMessage}}" class="surface-card">
     <view class="section-title">加载失败</view>
     <view class="error-box">{{errorMessage}}</view>
     <button class="primary-button action-button" bindtap="refresh">重新加载</button>
   </view>
 
   <block wx:else>
-    <view class="card">
-      <view class="row">
-        <view>
-          <view class="section-title">{{profile.displayName || user.displayName || session.displayName || '已注册用户'}}</view>
-          <view class="section-subtitle">{{phoneText}}</view>
+    <view class="home-content-shell home-body-shell">
+      <view class="home-entitlement-card tappable" bindtap="openEntitlements">
+        <view class="home-entitlement-main">
+          <view class="home-entitlement-icon">
+            <image class="home-entitlement-icon-image" src="/assets/ui/entitlement-card-icon.svg" mode="aspectFit"></image>
+          </view>
+          <view class="row-main">
+            <view class="home-entitlement-title">{{entitlementSummary.title}}</view>
+            <view class="home-entitlement-meta">{{entitlementSummary.detail}}</view>
+          </view>
         </view>
-        <view class="pill status-ok">已登录</view>
+        <view class="home-entitlement-action">
+          <text>{{entitlementActionText}}</text>
+          <image class="home-arrow-icon" src="/assets/ui/arrow-primary.svg" mode="aspectFit"></image>
+        </view>
       </view>
+
+      <view class="home-schedule-card">
+        <view class="home-field">
+          <view class="home-field-label">会议主题</view>
+          <input
+            class="meeting-subject-input"
+            value="{{subject}}"
+            bindinput="onSubjectInput"
+            placeholder="请输入会议主题"
+            maxlength="50"
+          />
+        </view>
+
+        <view class="home-divider"></view>
+
+        <view class="home-field">
+          <view class="home-field-label">会议时间</view>
+          <view class="home-time-row">
+            <view class="home-time-column">
+              <picker mode="time" value="{{startTime}}" bindchange="onStartTimeChange">
+                <view class="home-time-value">{{startTime}}</view>
+              </picker>
+              <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange">
+                <view class="home-date-value">{{startDateLabel}}</view>
+              </picker>
+            </view>
+            <image class="home-time-arrow-image" src="/assets/ui/time-arrow.svg" mode="aspectFit"></image>
+            <view class="home-time-column right">
+              <picker mode="time" value="{{endTime}}" bindchange="onEndTimeChange">
+                <view class="home-time-value">{{endTime}}</view>
+              </picker>
+              <picker mode="date" value="{{endDate}}" bindchange="onEndDateChange">
+                <view class="home-date-value">{{endDateLabel}}</view>
+              </picker>
+            </view>
+          </view>
+        </view>
+
+        <view wx:if="{{errorMessage}}" class="error-box">{{errorMessage}}</view>
+
+        <button
+          class="primary-button home-book-button"
+          bindtap="submit"
+          loading="{{submitting}}"
+          disabled="{{submitting}}"
+        >
+          {{submitButtonText}}
+        </button>
+      </view>
+
     </view>
 
-    <view class="card tappable" bindtap="openEntitlements">
-      <view class="row">
-        <view>
-          <view class="section-title">当前会议权益</view>
-          <view class="section-subtitle">{{entitlementSummary.title}}</view>
-          <view class="metric-line">{{entitlementSummary.detail}}</view>
-        </view>
-        <view class="pill {{entitlementSummary.tone === 'ok' ? 'status-ok' : 'status-warn'}}">{{entitlementSummary.tone === 'ok' ? '可用' : '去开通'}}</view>
-      </view>
-    </view>
+    <view wx:if="{{showHourPassModal}}" class="hour-pass-modal-mask" catchtap="closeHourPassModal">
+      <view class="hour-pass-modal" catchtap="noop">
+        <view class="hour-pass-title">购买小时会员后继续预定</view>
+        <view class="hour-pass-subtitle">你可以直接购买小时会员继续，也可以去选择高级会议卡。</view>
 
-    <view class="meeting-action">
-      <button
-        class="primary-button create-meeting-button"
-        bindtap="createMeeting"
-      >
-        创建会议
-      </button>
-    </view>
+        <view class="hour-pass-stepper">
+          <button class="hour-pass-stepper-button" bindtap="decreaseHourPassHours" disabled="{{paying || hourPassHours <= 1}}">-</button>
+          <view class="hour-pass-stepper-value">
+            <view class="hour-pass-hours">{{hourPassHours}} 小时</view>
+            <view class="hour-pass-price">{{hourPassDisplayPriceText}}</view>
+          </view>
+          <button class="hour-pass-stepper-button" bindtap="increaseHourPassHours" disabled="{{paying || hourPassHours >= 24}}">+</button>
+        </view>
 
-    <view class="card tappable" bindtap="openResume">
-      <view class="section-title">可信资料完整度</view>
-      <view class="resume-grid">
-        <view class="metric">
-          <view class="metric-value">{{resumeSummary.completion}}%</view>
-          <view class="metric-label">完成度</view>
-        </view>
-        <view class="metric">
-          <view class="metric-value">{{resumeSummary.credentialCount}}</view>
-          <view class="metric-label">官方认证</view>
-        </view>
-        <view class="metric">
-          <view class="metric-value">{{resumeSummary.confirmedCount}}</view>
-          <view class="metric-label">确认履历</view>
-        </view>
-      </view>
-    </view>
+        <view class="hour-pass-desc">展示价按 0.5 元/小时计算，当前测试支付仍按后端 0.01 元下单。</view>
 
-    <view class="card">
-      <view class="section-title">待处理事项</view>
-      <view class="task-row" bindtap="openEngagements">
-        <view>待确认孪生履历</view>
-        <view class="pill {{resumeSummary.pendingCount > 0 ? 'status-warn' : 'status-ok'}}">{{resumeSummary.pendingCount}}</view>
-      </view>
-      <view class="task-row" bindtap="openResume">
-        <view>补充自我介绍</view>
-        <view class="pill {{resumeSummary.needsSelfIntro ? 'status-warn' : 'status-ok'}}">{{resumeSummary.needsSelfIntro ? '待完善' : '已完成'}}</view>
-      </view>
-      <view class="task-row" bindtap="openOrders">
-        <view>订单与权益记录</view>
-        <view class="pill">查看</view>
+        <view class="hour-pass-actions">
+          <button class="hour-pass-cancel" bindtap="closeHourPassModal" disabled="{{paying}}">取消</button>
+          <button class="hour-pass-confirm" bindtap="confirmHourPassPurchase" loading="{{paying}}" disabled="{{paying}}">支付并继续</button>
+        </view>
+        <button class="hour-pass-link-button" bindtap="openMeetingProducts" disabled="{{paying}}">去买高级会议卡</button>
       </view>
     </view>
   </block>

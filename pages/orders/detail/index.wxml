@@ -1,0 +1,42 @@
+<view class="page page-plain order-detail-page">
+  <view wx:if="{{loading}}" class="surface-card">
+    <view class="section-title">正在读取订单详情</view>
+    <view class="section-subtitle">请稍候。</view>
+  </view>
+
+  <view wx:elif="{{errorMessage}}" class="surface-card">
+    <view class="section-title">读取失败</view>
+    <view class="error-box">{{errorMessage}}</view>
+    <button class="primary-button action-button" bindtap="loadDetail">重新加载</button>
+  </view>
+
+  <block wx:else>
+    <view class="surface-card order-detail-hero">
+      <view class="order-detail-hero-top">
+        <view class="order-detail-title">{{titleText}}</view>
+        <view class="pill {{statusClassName}}">{{statusText}}</view>
+      </view>
+      <view class="order-detail-amount">{{amountText}}</view>
+      <view class="order-detail-status-desc">{{statusDescriptionText}}</view>
+    </view>
+
+    <view class="surface-card">
+      <view class="section-title">订单信息</view>
+      <view wx:for="{{facts}}" wx:key="label" class="detail-row">
+        <view class="detail-row-label">{{item.label}}</view>
+        <view class="detail-row-value-wrap">
+          <view class="detail-row-value">{{item.value}}</view>
+          <view wx:if="{{item.copyable}}" class="detail-row-copy tappable" data-value="{{item.value}}" bindtap="copyField">复制</view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{timeline.length > 0}}" class="surface-card">
+      <view class="section-title">处理进度</view>
+      <view wx:for="{{timeline}}" wx:key="label" class="detail-row">
+        <view class="detail-row-label">{{item.label}}</view>
+        <view class="detail-row-value">{{item.value}}</view>
+      </view>
+    </view>
+  </block>
+</view>

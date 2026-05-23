@@ -1,25 +1,33 @@
-<view class="page">
-  <view class="hero">
-    <view class="hero-title">订单记录</view>
-    <view class="hero-subtitle">查看会议权益购买记录和支付状态。</view>
+<view class="page page-plain orders-page">
+  <view class="tab-strip">
+    <view class="tab-chip tappable {{activeAllTabClass}}" data-tab="all" bindtap="switchTab">全部订单</view>
+    <view class="tab-chip tappable {{activeExpiredTabClass}}" data-tab="expired" bindtap="switchTab">已失效权益</view>
   </view>
 
-  <view wx:if="{{loading}}" class="card">正在读取订单</view>
-  <view wx:elif="{{errorMessage}}" class="card">
+  <view wx:if="{{loading}}" class="surface-card">正在读取订单</view>
+  <view wx:elif="{{errorMessage}}" class="surface-card">
     <view class="error-box">{{errorMessage}}</view>
     <button class="primary-button action-button" bindtap="loadOrders">重新加载</button>
   </view>
-  <view wx:elif="{{orders.length === 0}}" class="empty-box">暂无订单记录</view>
+  <view wx:elif="{{visibleOrders.length === 0}}" class="empty-box">暂无订单记录</view>
 
-  <view wx:for="{{orders}}" wx:key="id" class="card">
+  <view wx:for="{{visibleOrders}}" wx:key="id" class="surface-card order-card tappable" data-id="{{item.id}}" bindtap="openDetail">
     <view class="row">
-      <view>
-        <view class="section-title">{{item.title || item.productName || item.sourceType || '支付订单'}}</view>
-        <view class="section-subtitle">{{item.createdAt || item.submittedAt || '暂无创建时间'}}</view>
+      <view class="row feature-row">
+        <view class="ticket-icon {{item.iconClass}}">
+          <image wx:if="{{!item.isExpired}}" class="ticket-icon-image" src="/assets/ui/card-ticket-icon.svg" mode="aspectFit"></image>
+          <image wx:else class="ticket-icon-image" src="/assets/ui/card-ticket-icon-expired.svg" mode="aspectFit"></image>
+        </view>
+        <view class="row-main">
+          <view class="section-title">{{item.titleText}}</view>
+          <view class="section-subtitle">{{item.timeText}}</view>
+        </view>
       </view>
-      <view class="pill">{{item.status || '未知'}}</view>
+      <view class="order-side">
+        <view class="order-price"><text class="order-price-unit">{{item.amountUnitText}}</text><text class="order-price-value">{{item.amountValueText}}</text></view>
+        <view class="order-status {{item.statusClass}}">{{item.statusDisplayText}}</view>
+        <view class="order-chevron">{{item.chevronText}}</view>
+      </view>
     </view>
-    <view class="detail-line">金额：{{item.amountText || item.amount || '暂无金额'}}</view>
-    <view class="detail-line">订单号：{{item.id || item.orderId}}</view>
   </view>
 </view>

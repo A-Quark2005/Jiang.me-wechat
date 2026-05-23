@@ -1,108 +1,200 @@
-.action-button {
-  margin-top: 22rpx;
+.entitlements-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-top: 18rpx;
+  padding-left: 0;
+  padding-right: 0;
+  box-sizing: border-box;
 }
 
-.mini-button {
-  min-width: 112rpx;
-  height: 64rpx;
-  line-height: 64rpx;
-  padding: 0 20rpx;
-  font-size: 24rpx;
+.entitlements-pending-card {
+  margin: 0 16px 12rpx;
 }
 
-.entitlement-row,
-.plan-card {
+.entitlements-orders-card {
   display: flex;
   align-items: center;
+  justify-content: center;
+  min-height: 108rpx;
+  margin: 0 16px 12rpx;
+  background: #0071fe;
+}
+
+.entitlements-orders-title {
+  font-size: 30rpx;
+  line-height: 1.45;
+  color: #ffffff;
+  text-align: center;
+}
+
+.entitlements-pending-button {
+  margin-top: 20rpx;
+}
+
+.entitlements-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 514rpx;
+  padding-top: 160rpx;
+}
+
+.entitlements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  margin: 0 16px;
+}
+
+.entitlements-card {
+  margin: 0;
+}
+
+.entitlements-card-main {
+  display: flex;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 20rpx;
-  margin-top: 18rpx;
-  padding: 24rpx;
-  border-radius: 16rpx;
-  background: #f7f9fc;
+  gap: 24rpx;
 }
 
-.plan-card {
-  border: 2rpx solid transparent;
-}
-
-.plan-selected {
-  border-color: #1677ff;
-  background: #eef4ff;
-}
-
-.plan-disabled {
-  opacity: 0.55;
-}
-
-.plan-main {
+.entitlements-card-copy {
   min-width: 0;
   flex: 1;
 }
 
-.plan-title-row {
+.entitlements-card-title {
+  font-size: 30rpx;
+  line-height: 1.45;
+  color: #333333;
+}
+
+.entitlements-card-summary {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  line-height: 1.5;
+  color: #6b7280;
+}
+
+.entitlements-card-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12rpx;
+  flex-shrink: 0;
+}
+
+.entitlements-card-badge {
+  min-width: 120rpx;
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  background: #eef5ff;
+  font-size: 20rpx;
+  line-height: 28rpx;
+  text-align: center;
+  color: #0071fe;
+}
+
+.entitlements-card-status {
+  font-size: 22rpx;
+  line-height: 30rpx;
+}
+
+.entitlements-card-status.active {
+  color: #0f9d58;
+}
+
+.entitlements-card-status.inactive {
+  color: #9ca3af;
+}
+
+.entitlements-empty-image {
+  width: 139px;
+  height: 108px;
+}
+
+.entitlements-empty-text {
+  margin-top: 16rpx;
+  font-size: 22rpx;
+  line-height: 1.5;
+  color: #b0b8c9;
+}
+
+.entitlements-recommend {
+  margin: 18rpx 16px 0;
+}
+
+.entitlements-recommend-fixed {
+  margin-top: auto;
+  padding-top: 24rpx;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+}
+
+.entitlements-divider-row {
   display: flex;
   align-items: center;
-  gap: 12rpx;
+  justify-content: center;
+  gap: 20rpx;
 }
 
-.plan-desc {
-  margin-top: 10rpx;
-  line-height: 1.45;
+.entitlements-divider {
+  width: 142rpx;
+  height: 1rpx;
+  background: #b0b8c9;
 }
 
-.row-title {
-  font-weight: 700;
-  color: #182033;
+.entitlements-divider-text {
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: #52565e;
 }
 
-.price {
-  color: #1677ff;
-  font-size: 34rpx;
-  font-weight: 700;
-}
-
-.note-row {
-  padding: 18rpx 0;
-  border-bottom: 1rpx solid #eef2f7;
-  color: #475467;
-  line-height: 1.5;
-}
-
-.note-row:last-child {
-  border-bottom: 0;
-}
-
-.buy-bar {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 220rpx;
-  gap: 18rpx;
+.entitlements-recommend-card {
+  display: flex;
   align-items: center;
-  box-sizing: border-box;
-  overflow: hidden;
+  gap: 18rpx;
+  margin-top: 24rpx;
+  padding: 24rpx 28rpx;
+  min-height: 160rpx;
+  border-radius: 16rpx;
+  background: #ffffff;
+  border: 1rpx solid #ebebeb;
 }
 
-.buy-bar > view {
-  min-width: 0;
+.entitlements-recommend-icon-image {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
 }
 
-.selected-title {
-  margin-top: 6rpx;
-  font-weight: 700;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.entitlements-recommend-title {
+  font-size: 30rpx;
+  line-height: 1.45;
+  color: #333333;
 }
 
-.buy-button {
-  width: 100%;
-  min-width: 0;
-  max-width: 220rpx;
-  box-sizing: border-box;
-  height: 82rpx;
-  line-height: 82rpx;
-  margin: 0;
-  padding: 0 12rpx;
+.entitlements-recommend-meta {
+  margin-top: 4rpx;
+  font-size: 24rpx;
+  line-height: 1.45;
+  color: #b0b8c9;
+}
+
+.entitlements-recommend-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3.99px;
+  flex-shrink: 0;
+  min-height: 88rpx;
+  padding-left: 8rpx;
   font-size: 28rpx;
-  justify-self: end;
+  line-height: 1.4;
+  color: #0071fe;
+}
+
+.entitlements-arrow-icon {
+  width: 15.98px;
+  height: 15.98px;
 }

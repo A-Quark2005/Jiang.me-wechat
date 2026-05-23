@@ -1,88 +1,185 @@
-.meeting-page {
+@import "../home/index.wxss";
+
+.meeting-create-page {
   min-height: 100vh;
-  background: #f5f7fb;
+  padding-bottom: 48rpx;
 }
 
-.meeting-hero {
-  height: 330rpx;
-  padding-top: 92rpx;
-  background: linear-gradient(135deg, #0066ff 0%, #0487ff 68%, #1054d8 100%);
-  text-align: center;
-  color: #ffffff;
+.meeting-create-hero {
+  min-height: 654rpx;
 }
 
-.meeting-hero-title {
-  font-size: 42rpx;
-  font-weight: 500;
+.meeting-create-brand-copy {
+  padding-top: 0;
 }
 
-.schedule-card {
-  position: relative;
-  margin: -70rpx 48rpx 0;
-  padding: 48rpx 38rpx 42rpx;
-  border-radius: 20rpx;
+.meeting-create-mascot {
+  top: 164rpx;
+  left: 264rpx;
+  width: 480rpx;
+  height: 450rpx;
+  margin-top: 0;
+  margin-right: 0;
+}
+
+.meeting-create-profile {
+  margin-top: 0;
+}
+
+.meeting-create-entitlement {
+  margin-top: 20px;
+}
+
+.meeting-create-card {
+  margin-top: 8px;
+}
+
+.meeting-subject-block,
+.meeting-time-block {
+  margin-top: 0;
+}
+
+.meeting-subject-input {
+  width: 100%;
+  min-height: 60rpx;
+  margin-top: 22rpx;
+  padding: 0 0 22rpx;
+  font-size: 24rpx;
+  line-height: 1.5;
+  color: #000000;
+}
+
+.meeting-subject-input::placeholder {
+  color: #bfbfbf;
+}
+
+.meeting-time-row {
+  margin-top: 16rpx;
+}
+
+.meeting-time-arrow {
+  width: 13.76rpx;
+  height: 27.18rpx;
+}
+
+.meeting-create-hint {
+  margin-top: 24rpx;
+  font-size: 22rpx;
+  line-height: 1.6;
+  color: #b0b8c9;
+}
+
+.meeting-submit-button {
+  margin-top: 36rpx;
+}
+
+.hour-pass-modal-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 32rpx;
+  background: rgba(0, 0, 0, 0.36);
+}
+
+.hour-pass-modal {
+  width: 100%;
+  max-width: 686rpx;
+  padding: 40rpx 32rpx 32rpx;
   background: #ffffff;
-  box-shadow: 0 20rpx 48rpx rgba(17, 25, 40, 0.08);
+  border-radius: 24rpx;
 }
 
-.field-label {
-  font-size: 31rpx;
-  font-weight: 600;
-  color: #1f2329;
+.hour-pass-title {
+  font-size: 32rpx;
+  line-height: 44rpx;
+  color: #1f2937;
+  text-align: center;
 }
 
-.subject-input {
-  height: 84rpx;
-  margin-top: 18rpx;
-  border-bottom: 1rpx solid #d9dde5;
-  color: #1f2329;
-  font-size: 30rpx;
+.hour-pass-subtitle {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  line-height: 36rpx;
+  color: #6b7280;
+  text-align: center;
 }
 
-.subject-input::placeholder {
-  color: #b5bcc9;
-}
-
-.time-label {
-  margin-top: 44rpx;
-}
-
-.time-row {
+.hour-pass-stepper {
   display: flex;
   align-items: center;
-  margin-top: 28rpx;
-  padding-bottom: 34rpx;
-  border-bottom: 1rpx solid #edf0f5;
+  justify-content: space-between;
+  gap: 24rpx;
+  margin-top: 32rpx;
 }
 
-.time-column {
+.hour-pass-stepper-button {
+  width: 88rpx;
+  min-width: 88rpx;
+  height: 88rpx;
+  margin: 0;
+  padding: 0;
+  border-radius: 20rpx;
+  background: #f3f4f6;
+  color: #111827;
+  font-size: 40rpx;
+  line-height: 88rpx;
+}
+
+.hour-pass-stepper-value {
   flex: 1;
-}
-
-.time-column.right {
-  text-align: right;
-}
-
-.time-value {
-  font-size: 58rpx;
-  line-height: 1.1;
-  color: #24262b;
-}
-
-.date-value {
-  margin-top: 14rpx;
-  font-size: 26rpx;
-  color: #1f2329;
-}
-
-.time-arrow {
-  width: 74rpx;
+  min-height: 88rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 20rpx;
+  background: #f8fafc;
   text-align: center;
-  color: #c1c7d0;
-  font-size: 60rpx;
-  font-weight: 200;
 }
 
-.reserve-button {
-  margin-top: 48rpx;
+.hour-pass-hours {
+  font-size: 30rpx;
+  line-height: 42rpx;
+  color: #111827;
+}
+
+.hour-pass-price {
+  margin-top: 4rpx;
+  font-size: 24rpx;
+  line-height: 34rpx;
+  color: #0071fe;
+}
+
+.hour-pass-desc {
+  margin-top: 24rpx;
+  font-size: 22rpx;
+  line-height: 34rpx;
+  color: #9ca3af;
+  text-align: center;
+}
+
+.hour-pass-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16rpx;
+  margin-top: 32rpx;
+}
+
+.hour-pass-cancel,
+.hour-pass-confirm {
+  height: 88rpx;
+  margin: 0;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  line-height: 88rpx;
+}
+
+.hour-pass-cancel {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.hour-pass-confirm {
+  background: #0071fe;
+  color: #ffffff;
 }

@@ -1,12 +1,91 @@
-const auth = require('../../services/auth');
 const apiClient = require('../../services/api-client');
 const sessionStore = require('../../services/session-store');
 const entitlementsService = require('../../services/meeting-entitlements');
-const profileService = require('../../services/profile');
 const refreshState = require('../../services/refresh-state');
+const heroLayout = require('../../services/hero-layout');
+const loginGuard = require('../../services/login-guard');
+const displayFormatters = require('../../services/display-formatters');
 
 const PAGE_KEY = 'home';
 const CACHE_MAX_AGE_MS = 5 * 60 * 1000;
+
+/**
+ * Left-pad numeric date and time fragments.
+ *
+ * @param {number|string} value Numeric value to pad.
+ * @returns {string} Two-digit string.
+ */
+function pad(value) {
+  return String(value).padStart(2, '0');
+}
+
+/**
+ * Convert a Date instance into the picker date format.
+ *
+ * @param {Date} date Source date.
+ * @returns {string} Date string in YYYY-MM-DD format.
+ */
+function toDateValue(date) {
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+/**
+ * Convert a Date instance into the picker time format.
+ *
+ * @param {Date} date Source date.
+ * @returns {string} Time string in HH:mm format.
+ */
+function toTimeValue(date) {
+  return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+/**
+ * Build a Date instance from picker date and time values.
+ *
+ * @param {string} dateValue Date string in YYYY-MM-DD format.
+ * @param {string} timeValue Time string in HH:mm format.
+ * @returns {Date} Combined local date.
+ */
+function toTimestamp(dateValue, timeValue) {
+  const [year, month, day] = String(dateValue).split('-').map((item) => Number(item));
+  const [hour, minute] = String(timeValue).split(':').map((item) => Number(item));
+  return new Date(year, month - 1, day, hour, minute, 0, 0);
+}
+
+/**
+ * Calculate the meeting duration in minutes from start and end time.
+ *
+ * @param {Date} start Meeting start time.
+ * @param {Date} end Meeting end time.
+ * @returns {number} Integer duration in minutes with a minimum of 1 minute.
+ */
+function durationMinutesBetween(start, end) {
+  return Math.max(1, Math.round((end.getTime() - start.getTime()) / 60000));
+}
+
+/**
+ * Format picker date values into the Chinese date label used by the design.
+ *
+ * @param {string} value Date string in YYYY-MM-DD format.
+ * @returns {string} Human-readable Chinese date label.
+ */
+function formatDateLabel(value) {
+  const [year, month, day] = String(value).split('-');
+  return `${year}年${month}月${day}日`;
+}
+
+/**
+ * Build display labels from meeting form data.
+ *
+ * @param {object} data Meeting form data.
+ * @returns {{startDateLabel: string, endDateLabel: string}} Date labels.
+ */
+function buildLabels(data) {
+  return {
+    startDateLabel: formatDateLabel(data.startDate),
+    endDateLabel: formatDateLabel(data.endDate),
+  };
+}
 
 function safeArray(value) {
   return Array.isArray(value) ? value : [];
@@ -17,7 +96,7 @@ function formatPhone(user, profile) {
     (user && (user.phone || user.phoneMasked || user.mobile)) ||
     (profile && (profile.phone || profile.phoneMasked)) ||
     '';
-  return phone || '未授权手机号';
+  return displayFormatters.formatPhoneText(phone, { fallback: '未授权手机号' });
 }
 
 function resolveEntitlementSummary(entitlements) {
@@ -25,18 +104,72 @@ function resolveEntitlementSummary(entitlements) {
   const active = list.find((item) => String(item.status || '').toLowerCase() === 'active') || list[0];
   if (!active) {
     return {
-      title: '未开通会议权益',
-      detail: '可按需购买会议权益，并同步到安卓 APP',
+      title: '当前会议权益',
+      detail: '未开通 · 可按需购买',
       tone: 'warn',
     };
   }
   const expiresAt = active.expiresAt || active.validUntil || '';
   const remaining = active.remainingCount || active.remainingUses || '';
+  const durationHours = active.durationHours || '';
+  const type = String(active.type || '').toLowerCase();
+  const sourceId = String(active.sourceId || '').toLowerCase();
+  const isHourPass = type === 'hour_pass' || sourceId === 'meeting-hour-pass';
   return {
-    title: active.name || active.title || '会议权益可用',
-    detail: expiresAt ? `有效期至 ${expiresAt}` : remaining ? `剩余 ${remaining} 次` : '权益已生效',
+    title: active.name || active.title || '当前会议权益',
+    detail: expiresAt
+      ? `有效期至 ${displayFormatters.formatDateText(expiresAt, { includeTime: isHourPass, fallback: expiresAt })}`
+      : remaining
+        ? `剩余 ${remaining} 次`
+        : durationHours && isHourPass
+          ? `${durationHours}小时权益`
+        : '已开通 · 可立即使用',
     tone: 'ok',
   };
+}
+
+/**
+ * Check whether the current user already owns a valid unlimited duration card.
+ *
+ * @param {any} entitlementsRaw Entitlements API response.
+ * @returns {boolean} True when an active duration entitlement exists.
+ */
+function hasActiveUnlimitedCard(entitlementsRaw) {
+  const entitlements = safeArray(entitlementsRaw && (entitlementsRaw.items || entitlementsRaw.entitlements || entitlementsRaw));
+  return entitlements.some((item) => {
+    const status = String(item && item.status ? item.status : '').toLowerCase();
+    const type = String(item && item.type ? item.type : '').toLowerCase();
+    return status === 'active' && (type === 'duration' || type === 'hour_pass');
+  });
+}
+
+/**
+ * Render the hour-pass display price for the UI stepper.
+ *
+ * @param {number|string} hours Selected hours.
+ * @returns {string} Display price text.
+ */
+function hourPriceText(hours) {
+  return `￥${(Number(hours || 0) * 0.5).toFixed(1)}`;
+}
+
+/**
+ * Determine whether activation state requires jumping to the activation page.
+ *
+ * @param {object} activation Normalized activation state.
+ * @returns {boolean} True when login or phone binding is still missing.
+ */
+function needsActivationPageBlock(activation) {
+  if (!activation) {
+    return true;
+  }
+  if (!activation.isLoggedIn) {
+    return true;
+  }
+  if (activation.needsPhone) {
+    return true;
+  }
+  return false;
 }
 
 function resolveResumeSummary(resume, credentials, engagements) {
@@ -61,6 +194,141 @@ function resolveResumeSummary(resume, credentials, engagements) {
   };
 }
 
+function cachedDashboard() {
+  return wx.getStorageSync('jiangleme.page.home.dashboard') || null;
+}
+
+function saveCachedDashboard(payload) {
+  wx.setStorageSync('jiangleme.page.home.dashboard', {
+    savedAt: Date.now(),
+    data: payload,
+  });
+}
+
+function recentCache(record, maxAgeMs) {
+  if (!record || typeof record !== 'object') return null;
+  const savedAt = Number(record.savedAt || 0);
+  if (!savedAt || Date.now() - savedAt > maxAgeMs) return null;
+  return record.data || null;
+}
+
+function primeDerivedCaches(dashboard) {
+  if (!dashboard) return;
+  apiClient.primeCache('mini_program_dashboard', dashboard);
+  apiClient.primeCache('bootstrap', dashboard.bootstrap);
+  apiClient.primeCache('meeting_entitlements', dashboard.entitlements);
+  apiClient.primeCache('resume_portfolio', dashboard.resume);
+  apiClient.primeCache('meeting_activation', dashboard.activation);
+}
+
+function warmSecondaryCaches() {
+  setTimeout(() => {
+    entitlementsService.getProducts().catch(() => {});
+    entitlementsService.getOrders().catch(() => {});
+  }, 120);
+}
+
+/**
+ * Build a small pending-activation view model for the current page.
+ *
+ * @param {object} rawActivation Raw activation payload from backend.
+ * @returns {{activation: object|null, showPendingActivationNotice: boolean, pendingActivationText: string}} Page state fragment.
+ */
+function buildPendingActivationState(rawActivation) {
+  const activation = displayFormatters.normalizeMeetingActivationState(rawActivation);
+  const showPendingActivationNotice = Boolean(activation && activation.isPendingActivation);
+  return {
+    activation,
+    showPendingActivationNotice,
+    pendingActivationText: showPendingActivationNotice
+      ? '腾讯会议企业号待激活，请查看短信或激活链接。'
+      : '',
+  };
+}
+
+/**
+ * Convert raw date-like values into Date objects for invite rendering.
+ *
+ * @param {string|Date} value Raw date source.
+ * @returns {Date|null} Parsed date or null.
+ */
+function toDisplayDate(value) {
+  if (!value) return null;
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
+  }
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+/**
+ * Return the fixed timezone label used by current meeting scheduling.
+ *
+ * @returns {string} Timezone label text.
+ */
+function buildTimezoneLabel() {
+  return '(GMT+08:00) 中国标准时间 - 北京';
+}
+
+/**
+ * Format a meeting time range for the Tencent Meeting invite copy.
+ *
+ * @param {string|Date} startValue Meeting start time.
+ * @param {string|Date} endValue Meeting end time.
+ * @returns {string} Time range text.
+ */
+function formatMeetingInviteTimeRange(startValue, endValue) {
+  const startDate = toDisplayDate(startValue);
+  const endDate = toDisplayDate(endValue);
+  if (!startDate || !endDate) {
+    return '';
+  }
+  const sameDay =
+    startDate.getFullYear() === endDate.getFullYear() &&
+    startDate.getMonth() === endDate.getMonth() &&
+    startDate.getDate() === endDate.getDate();
+  const startDateText = `${startDate.getFullYear()}/${pad(startDate.getMonth() + 1)}/${pad(startDate.getDate())}`;
+  const startTimeText = `${pad(startDate.getHours())}:${pad(startDate.getMinutes())}`;
+  const endDateText = `${endDate.getFullYear()}/${pad(endDate.getMonth() + 1)}/${pad(endDate.getDate())}`;
+  const endTimeText = `${pad(endDate.getHours())}:${pad(endDate.getMinutes())}`;
+  if (sameDay) {
+    return `${startDateText} ${startTimeText}-${endTimeText} ${buildTimezoneLabel()}`;
+  }
+  return `${startDateText} ${startTimeText} - ${endDateText} ${endTimeText} ${buildTimezoneLabel()}`;
+}
+
+/**
+ * Build Tencent Meeting invite copy for clipboard sharing.
+ *
+ * @param {object} options Invite options.
+ * @param {string} options.displayName Inviter display name.
+ * @param {string} options.subject Meeting subject.
+ * @param {string} options.meetingCode Meeting code.
+ * @param {string} options.meetingLink Meeting join link.
+ * @param {string|Date} options.startTime Meeting start time.
+ * @param {string|Date} options.endTime Meeting end time.
+ * @returns {string} Clipboard share content.
+ */
+function buildMeetingInviteCopy(options) {
+  const displayName = String(options.displayName || '用户昵称').trim() || '用户昵称';
+  const subject = String(options.subject || '腾讯会议').trim() || '腾讯会议';
+  const meetingCode = String(options.meetingCode || '').trim();
+  const meetingLink = String(options.meetingLink || '').trim();
+  const timeText = formatMeetingInviteTimeRange(options.startTime, options.endTime);
+  return [
+    `${displayName} 邀请您参加腾讯会议`,
+    `会议主题：${subject}`,
+    timeText ? `会议时间：${timeText}` : '',
+    '',
+    '点击链接入会，或添加至会议列表：',
+    meetingLink,
+    '',
+    meetingCode ? `#腾讯会议：${meetingCode}` : '',
+    '',
+    '复制该信息，打开腾讯会议即可参与',
+  ].join('\n');
+}
+
 Page({
   data: {
     loading: true,
@@ -69,25 +337,107 @@ Page({
     user: null,
     profile: null,
     phoneText: '',
+    avatarText: '讲',
     entitlementSummary: null,
     resumeSummary: null,
     backendBaseUrl: '',
+    mascotUrl: '/assets/ui/jlm-figma-home.png',
+    displayNameText: '用户昵称',
+    entitlementActionText: '去开通',
+    heroSafeTopPx: 0,
+    guestMode: true,
+    activation: null,
+    showPendingActivationNotice: false,
+    pendingActivationText: '',
+    sendingActivationInvite: false,
+    subject: '',
+    startDate: '',
+    startTime: '',
+    endDate: '',
+    endTime: '',
+    startDateLabel: '',
+    endDateLabel: '',
+    submitting: false,
+    submitButtonText: '立即预定',
+    paying: false,
+    showHourPassModal: false,
+    hourPassHours: 1,
+    hourPassDisplayPriceText: '￥0.5',
+    continuingAfterPayment: false,
   },
 
   onLoad() {
-    this.setData({ backendBaseUrl: apiClient.backendBaseUrl() });
-  },
-
-  onShow() {
-    if (!this.data.session || refreshState.consume(PAGE_KEY) || refreshState.isExpired(PAGE_KEY, CACHE_MAX_AGE_MS)) {
-      this.ensureRegisteredAndLoad();
+    const now = new Date();
+    now.setMinutes(Math.ceil(now.getMinutes() / 10) * 10, 0, 0);
+    const end = new Date(now.getTime() + 30 * 60 * 1000);
+    const nextData = {
+      startDate: toDateValue(now),
+      startTime: toTimeValue(now),
+      endDate: toDateValue(end),
+      endTime: toTimeValue(end),
+    };
+    this.setData({
+      backendBaseUrl: apiClient.backendBaseUrl(),
+      ...nextData,
+      ...buildLabels(nextData),
+      ...heroLayout.buildHeroLayoutData(),
+    });
+    const cached = recentCache(cachedDashboard(), CACHE_MAX_AGE_MS);
+    if (cached) {
+      this.setData({
+        loading: false,
+        errorMessage: '',
+        ...cached,
+      });
     }
   },
 
-  async ensureRegisteredAndLoad() {
-    this.setData({ loading: true, errorMessage: '' });
+  onShow() {
+    if (!loginGuard.isLoggedIn()) {
+      this.enterGuestMode();
+      return;
+    }
+    if (!this.data.session || refreshState.consume(PAGE_KEY) || refreshState.isExpired(PAGE_KEY, CACHE_MAX_AGE_MS)) {
+      this.loadAuthenticatedDashboard();
+    }
+  },
+
+  enterGuestMode() {
+    this.setData({
+      loading: false,
+      errorMessage: '',
+      session: null,
+      user: null,
+      profile: null,
+      phoneText: '点击登录后授权手机号',
+      avatarText: '讲',
+      displayNameText: '游客模式',
+      entitlementSummary: {
+        title: '当前会议权益',
+        detail: '未登录 · 登录后查看权益与购卡',
+        tone: 'warn',
+      },
+      entitlementActionText: '去登录',
+      resumeSummary: null,
+      guestMode: true,
+      activation: null,
+      showPendingActivationNotice: false,
+      pendingActivationText: '',
+      sendingActivationInvite: false,
+    });
+  },
+
+  async loadAuthenticatedDashboard() {
+    if (!loginGuard.isLoggedIn()) {
+      this.enterGuestMode();
+      return;
+    }
+    if (!this.data.session) {
+      this.setData({ loading: true, errorMessage: '' });
+    } else {
+      this.setData({ errorMessage: '' });
+    }
     try {
-      const loginResult = await auth.loginWithMiniProgram();
       const app = getApp();
       const pendingInviteToken =
         app && app.globalData ? app.globalData.pendingEngagementInviteToken : '';
@@ -98,7 +448,7 @@ Page({
         return;
       }
       const sessionRecord = sessionStore.getSessionRecord();
-      await this.loadDashboard(sessionRecord);
+      await this.loadDashboard(sessionRecord, true);
     } catch (error) {
       this.setData({
         loading: false,
@@ -107,51 +457,432 @@ Page({
     }
   },
 
-  async loadDashboard(sessionRecord) {
-    const [bootstrap, capabilities, entitlements, resume, credentials, engagements] = await Promise.all([
-      apiClient.request({ path: '/api/bootstrap' }),
-      entitlementsService.getCapabilities(),
-      entitlementsService.getEntitlements(),
-      profileService.getResume(),
-      profileService.getCredentials(),
-      profileService.getEngagements(),
-    ]);
+  async loadDashboard(sessionRecord, forceRefresh) {
+    const dashboard = await apiClient.request({
+      path: '/api/mini-program/dashboard',
+      cacheKey: 'mini_program_dashboard',
+      maxAgeMs: 60 * 1000,
+      forceRefresh: Boolean(forceRefresh),
+    });
+    const bootstrap = dashboard && dashboard.bootstrap;
+    const entitlements = dashboard && dashboard.entitlements;
+    const resume = dashboard && dashboard.resume;
+    const activationViewState = buildPendingActivationState(
+      dashboard && dashboard.activation,
+    );
+    primeDerivedCaches(dashboard);
     const user = (bootstrap && bootstrap.me) || (sessionRecord && sessionRecord.user) || {};
     const profile = (bootstrap && bootstrap.profile) || (sessionRecord && sessionRecord.profile) || {};
-    this.setData({
-      loading: false,
+    const displayName = profile.displayName || user.displayName || sessionStore.getSession() && sessionStore.getSession().displayName || '';
+    const entitlementSummary = resolveEntitlementSummary(entitlements);
+    const nextViewState = {
       session: sessionStore.getSession(),
       user,
       profile,
       phoneText: formatPhone(user, profile),
-      entitlementSummary: resolveEntitlementSummary(entitlements || capabilities),
-      resumeSummary: resolveResumeSummary(resume, credentials, engagements),
+      avatarText: String(displayName || '讲').trim().slice(0, 1) || '讲',
+      displayNameText: displayName || '用户昵称',
+      entitlementSummary,
+      entitlementActionText: entitlementSummary.tone === 'ok' ? '去查看' : '去开通',
+      guestMode: false,
+      ...activationViewState,
+      resumeSummary: resolveResumeSummary(
+        resume,
+        resume && (resume.certifiedQualifications || resume.credentials),
+        resume && (resume.relatedExperiences || resume.engagements),
+      ),
+    };
+    this.setData({
+      loading: false,
+      ...nextViewState,
     });
+    saveCachedDashboard(nextViewState);
+    warmSecondaryCaches();
     refreshState.touch(PAGE_KEY);
   },
 
   openResume() {
-    wx.switchTab({ url: '/pages/resume/index' });
+    loginGuard.guardAction('/pages/resume/index', () => {
+      wx.switchTab({ url: '/pages/resume/index' });
+    }, { viaTab: true });
   },
 
   openEntitlements() {
-    wx.switchTab({ url: '/pages/meeting_entitlements/index' });
+    loginGuard.guardAction('/pages/meeting_entitlements/index', () => {
+      wx.switchTab({ url: '/pages/meeting_entitlements/index' });
+    }, { viaTab: true });
   },
 
   createMeeting() {
-    wx.navigateTo({ url: '/pages/meeting_create/index' });
+    this.submit();
+  },
+
+  /**
+   * Update the meeting subject input on the home page.
+   *
+   * @param {WechatMiniprogram.CustomEvent} event Input event.
+   * @returns {void}
+   */
+  onSubjectInput(event) {
+    this.setData({ subject: event.detail.value });
+  },
+
+  /**
+   * Handle meeting start-date changes.
+   *
+   * @param {WechatMiniprogram.CustomEvent} event Picker event.
+   * @returns {void}
+   */
+  onStartDateChange(event) {
+    this.setData({
+      startDate: event.detail.value,
+      startDateLabel: formatDateLabel(event.detail.value),
+    });
+    this.ensureEndAfterStart();
+  },
+
+  /**
+   * Handle meeting start-time changes.
+   *
+   * @param {WechatMiniprogram.CustomEvent} event Picker event.
+   * @returns {void}
+   */
+  onStartTimeChange(event) {
+    this.setData({ startTime: event.detail.value });
+    this.ensureEndAfterStart();
+  },
+
+  /**
+   * Handle meeting end-date changes.
+   *
+   * @param {WechatMiniprogram.CustomEvent} event Picker event.
+   * @returns {void}
+   */
+  onEndDateChange(event) {
+    this.setData({
+      endDate: event.detail.value,
+      endDateLabel: formatDateLabel(event.detail.value),
+    });
+  },
+
+  /**
+   * Handle meeting end-time changes.
+   *
+   * @param {WechatMiniprogram.CustomEvent} event Picker event.
+   * @returns {void}
+   */
+  onEndTimeChange(event) {
+    this.setData({ endTime: event.detail.value });
+  },
+
+  /**
+   * Keep the end time at least 30 minutes after the current start time.
+   *
+   * @returns {void}
+   */
+  ensureEndAfterStart() {
+    const start = toTimestamp(this.data.startDate, this.data.startTime);
+    const end = toTimestamp(this.data.endDate, this.data.endTime);
+    if (end.getTime() > start.getTime()) {
+      return;
+    }
+    const nextEnd = new Date(start.getTime() + 30 * 60 * 1000);
+    this.setData({
+      endDate: toDateValue(nextEnd),
+      endTime: toTimeValue(nextEnd),
+      endDateLabel: formatDateLabel(toDateValue(nextEnd)),
+    });
+  },
+
+  /**
+   * Submit a Tencent Meeting reservation directly from the home page.
+   *
+   * @returns {Promise<void>} Resolves after the booking flow completes.
+   */
+  async submit() {
+    if (!loginGuard.isLoggedIn()) {
+      loginGuard.redirectToLogin({ targetUrl: '/pages/home/index' });
+      return;
+    }
+    const fallbackDisplayName = String(this.data.displayNameText || '用户昵称').trim() || '用户昵称';
+    const subject = this.data.subject.trim() || `${fallbackDisplayName} 预定的会议`;
+    const start = toTimestamp(this.data.startDate, this.data.startTime);
+    const end = toTimestamp(this.data.endDate, this.data.endTime);
+    if (end.getTime() <= start.getTime()) {
+      this.setData({ errorMessage: '结束时间需要晚于开始时间' });
+      return;
+    }
+
+    this.setData({ submitting: true, errorMessage: '', submitButtonText: '正在预定' });
+    try {
+      const entitlements = await entitlementsService.getEntitlements();
+      if (!hasActiveUnlimitedCard(entitlements)) {
+        this.setData({
+          submitting: false,
+          submitButtonText: '立即预定',
+          continuingAfterPayment: true,
+          showHourPassModal: true,
+        });
+        return;
+      }
+      const activation = displayFormatters.normalizeMeetingActivationState(
+        await entitlementsService.getTencentMeetingActivation(),
+      );
+      if (needsActivationPageBlock(activation)) {
+        this.setData({ submitting: false, submitButtonText: '立即预定' });
+        wx.navigateTo({ url: '/pages/meeting_activation/index' });
+        return;
+      }
+      if (activation.isPendingActivation) {
+        this.setData({
+          submitting: false,
+          submitButtonText: '立即预定',
+          errorMessage: '腾讯会议账号待激活，请查看短信或激活链接后再预定会议。',
+        });
+        wx.showModal({
+          title: '请先完成激活',
+          content: '腾讯会议账号待激活，请查看短信或激活链接完成启用后，再继续预定会议。',
+          confirmText: '重发链接',
+          cancelText: '知道了',
+          success: async (result) => {
+            if (!result.confirm) {
+              return;
+            }
+            await this.resendActivationInvite();
+          },
+        });
+        return;
+      }
+      this.setData({ submitButtonText: '正在创建会议' });
+      const meeting = await entitlementsService.createTencentMeeting({
+        subject,
+        startTime: start.toISOString(),
+        endTime: end.toISOString(),
+        startTimeIso: start.toISOString(),
+        endTimeIso: end.toISOString(),
+        durationMinutes: durationMinutesBetween(start, end),
+        timeZone: 'Asia/Shanghai',
+      });
+      const meetingCode = meeting.meetingCode || meeting.roomId || meeting.meetingId || meeting.id || '';
+      const meetingLink = meeting.meetingLink || meeting.joinUrl || meeting.link || '';
+      const modalSubject = meeting.subject || subject;
+      const modalTimeText = formatMeetingInviteTimeRange(
+        meeting.startTime || start.toISOString(),
+        meeting.endTime || end.toISOString(),
+      );
+      const inviteCopy = buildMeetingInviteCopy({
+        displayName: this.data.displayNameText,
+        subject: modalSubject,
+        meetingCode,
+        meetingLink,
+        startTime: meeting.startTime || start.toISOString(),
+        endTime: meeting.endTime || end.toISOString(),
+      });
+      this.setData({ submitting: false, submitButtonText: '立即预定' });
+      refreshState.mark(['home', 'entitlements', 'orders']);
+      wx.showModal({
+        title: '会议已预定',
+        content: [
+          `主题：${modalSubject}`,
+          meetingCode ? `会议号：${meetingCode}` : '',
+          modalTimeText ? `日期时间时区：${modalTimeText}` : '',
+        ].filter(Boolean).join('\n'),
+        confirmText: inviteCopy ? '复制邀约' : '知道了',
+        cancelText: '关闭',
+        showCancel: Boolean(inviteCopy),
+        success(result) {
+          if (result.confirm && inviteCopy) {
+            wx.setClipboardData({ data: inviteCopy });
+          }
+        },
+      });
+    } catch (error) {
+      const rawMessage = error && error.message ? error.message : '预定会议失败';
+      const activationPending =
+        rawMessage.includes('待激活') ||
+        rawMessage.includes('未激活') ||
+        rawMessage.includes('激活');
+      this.setData({
+        submitting: false,
+        submitButtonText: '立即预定',
+        continuingAfterPayment: false,
+        errorMessage: activationPending
+          ? '腾讯会议账号待激活，请查看短信或激活链接后再预定会议。'
+          : rawMessage,
+      });
+      if (activationPending) {
+        wx.showModal({
+          title: '请先完成激活',
+          content: '腾讯会议账号待激活，请查看短信或激活链接完成启用后，再继续预定会议。',
+          confirmText: '知道了',
+          showCancel: false,
+        });
+      }
+    }
+  },
+
+  /**
+   * Close the hour-pass purchase modal.
+   *
+   * @returns {void}
+   */
+  closeHourPassModal() {
+    if (this.data.paying) {
+      return;
+    }
+    this.setData({
+      showHourPassModal: false,
+      continuingAfterPayment: false,
+    });
+  },
+
+  /**
+   * Decrease selected hour-pass hours.
+   *
+   * @returns {void}
+   */
+  decreaseHourPassHours() {
+    const nextHours = Math.max(1, Number(this.data.hourPassHours || 1) - 1);
+    this.setData({
+      hourPassHours: nextHours,
+      hourPassDisplayPriceText: hourPriceText(nextHours),
+    });
+  },
+
+  /**
+   * Increase selected hour-pass hours.
+   *
+   * @returns {void}
+   */
+  increaseHourPassHours() {
+    const nextHours = Math.min(24, Number(this.data.hourPassHours || 1) + 1);
+    this.setData({
+      hourPassHours: nextHours,
+      hourPassDisplayPriceText: hourPriceText(nextHours),
+    });
+  },
+
+  /**
+   * Purchase an hour pass and continue the scheduling flow on the home page.
+   *
+   * @returns {Promise<void>} Resolves after payment handling finishes.
+   */
+  async confirmHourPassPurchase() {
+    if (this.data.paying) {
+      return;
+    }
+    const selectedHours = Number(this.data.hourPassHours || 1);
+    this.setData({
+      paying: true,
+      errorMessage: '',
+      submitButtonText: '等待支付',
+    });
+    try {
+      const order = await entitlementsService.createWechatMiniProgramOrder('meeting-hour-pass', {
+        hours: selectedHours,
+      });
+      if (!order || !order.paymentParams) {
+        throw new Error('小时会员支付参数异常，请稍后重试');
+      }
+      await entitlementsService.requestPayment(order.paymentParams);
+      if (order.orderId) {
+        await entitlementsService.syncPaymentStatus(order.orderId);
+      }
+      refreshState.mark(['home', 'entitlements', 'orders']);
+      this.setData({
+        paying: false,
+        showHourPassModal: false,
+      });
+      if (this.data.continuingAfterPayment) {
+        await this.loadAuthenticatedDashboard();
+        await this.submit();
+        return;
+      }
+      wx.showToast({ title: '购买成功', icon: 'success' });
+    } catch (error) {
+      const message = error && error.message ? error.message : '小时会员购买失败';
+      const canceled = String(message || '').toLowerCase().includes('cancel');
+      this.setData({
+        paying: false,
+        submitButtonText: '立即预定',
+        errorMessage: canceled ? '' : message,
+      });
+      if (canceled) {
+        return;
+      }
+      wx.showModal({
+        title: '购买失败',
+        content: message,
+        showCancel: false,
+      });
+    }
+  },
+
+  /**
+   * Open the advanced meeting-card purchase page from the hour-pass modal.
+   *
+   * @returns {void}
+   */
+  openMeetingProducts() {
+    if (this.data.paying) {
+      return;
+    }
+    this.setData({
+      showHourPassModal: false,
+      continuingAfterPayment: false,
+    });
+    wx.switchTab({ url: '/pages/meeting_entitlements/index' });
+  },
+
+  noop() {},
+
+  /**
+   * Re-send Tencent Meeting activation invite for pending enterprise accounts.
+   *
+   * @returns {Promise<void>} Resolves after the invite flow finishes.
+   */
+  async resendActivationInvite() {
+    if (this.data.sendingActivationInvite) {
+      return;
+    }
+    this.setData({ sendingActivationInvite: true });
+    try {
+      const result = await entitlementsService.sendTencentMeetingActivationInvite();
+      wx.showToast({
+        title: result && result.inviteMessage ? result.inviteMessage : '激活链接已重发',
+        icon: 'none',
+      });
+      refreshState.mark(['home', 'entitlements', 'resume']);
+      await this.loadAuthenticatedDashboard();
+    } catch (error) {
+      wx.showModal({
+        title: '发送失败',
+        content: error && error.message ? error.message : '激活链接发送失败',
+        showCancel: false,
+      });
+    } finally {
+      this.setData({ sendingActivationInvite: false });
+    }
   },
 
   openEngagements() {
-    wx.navigateTo({ url: '/pages/resume/engagements/index?tab=pending' });
+    loginGuard.guardAction('/pages/resume/engagements/index?tab=pending', () => {
+      wx.navigateTo({ url: '/pages/resume/engagements/index?tab=pending' });
+    });
   },
 
   openOrders() {
-    wx.navigateTo({ url: '/pages/orders/index' });
+    loginGuard.guardAction('/pages/orders/index', () => {
+      wx.navigateTo({ url: '/pages/orders/index' });
+    });
   },
 
   refresh() {
+    if (!loginGuard.isLoggedIn()) {
+      loginGuard.redirectToLogin({ targetUrl: '/pages/home/index' });
+      return;
+    }
     refreshState.mark(PAGE_KEY);
-    this.ensureRegisteredAndLoad();
+    this.loadAuthenticatedDashboard();
   },
 });

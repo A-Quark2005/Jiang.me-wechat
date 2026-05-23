@@ -1,70 +1,81 @@
-<view class="page">
-  <view class="hero">
-    <view class="hero-title">可信资料</view>
-    <view class="hero-subtitle">维护自我介绍、官方认证和双方确认的服务履历。</view>
-  </view>
-
-  <view wx:if="{{loading}}" class="card">
+<view class="page page-with-bar page-plain resume-page">
+  <view wx:if="{{loading}}" class="surface-card">
     <view class="section-title">正在读取资料</view>
   </view>
 
-  <view wx:elif="{{errorMessage}}" class="card">
+  <view wx:elif="{{errorMessage}}" class="surface-card">
     <view class="section-title">读取失败</view>
     <view class="error-box">{{errorMessage}}</view>
     <button class="primary-button action-button" bindtap="loadResume">重新加载</button>
   </view>
 
   <block wx:else>
-    <view class="card">
-      <view class="row">
-        <view>
-          <view class="section-title">官方认证</view>
-          <view class="section-subtitle">由官方渠道签发，用于提升资料可信度。</view>
-        </view>
-        <button class="ghost-button mini-button" bindtap="openCredentials">查看</button>
+    <view class="profile-stack">
+      <view wx:if="{{showPendingActivationNotice}}" class="surface-card resume-pending-card">
+        <view class="section-title">腾讯会议待激活</view>
+        <view class="section-subtitle">{{pendingActivationText}}</view>
+        <button class="secondary-button resume-pending-button" loading="{{sendingActivationInvite}}" bindtap="resendActivationInvite">重发激活链接</button>
       </view>
-      <view wx:if="{{credentials.length === 0}}" class="empty-box">暂无官方认证</view>
-      <view wx:for="{{credentials}}" wx:key="id" class="list-row">
-        <view>
-          <view class="row-title">{{item.title || item.name || '官方认证'}}</view>
-          <view class="muted small">{{item.issuerName || item.issuerPublicAccountId || '官方渠道'}}</view>
-        </view>
-        <view class="pill">{{item.status || '未知'}}</view>
-      </view>
-    </view>
 
-    <view class="card">
-      <view class="row">
-        <view>
+      <view class="surface-card intro-card tappable" bindtap="openEditSelf">
+        <view class="row">
           <view class="section-title">自我介绍</view>
-          <view class="section-subtitle">{{resume.selfIntroduction || '补充自我介绍，让对方更快了解你的服务背景。'}}</view>
+          <view class="page-link tap-target-inline">编辑</view>
         </view>
-        <button class="ghost-button mini-button" bindtap="openEditSelf">编辑</button>
+        <view class="soft-empty">{{selfIntroductionText}}</view>
       </view>
-    </view>
 
-    <view class="card">
-      <view class="row">
-        <view>
-          <view class="section-title">服务履历</view>
-          <view class="section-subtitle">已确认的履历会展示在你的可信资料中。</view>
-        </view>
-        <button class="ghost-button mini-button" bindtap="createEngagement">新建</button>
-      </view>
-      <view class="resume-grid">
-        <view class="metric" bindtap="openEngagements" data-tab="provided">
-          <view class="metric-value">{{engagementGroups.provided.length}}</view>
-          <view class="metric-label">我服务过</view>
-        </view>
-        <view class="metric" bindtap="openEngagements" data-tab="received">
-          <view class="metric-value">{{engagementGroups.received.length}}</view>
-          <view class="metric-label">我被服务过</view>
-        </view>
-        <view class="metric" bindtap="openEngagements" data-tab="pending">
-          <view class="metric-value">{{engagementGroups.pending.length}}</view>
-          <view class="metric-label">待确认</view>
+      <view class="surface-card feature-card tappable" bindtap="openCredentials">
+        <view class="row">
+          <view class="row feature-row">
+            <view class="feature-icon">
+              <image class="feature-icon-image" src="/assets/ui/credentials-icon.svg" mode="aspectFit"></image>
+            </view>
+            <view class="row-main">
+              <view class="row-title">官方认证</view>
+              <view class="row-meta">院校认证，提升可信度</view>
+            </view>
+          </view>
+          <view class="page-link page-link-with-icon tap-target-inline">
+            <text>查看</text>
+            <image class="page-link-icon" src="/assets/ui/arrow-light.svg" mode="aspectFit"></image>
+          </view>
         </view>
       </view>
+
+      <view class="surface-card feature-card">
+        <view class="row">
+          <view class="row feature-row">
+            <view class="feature-icon">
+              <image class="feature-icon-image" src="/assets/ui/engagement-icon.svg" mode="aspectFit"></image>
+            </view>
+            <view class="row-main">
+              <view class="row-title">服务履历</view>
+              <view class="row-meta">已确认的履历会展示在你的可信资料中</view>
+            </view>
+          </view>
+          <view class="page-link page-link-with-icon tap-target-inline" bindtap="createEngagement">
+            <text>新建</text>
+            <image class="page-link-icon" src="/assets/ui/arrow-light.svg" mode="aspectFit"></image>
+          </view>
+        </view>
+        <view class="stats-grid">
+          <view class="stat-box tappable" bindtap="openEngagements" data-tab="provided">
+            <view class="stat-value">{{engagementGroups.provided.length}}</view>
+            <view class="stat-label">我服务过</view>
+          </view>
+          <view class="stat-box tappable" bindtap="openEngagements" data-tab="received">
+            <view class="stat-value">{{engagementGroups.received.length}}</view>
+            <view class="stat-label">我被服务</view>
+          </view>
+          <view class="stat-box tappable" bindtap="openEngagements" data-tab="pending">
+            <view class="stat-value">{{engagementGroups.pending.length}}</view>
+            <view class="stat-label">待确认</view>
+          </view>
+        </view>
+      </view>
+
+      <button class="primary-button public-home-button" bindtap="openPublicProfile">查看对外主页</button>
     </view>
   </block>
 </view>
