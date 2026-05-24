@@ -3,14 +3,7 @@
 }
 
 .engagement-create-tabs {
-  position: fixed;
-  top: calc(88rpx + env(safe-area-inset-top));
-  left: 0;
-  right: 0;
-  z-index: 19;
-  padding: 16rpx 16rpx 14rpx;
-  background: #ffffff;
-  border-bottom: 1rpx solid #f3f4f6;
+  margin: 18rpx 0 16rpx;
 }
 
 .engagement-create-strip {
@@ -35,8 +28,13 @@
   display: none;
 }
 
+.engagement-create-chip.segment-chip-active {
+  background: #0071fe;
+  color: #ffffff;
+}
+
 .engagement-create-form-card {
-  margin-top: 106rpx;
+  margin-top: 0;
 }
 
 .engagement-create-tip-card {

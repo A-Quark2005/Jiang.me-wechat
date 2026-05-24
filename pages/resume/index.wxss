@@ -269,6 +269,13 @@
   height: 22px;
 }
 
+.feature-icon-image-engagement {
+  width: 104rpx;
+  height: 88rpx;
+  flex-shrink: 0;
+  border-radius: 0;
+}
+
 .page-link {
   display: inline-flex;
   align-items: center;

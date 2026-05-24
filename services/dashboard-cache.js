@@ -78,6 +78,7 @@ function invalidateDashboardRelated() {
     'meeting_activation',
     'payment_orders',
     'resume_credentials',
+    'certification_organizations',
     'resume_engagements',
   ]);
 }

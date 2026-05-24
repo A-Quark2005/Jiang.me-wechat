@@ -32,7 +32,12 @@ function isPending(item) {
  * @returns {boolean} True when my confirmation is required.
  */
 function needsMyConfirmation(item) {
-  return Boolean(item && item.requiresMyConfirmation);
+  if (!item) return false;
+  if (item.requiresMyConfirmation === true) return true;
+  if (item.pendingChange) {
+    return item.pendingChange.waitingForOtherConfirmation !== true;
+  }
+  return false;
 }
 
 /**
@@ -236,8 +241,8 @@ Page({
         : '对方邀请你确认这条服务履历的修改内容。';
     }
     return inviteMode
-      ? '对方邀请你确认这条服务履历。确认后，它会进入双方可信资料。'
-      : '确认后，这条服务记录会进入双方可信资料。';
+      ? '对方邀请你确认这条服务履历。确认后，它会进入双方资料。'
+      : '确认后，这条服务记录会进入双方资料。';
   },
 
   buildDetailText(item) {

@@ -114,10 +114,11 @@
     <view class="wechat-profile-modal">
       <view class="wechat-profile-title">完善头像昵称</view>
       <view class="wechat-profile-subtitle">用于展示你的讲了么账号资料，不影响手机号绑定。</view>
-      <button class="wechat-profile-avatar-button" open-type="chooseAvatar" bindchooseavatar="onProfileModalChooseAvatar">
+      <view class="wechat-profile-avatar-picker">
         <image wx:if="{{profileDraftAvatarUrl}}" class="wechat-profile-avatar-image" src="{{profileDraftAvatarUrl}}" mode="aspectFill"></image>
         <view wx:else class="wechat-profile-avatar-placeholder">头像</view>
-      </button>
+        <button class="wechat-profile-avatar-native-button" open-type="chooseAvatar" bindchooseavatar="onProfileModalChooseAvatar"></button>
+      </view>
       <input
         class="wechat-profile-nickname-input"
         type="nickname"

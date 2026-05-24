@@ -37,8 +37,8 @@
               <image class="feature-icon-image" src="/assets/ui/credentials-icon.svg" mode="aspectFit"></image>
             </view>
             <view class="row-main">
-              <view class="row-title">官方认证</view>
-              <view class="row-meta">院校认证，提升可信度</view>
+              <view class="row-title">我的认证</view>
+              <view class="row-meta">第三方认证，提升资料完整度</view>
             </view>
           </view>
           <view class="page-link page-link-with-icon tap-target-inline">
@@ -51,12 +51,10 @@
       <view class="surface-card feature-card">
         <view class="row">
           <view class="row feature-row">
-            <view class="feature-icon">
-              <image class="feature-icon-image" src="/assets/ui/engagement-icon.svg" mode="aspectFit"></image>
-            </view>
+            <image class="feature-icon-image-engagement" src="/assets/ui/engagement-profile.png" mode="aspectFit"></image>
             <view class="row-main">
               <view class="row-title">服务履历</view>
-              <view class="row-meta">已确认的履历会展示在你的可信资料中</view>
+              <view class="row-meta">已确认的履历会展示在你的资料中</view>
             </view>
           </view>
           <view class="page-link page-link-with-icon tap-target-inline" bindtap="createEngagement">

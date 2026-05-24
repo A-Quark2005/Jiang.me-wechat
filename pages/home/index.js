@@ -113,6 +113,10 @@ function mergeDisplayProfile(user, profile) {
   };
 }
 
+function isOwnUploadedAvatarUrl(value) {
+  return String(value || '').startsWith(`${apiClient.backendBaseUrl()}/uploads/`);
+}
+
 function resolveEntitlementSummary(entitlements) {
   const list = safeArray(entitlements && (entitlements.items || entitlements.entitlements || entitlements));
   const active = list.find((item) => String(item.status || '').toLowerCase() === 'active') || list[0];
@@ -512,7 +516,7 @@ Page({
     this.setData({ savingWechatProfile: true });
     try {
       let finalAvatarUrl = avatarUrl;
-      if (!/^https?:\/\//i.test(finalAvatarUrl)) {
+      if (!isOwnUploadedAvatarUrl(finalAvatarUrl)) {
         const uploaded = await profileService.uploadAvatar(finalAvatarUrl);
         finalAvatarUrl = uploaded.avatarUrl || uploaded.url || finalAvatarUrl;
       }

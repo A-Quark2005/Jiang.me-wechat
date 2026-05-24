@@ -10,13 +10,13 @@ Page({
     errorMessage: '',
     invite: null,
     createdEngagementId: '',
-    kindProvidedClass: 'segment-active',
+    kindProvidedClass: 'segment-chip-active',
     kindReceivedClass: '',
     kindProvidedChecked: true,
     kindReceivedChecked: false,
     saveButtonDisabled: false,
     helperTitleText: '填写服务事实并邀请对方确认',
-    helperBodyText: '确认后的履历会进入双方可信资料，可作为正式服务记录展示。',
+    helperBodyText: '确认后的履历会进入双方资料，可作为正式服务记录展示。',
     inviteReadyText: '微信邀请已生成，发送给对方后即可确认这条履历。',
     submitLabelText: '生成微信邀请',
     form: {
@@ -70,15 +70,15 @@ Page({
     const kind = event.detail.value === 'received' ? 'purchased_service' : 'provided_service';
     this.setData({
       'form.kind': kind,
-      kindProvidedClass: kind === 'provided_service' ? 'segment-active' : '',
-      kindReceivedClass: kind === 'purchased_service' ? 'segment-active' : '',
+      kindProvidedClass: kind === 'provided_service' ? 'segment-chip-active' : '',
+      kindReceivedClass: kind === 'purchased_service' ? 'segment-chip-active' : '',
       kindProvidedChecked: kind === 'provided_service',
       kindReceivedChecked: kind === 'purchased_service',
       helperTitleText: kind === 'provided_service' ? '填写你提供过的服务事实' : '填写你接受过的服务事实',
       helperBodyText:
         kind === 'provided_service'
-          ? '邀请对方确认后，这条服务记录会展示在双方可信资料中。'
-          : '邀请服务方确认后，这条被服务记录会展示在双方可信资料中。',
+          ? '邀请对方确认后，这条服务记录会展示在双方资料中。'
+          : '邀请服务方确认后，这条被服务记录会展示在双方资料中。',
     });
   },
 

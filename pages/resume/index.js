@@ -74,6 +74,10 @@ function buildAccountInfo(resume) {
   };
 }
 
+function isOwnUploadedAvatarUrl(value) {
+  return String(value || '').startsWith(`${apiClient.backendBaseUrl()}/uploads/`);
+}
+
 Page({
   data: {
     loading: true,
@@ -228,7 +232,7 @@ Page({
     this.setData({ savingWechatProfile: true });
     try {
       let finalAvatarUrl = avatarUrl;
-      if (!/^https?:\/\//i.test(finalAvatarUrl)) {
+      if (!isOwnUploadedAvatarUrl(finalAvatarUrl)) {
         const uploaded = await profileService.uploadAvatar(finalAvatarUrl);
         finalAvatarUrl = uploaded.avatarUrl || uploaded.url || finalAvatarUrl;
       }

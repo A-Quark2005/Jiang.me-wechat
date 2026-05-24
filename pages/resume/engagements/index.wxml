@@ -1,8 +1,4 @@
 <view class="page engagements-page">
-  <view class="engagements-top-action">
-    <view class="engagements-create-link tappable" bindtap="createEngagement">新建</view>
-  </view>
-
   <view class="segmented-strip engagements-tabs">
     <view
       wx:for="{{tabs}}"
@@ -15,23 +11,35 @@
     </view>
   </view>
 
-  <view wx:if="{{loading}}" class="surface-card">正在读取履历</view>
-  <view wx:elif="{{errorMessage}}" class="surface-card">
+  <view wx:if="{{loading}}" class="surface-card engagements-state-card">正在读取履历</view>
+  <view wx:elif="{{errorMessage}}" class="surface-card engagements-state-card">
     <view class="error-box">{{errorMessage}}</view>
     <button class="primary-button action-button" bindtap="loadEngagements">重新加载</button>
   </view>
-  <view wx:elif="{{visibleItems.length === 0}}" class="empty-box">暂无相关履历</view>
+  <view wx:elif="{{visibleItems.length === 0}}" class="engagements-empty">
+    <view class="engagements-empty-icon">
+      <image class="engagements-empty-image" src="/assets/ui/engagement-empty.png" mode="aspectFit"></image>
+    </view>
+    <view class="engagements-empty-title">暂无相关履历</view>
+    <view class="engagements-empty-subtitle">新建一条履历并发给对方确认后，会出现在这里。</view>
+    <button class="engagements-empty-button ghost-button" bindtap="createEngagement">新建履历</button>
+  </view>
 
   <view wx:else class="engagements-list">
     <view wx:for="{{visibleItems}}" wx:key="id" class="engagement-card tappable" data-id="{{item.id}}" bindtap="openDetail">
       <view class="engagement-main">
-        <view class="engagement-title">{{item.titleText}}</view>
-        <view class="engagement-meta"><text class="engagement-meta-primary">{{item.metaPrefixText}}</text> · {{item.counterpartNameText}} · {{item.monthText}}</view>
+        <view class="engagement-title-row">
+          <view class="engagement-title">{{item.titleText}}</view>
+          <view class="pill {{item.statusClass}}">{{item.statusLabel}}</view>
+        </view>
+        <view class="engagement-meta">
+          <text class="engagement-meta-primary">{{item.metaPrefixText}}</text>
+          <text>{{item.counterpartNameText}}</text>
+          <text>{{item.monthText}}</text>
+        </view>
+        <view wx:if="{{item.summaryText}}" class="engagement-summary">{{item.summaryText}}</view>
       </view>
-      <view class="engagement-side">
-        <view class="pill {{item.statusClass}}">{{item.statusLabel}}</view>
-        <image class="engagement-arrow-icon" src="/assets/ui/engagement-arrow.svg" mode="aspectFit"></image>
-      </view>
+      <image class="engagement-arrow-icon" src="/assets/ui/engagement-arrow.svg" mode="aspectFit"></image>
     </view>
   </view>
 </view>
