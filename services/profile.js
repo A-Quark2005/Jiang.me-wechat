@@ -1,4 +1,6 @@
 const { request } = require('./api-client');
+const apiClient = require('./api-client');
+const sessionStore = require('./session-store');
 
 function getResume(options) {
   const requestOptions = options || {};
@@ -23,6 +25,36 @@ function updateSelfIntroduction(payload) {
     path: '/api/me/resume/self-introduction',
     method: 'PATCH',
     data: payload,
+  });
+}
+
+function uploadAvatar(filePath) {
+  const token = sessionStore.getAccessToken();
+  return new Promise((resolve, reject) => {
+    wx.uploadFile({
+      url: `${apiClient.backendBaseUrl()}/api/me/avatar`,
+      filePath,
+      name: 'file',
+      header: token ? { Authorization: `Bearer ${token}` } : {},
+      success(response) {
+        const statusCode = response.statusCode || 0;
+        let body = {};
+        try {
+          body = response.data ? JSON.parse(response.data) : {};
+        } catch (error) {
+          reject(new Error('头像上传响应格式异常'));
+          return;
+        }
+        if (statusCode >= 200 && statusCode < 300 && body.ok === true) {
+          resolve(body.data || {});
+          return;
+        }
+        reject(new Error(body.message || body.error || '头像上传失败'));
+      },
+      fail(error) {
+        reject(new Error(error && error.errMsg ? `头像上传失败：${error.errMsg}` : '头像上传失败'));
+      },
+    });
   });
 }
 
@@ -126,5 +158,6 @@ module.exports = {
   requestEngagementUpdate,
   updateEngagementVisibility,
   updateResume,
+  uploadAvatar,
   updateSelfIntroduction,
 };

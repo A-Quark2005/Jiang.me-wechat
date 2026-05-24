@@ -115,8 +115,8 @@ function entitlementTypeLabel(entitlement) {
   if (type === 'duration') {
     return '不限次会议卡';
   }
-  if (type === 'single_meeting' || sourceId === 'meeting-single') {
-    return '单次会议券';
+  if (sourceId === 'meeting-single') {
+    return '高级账号';
   }
   if (type === 'recording_pack') {
     return '资料包';
@@ -127,22 +127,13 @@ function entitlementTypeLabel(entitlement) {
 function buildEntitlementCards(entitlements) {
   return entitlements.map((entitlement) => {
     const expiresAt = entitlement.expiresAt || entitlement.validUntil || '';
-    const durationHours = entitlement.durationHours || '';
-    const durationDays = entitlement.durationDays || '';
-    const isHourPass =
-      String(entitlement && entitlement.type ? entitlement.type : '').toLowerCase() === 'hour_pass' ||
-      String(entitlement && entitlement.sourceId ? entitlement.sourceId : '').toLowerCase() === 'meeting-hour-pass';
     const summaryParts = [];
     if (expiresAt) {
       summaryParts.push(
-        `有效期至 ${displayFormatters.formatDateText(expiresAt, { includeTime: true, fallback: expiresAt })}`,
+        `高级账号有效期至 ${displayFormatters.formatDateText(expiresAt, { includeTime: true, fallback: expiresAt })}`,
       );
-    } else if (isHourPass) {
-      summaryParts.push('有效期以系统生效时间为准');
-    } else if (durationDays) {
-      summaryParts.push(`${durationDays}天权益`);
-    } else if (durationHours) {
-      summaryParts.push(`${durationHours}小时权益`);
+    } else {
+      summaryParts.push('高级账号已开通');
     }
     return {
       id: String(entitlement.id || entitlement.orderId || entitlement.sourceId || Math.random()),
@@ -166,13 +157,10 @@ Page({
     planCards: [],
     entitlementCards: [],
     selectedPlanId: '',
-    selectedPlan: null,
-    passwordlessContract: null,
+    selectedPlan: null,
     sleepImageUrl: '/assets/ui/sleep.png',
     emptyStateText: '暂无可用卡',
-    recommendPlanTitle: '高级会议卡',
-    contractStatusText: '未启用',
-    contractActionText: '开通免密',
+    recommendPlanTitle: '高级会议卡',
     activation: null,
     showPendingActivationNotice: false,
     pendingActivationText: '',
@@ -195,10 +183,9 @@ Page({
       this.setData({ errorMessage: '' });
     }
     try {
-      const [entitlementsRaw, productsRaw, contractRaw, activationRaw] = await Promise.all([
+      const [entitlementsRaw, productsRaw, activationRaw] = await Promise.all([
         service.getEntitlements({ forceRefresh }),
-        service.getProducts({ forceRefresh }),
-        service.getPasswordlessContractStatus({ forceRefresh }),
+        service.getProducts({ forceRefresh }),
         service.getTencentMeetingActivation({ forceRefresh }),
       ]);
       const rawProducts = catalogProducts(normalizeList(productsRaw, ['items', 'products']));
@@ -216,12 +203,9 @@ Page({
         products: rawProducts,
         planCards,
         selectedPlanId,
-        selectedPlan,
-        passwordlessContract: contractRaw,
+        selectedPlan,
         emptyStateText: '暂无可用卡',
-        recommendPlanTitle: '高级会议卡',
-        contractStatusText: contractRaw && contractRaw.enabled ? '已启用' : '未启用',
-        contractActionText: contractRaw && contractRaw.enabled ? '重新签约' : '开通免密',
+        recommendPlanTitle: '高级会议卡',
         ...activationState,
       });
       refreshState.touch(PAGE_KEY);
@@ -279,8 +263,7 @@ Page({
       }
       await service.requestPayment(order.paymentParams);
       if (order.orderId) {
-        await service.syncPaymentStatus(order.orderId);
-        const orderDetail = await service.getOrder(order.orderId);
+        const orderDetail = await service.confirmPaidOrder(order.orderId);
         dashboardCache.invalidateDashboardRelated();
         dashboardCache.primeOrders([orderDetail]);
       }
@@ -342,49 +325,7 @@ Page({
   openHourPurchase() {
     wx.navigateTo({ url: '/pages/meeting_hour_purchase/index' });
   },
-
-  async openPasswordlessContract(skipActivationCheck) {
-    if (!skipActivationCheck) {
-      const activated = await this.ensureTencentMeetingActivated();
-      if (!activated) {
-        return;
-      }
-    }
-    this.setData({ paying: true, errorMessage: '' });
-    try {
-      const result = await service.preparePasswordlessContract();
-      if (!result || result.status === 'not_configured' || result.configured === false) {
-        this.setData({ paying: false });
-        wx.showModal({
-          title: '暂未开通',
-          content: result && result.message ? result.message : '微信支付免密签约参数尚未配置。',
-          showCancel: false,
-        });
-        return;
-      }
-      this.setData({ passwordlessContract: result });
-      await service.openPasswordlessSign(result);
-      dashboardCache.invalidateDashboardRelated();
-      this.setData({ paying: false });
-      wx.showModal({
-        title: '等待签约结果',
-        content: '已打开微信支付免密签约。完成签约后，系统会根据微信支付通知自动生效。',
-        confirmText: '知道了',
-        showCancel: false,
-      });
-      refreshState.mark(['entitlements', 'home']);
-    } catch (error) {
-      this.setData({
-        paying: false,
-        errorMessage: error && error.message ? error.message : '免密签约准备失败',
-      });
-      wx.showModal({
-        title: '免密签约失败',
-        content: error && error.message ? error.message : '免密签约准备失败',
-        showCancel: false,
-      });
-    }
-  },
+
 
   productLabel,
 });

@@ -67,38 +67,6 @@ function createWechatMiniProgramOrder(productId, purchaseOptions) {
   });
 }
 
-function getPasswordlessContractStatus(options) {
-  const requestOptions = options || {};
-  return request({
-    path: '/api/payments/wechat-mini-program/passwordless-contract',
-    cacheKey: 'passwordless_contract',
-    maxAgeMs: 60 * 1000,
-    forceRefresh: Boolean(requestOptions.forceRefresh),
-  });
-}
-
-function preparePasswordlessContract() {
-  return request({
-    path: '/api/payments/wechat-mini-program/passwordless-contract/prepare',
-    method: 'POST',
-  });
-}
-
-function confirmPasswordlessContract(contractId, rawPayload) {
-  return request({
-    path: '/api/payments/wechat-mini-program/passwordless-contract/confirm',
-    method: 'POST',
-    data: { contractId, rawPayload },
-  });
-}
-
-function createPayPerUseDeduction() {
-  return request({
-    path: '/api/payments/wechat-mini-program/pay-per-use/deductions',
-    method: 'POST',
-  });
-}
-
 function syncPaymentStatus(orderId) {
   return request({
     path: `/api/payments/${encodeURIComponent(orderId)}/sync-status`,
@@ -120,6 +88,23 @@ function getOrder(orderId) {
   return request({ path: `/api/payments/${encodeURIComponent(orderId)}` });
 }
 
+async function confirmPaidOrder(orderId) {
+  if (!orderId) {
+    return null;
+  }
+  const synced = await syncPaymentStatus(orderId);
+  const order = synced && (synced.order || synced.paymentOrder || synced);
+  if (order && String(order.status || order.orderStatus || '').toLowerCase() === 'paid') {
+    return order;
+  }
+  const latest = await getOrder(orderId);
+  const latestOrder = latest && (latest.order || latest.paymentOrder || latest);
+  if (latestOrder && String(latestOrder.status || latestOrder.orderStatus || '').toLowerCase() === 'paid') {
+    return latestOrder;
+  }
+  throw new Error('支付已提交，系统正在确认权益，请稍后刷新');
+}
+
 function requestPayment(paymentParams) {
   return new Promise((resolve, reject) => {
     wx.requestPayment({
@@ -132,40 +117,16 @@ function requestPayment(paymentParams) {
   });
 }
 
-function openPasswordlessSign(signParams) {
-  return new Promise((resolve, reject) => {
-    const appId = String(signParams.signMiniProgramAppId || signParams.sign_mp_appid || '');
-    const path = String(signParams.signMiniProgramPath || signParams.sign_mp_path || '');
-    if (!appId || !path) {
-      reject(new Error('微信支付免密签约跳转参数缺失'));
-      return;
-    }
-    wx.navigateToMiniProgram({
-      appId,
-      path,
-      envVersion: 'release',
-      success: resolve,
-      fail(error) {
-        reject(new Error(error && error.errMsg ? error.errMsg : '打开微信支付免密签约失败'));
-      },
-    });
-  });
-}
-
 module.exports = {
   createTencentMeeting,
-  createWechatMiniProgramOrder,
-  createPayPerUseDeduction,
-  confirmPasswordlessContract,
+  createWechatMiniProgramOrder,
   getCapabilities,
   getEntitlements,
   getOrder,
   getOrders,
-  getTencentMeetingActivation,
-  getPasswordlessContractStatus,
-  getProducts,
-  openPasswordlessSign,
-  preparePasswordlessContract,
+  confirmPaidOrder,
+  getTencentMeetingActivation,
+  getProducts,
   requestPayment,
   sendTencentMeetingActivationInvite,
   syncPaymentStatus,

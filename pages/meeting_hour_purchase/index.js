@@ -64,8 +64,7 @@ Page({
       }
       await service.requestPayment(order.paymentParams);
       if (order.orderId) {
-        await service.syncPaymentStatus(order.orderId);
-        const orderDetail = await service.getOrder(order.orderId);
+        const orderDetail = await service.confirmPaidOrder(order.orderId);
         dashboardCache.invalidateDashboardRelated();
         dashboardCache.primeOrders([orderDetail]);
       }

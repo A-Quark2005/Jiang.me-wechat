@@ -183,8 +183,9 @@ function request(options) {
   if (inFlightRequests[requestKey]) {
     return inFlightRequests[requestKey];
   }
+  const shouldSendJsonBody = normalizedMethod !== 'GET' && normalizedMethod !== 'HEAD';
   const header = {
-    'content-type': hasBody ? 'application/json' : 'application/x-www-form-urlencoded',
+    'content-type': shouldSendJsonBody ? 'application/json' : 'application/x-www-form-urlencoded',
   };
   const token = sessionStore.getAccessToken();
   if (auth && token) {
@@ -217,8 +218,8 @@ function request(options) {
         reject(new Error(error && error.errMsg ? `网络请求失败：${error.errMsg}` : '网络请求失败'));
       },
     };
-    if (hasBody) {
-      requestOptions.data = data;
+    if (shouldSendJsonBody) {
+      requestOptions.data = hasBody ? data : {};
     }
     wx.request(requestOptions);
   }).finally(() => {

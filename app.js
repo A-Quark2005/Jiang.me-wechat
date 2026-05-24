@@ -1,6 +1,5 @@
 const apiClient = require('./services/api-client');
 const sessionStore = require('./services/session-store');
-const wechatProfile = require('./services/wechat-profile');
 const LOCAL_RESET_STAMP_KEY = 'jiangleme.local-reset-stamp';
 const LOCAL_RESET_VERSION = '2026-05-23-full-reset-v2';
 
@@ -24,11 +23,9 @@ App({
   globalData: {
     backendBaseUrl: 'https://api.whkerdb.top',
     pendingEngagementInviteToken: '',
-    wechatProfile: null,
   },
 
   onLaunch() {
     resetLocalStateIfNeeded();
-    this.globalData.wechatProfile = wechatProfile.getProfile();
   },
 });

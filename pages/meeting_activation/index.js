@@ -13,52 +13,50 @@ const displayFormatters = require('../../services/display-formatters');
 function resolveStatusMeta(activation) {
   if (activation && activation.isActive) {
     return {
-      title: '腾讯会议能力已可用',
-      detail: '当前账号已经具备腾讯会议能力，可以直接回到服务中心继续使用。',
-      actionText: '返回继续使用',
+      title: '\u817e\u8baf\u4f1a\u8bae\u80fd\u529b\u5df2\u53ef\u7528',
+      detail: '\u5f53\u524d\u8d26\u53f7\u5df2\u7ecf\u5177\u5907\u817e\u8baf\u4f1a\u8bae\u80fd\u529b\uff0c\u53ef\u4ee5\u76f4\u63a5\u56de\u5230\u670d\u52a1\u4e2d\u5fc3\u7ee7\u7eed\u4f7f\u7528\u3002',
+      actionText: '\u8fd4\u56de\u7ee7\u7eed\u4f7f\u7528',
       tone: 'ok',
     };
   }
   if (activation && activation.isPendingActivation) {
     return {
-      title: '请完成腾讯会议激活',
-      detail: '企业账号已创建，腾讯会议激活邀请会发送到你的手机号。完成确认后即可正常使用。',
-      actionText: '重新发送激活邀请',
+      title: '\u8bf7\u5b8c\u6210\u817e\u8baf\u4f1a\u8bae\u6fc0\u6d3b',
+      detail: '\u4f01\u4e1a\u8d26\u53f7\u5df2\u521b\u5efa\uff0c\u817e\u8baf\u4f1a\u8bae\u6fc0\u6d3b\u9080\u8bf7\u4f1a\u53d1\u9001\u5230\u4f60\u7684\u624b\u673a\u53f7\u3002\u5b8c\u6210\u786e\u8ba4\u540e\u5373\u53ef\u6b63\u5e38\u4f7f\u7528\u3002',
+      actionText: '\u91cd\u65b0\u53d1\u9001\u6fc0\u6d3b\u9080\u8bf7',
       tone: 'warn',
     };
   }
   if (activation && activation.needsActivation) {
     return {
-      title: '还差一步完成启用',
+      title: '\u8fd8\u5dee\u4e00\u6b65\u5b8c\u6210\u542f\u7528',
       detail: activation.hasEnterpriseUser
-        ? '当前账号信息已就绪，需要继续完成腾讯会议能力启用。'
-        : '正在创建腾讯会议企业账号，完成后即可继续启用。',
-      actionText: '继续启用',
+        ? '\u5f53\u524d\u8d26\u53f7\u4fe1\u606f\u5df2\u5c31\u7eea\uff0c\u9700\u8981\u7ee7\u7eed\u5b8c\u6210\u817e\u8baf\u4f1a\u8bae\u80fd\u529b\u542f\u7528\u3002'
+        : '\u6b63\u5728\u521b\u5efa\u817e\u8baf\u4f1a\u8bae\u4f01\u4e1a\u8d26\u53f7\uff0c\u5b8c\u6210\u540e\u5373\u53ef\u7ee7\u7eed\u542f\u7528\u3002',
+      actionText: '\u7ee7\u7eed\u542f\u7528',
       tone: 'warn',
     };
   }
-  if (activation?.needsPhone) {
+  if (activation && activation.needsPhone) {
     return {
-      title: '需要先补充手机号授权',
-      detail: '只有在后端要求时，才需要补充手机号以继续完成腾讯会议身份绑定。',
-      actionText: '授权手机号并继续',
+      title: '\u9700\u8981\u5148\u8865\u5145\u624b\u673a\u53f7\u6388\u6743',
+      detail: '\u53ea\u6709\u5728\u9700\u8981\u817e\u8baf\u4f1a\u8bae\u76f8\u5173\u529f\u80fd\u65f6\uff0c\u624d\u9700\u8981\u8865\u5145\u624b\u673a\u53f7\u4ee5\u7ee7\u7eed\u5b8c\u6210\u817e\u8baf\u4f1a\u8bae\u8eab\u4efd\u7ed1\u5b9a\u3002',
+      actionText: '\u6388\u6743\u624b\u673a\u53f7\u5e76\u7ee7\u7eed',
       tone: 'warn',
     };
   }
   if (activation && activation.isDisabled) {
     return {
-      title: activation.reason === 'membership_inactive' ? '当前暂无有效会议会员' : '当前环境未启用腾讯会议能力',
-      detail: activation.reason === 'membership_inactive'
-        ? '你的腾讯会议企业账号已存在，但当前没有有效会议会员，权限暂未开启。购买有效会员后会自动恢复。'
-        : '这是环境配置状态，不是你的账号异常。等后端启用后，这里会自动更新。',
-      actionText: activation.reason === 'membership_inactive' ? '刷新状态' : '刷新状态',
+      title: '\u5f53\u524d\u73af\u5883\u672a\u542f\u7528\u817e\u8baf\u4f1a\u8bae\u80fd\u529b',
+      detail: '\u8fd9\u662f\u73af\u5883\u914d\u7f6e\u72b6\u6001\uff0c\u4e0d\u662f\u4f60\u7684\u8d26\u53f7\u5f02\u5e38\u3002\u7b49\u540e\u7aef\u542f\u7528\u540e\uff0c\u8fd9\u91cc\u4f1a\u81ea\u52a8\u66f4\u65b0\u3002',
+      actionText: '\u5237\u65b0\u72b6\u6001',
       tone: 'warn',
     };
   }
   return {
-    title: '正在检查腾讯会议状态',
-    detail: '请刷新状态，确认当前环境和账号是否已经同步完成。',
-    actionText: '刷新状态',
+    title: '\u6b63\u5728\u68c0\u67e5\u817e\u8baf\u4f1a\u8bae\u72b6\u6001',
+    detail: '\u8bf7\u5237\u65b0\u72b6\u6001\uff0c\u786e\u8ba4\u5f53\u524d\u73af\u5883\u548c\u8d26\u53f7\u662f\u5426\u5df2\u7ecf\u540c\u6b65\u5b8c\u6210\u3002',
+    actionText: '\u5237\u65b0\u72b6\u6001',
     tone: 'warn',
   };
 }

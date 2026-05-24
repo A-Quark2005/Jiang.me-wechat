@@ -7,7 +7,7 @@
       <view class="hour-label">所需小时数</view>
       <view class="hour-input-row">
         <button class="hour-stepper" bindtap="decreaseHours">-</button>
-        <input class="hour-input" type="number" value="{{hours}}" bindinput="onHoursInput"></input>
+        <input class="hour-input" type="number" value="{{hours}}" bindinput="onHoursInput" maxlength="3"></input>
         <button class="hour-stepper" bindtap="increaseHours">+</button>
       </view>
       <view class="hour-hint">¥2.50 / 小时，至少购买 1 小时</view>

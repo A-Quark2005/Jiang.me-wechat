@@ -124,8 +124,9 @@
         value="{{profileDraftNickname}}"
         bindinput="onProfileModalNicknameInput"
         placeholder="请输入昵称"
+        maxlength="64"
       />
-      <button class="wechat-profile-confirm" bindtap="confirmWechatProfile">确认</button>
+      <button class="wechat-profile-confirm" bindtap="confirmWechatProfile" loading="{{savingWechatProfile}}">确认</button>
     </view>
   </view>
   </block>

@@ -3,7 +3,6 @@ const refreshState = require('../../services/refresh-state');
 const apiClient = require('../../services/api-client');
 const loginGuard = require('../../services/login-guard');
 const sessionStore = require('../../services/session-store');
-const wechatProfile = require('../../services/wechat-profile');
 
 const PAGE_KEY = 'resume';
 const CACHE_MAX_AGE_MS = 5 * 60 * 1000;
@@ -57,14 +56,12 @@ function recentCache(record, maxAgeMs) {
 
 function buildAccountInfo(resume) {
   const session = sessionStore.getSession() || {};
-  const localWechatProfile = wechatProfile.getProfile();
   const source = resume || {};
   const displayName =
-    localWechatProfile.nickname ||
     source.displayName ||
     session.displayName ||
     '用户昵称';
-  const avatarUrl = localWechatProfile.avatarUrl || source.avatarUrl || '';
+  const avatarUrl = source.avatarUrl || '';
   const accountTier = source.accountTier || 'standard';
   const accountTierText = source.accountTierText || (accountTier === 'premium' ? '高级账号' : '普通账号');
   return {
@@ -196,11 +193,10 @@ Page({
   },
 
   openWechatProfileEditor() {
-    const profile = wechatProfile.getProfile() || {};
     this.setData({
       showWechatProfileModal: true,
-      profileDraftNickname: profile.nickname || this.data.displayNameText || '',
-      profileDraftAvatarUrl: profile.avatarUrl || this.data.avatarUrl || '',
+      profileDraftNickname: this.data.displayNameText === '用户昵称' ? '' : this.data.displayNameText || '',
+      profileDraftAvatarUrl: this.data.avatarUrl || '',
     });
   },
 
@@ -231,9 +227,15 @@ Page({
     if (this.data.savingWechatProfile) return;
     this.setData({ savingWechatProfile: true });
     try {
-      wechatProfile.saveNickname(nickname);
-      wechatProfile.saveAvatarUrl(avatarUrl);
-      const resume = await profileService.updateResume({ displayName: nickname });
+      let finalAvatarUrl = avatarUrl;
+      if (!/^https?:\/\//i.test(finalAvatarUrl)) {
+        const uploaded = await profileService.uploadAvatar(finalAvatarUrl);
+        finalAvatarUrl = uploaded.avatarUrl || uploaded.url || finalAvatarUrl;
+      }
+      const resume = await profileService.updateResume({
+        displayName: nickname,
+        avatarUrl: finalAvatarUrl,
+      });
       const nextState = {
         resume,
         credentials: arrayFrom(

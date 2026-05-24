@@ -5,7 +5,6 @@ const displayFormatters = require('../../services/display-formatters');
 const heroLayout = require('../../services/hero-layout');
 const loginGuard = require('../../services/login-guard');
 const tencentMeetingAccess = require('../../services/tencent-meeting-access');
-const wechatProfile = require('../../services/wechat-profile');
 
 /**
  * Left-pad numeric date and time fragments.
@@ -113,9 +112,7 @@ function buildProfileSummary() {
   const session = sessionStore.getSession() || {};
   const user = record.user || {};
   const profile = record.profile || {};
-  const localWechatProfile = wechatProfile.getProfile() || {};
   const displayName =
-    localWechatProfile.nickname ||
     profile.displayName ||
     user.displayName ||
     session.displayName ||
@@ -132,7 +129,7 @@ function buildProfileSummary() {
     displayNameText: displayName,
     phoneText: phone,
     avatarText: String(displayName || '讲').trim().slice(0, 1) || '讲',
-    avatarUrl: localWechatProfile.avatarUrl || profile.avatarUrl || user.avatarUrl || '',
+    avatarUrl: profile.avatarUrl || user.avatarUrl || '',
   };
 }
 
@@ -333,8 +330,8 @@ Page({
         entitlementSummaryTitle: active.name || active.title || '当前会议权益',
         entitlementSummaryDetail:
           active.expiresAt
-            ? `${active.durationHours ? `${active.durationHours}小时会员 · ` : ''}有效期至 ${displayFormatters.formatDateText(active.expiresAt, { fallback: active.expiresAt })}`
-            : '已开通 · 可直接使用',
+            ? `高级账号有效期至 ${displayFormatters.formatDateText(active.expiresAt, { includeTime: true, fallback: active.expiresAt })}`
+            : '高级账号已开通',
         entitlementActionText: '去查看',
       });
     } catch (error) {

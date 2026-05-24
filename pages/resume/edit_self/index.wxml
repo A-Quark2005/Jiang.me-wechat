@@ -4,7 +4,7 @@
   <view wx:else class="surface-card edit-self-card">
     <view class="field edit-self-field">
       <view class="field-label">自我介绍</view>
-      <textarea class="textarea edit-self-textarea" value="{{form.selfIntroduction}}" data-field="selfIntroduction" bindinput="updateField" placeholder="介绍你的服务方向、经验和合作方式" />
+      <textarea class="textarea edit-self-textarea" value="{{form.selfIntroduction}}" data-field="selfIntroduction" bindinput="updateField" maxlength="1000" placeholder="介绍你的服务方向、经验和合作方式" />
     </view>
     <view class="field row edit-self-switch-row">
       <view class="row-main">

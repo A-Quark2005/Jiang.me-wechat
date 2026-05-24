@@ -28,16 +28,11 @@ async function ensureReady(options) {
   const activation = displayFormatters.normalizeMeetingActivationState(
     await meetingEntitlements.getTencentMeetingActivation({ forceRefresh: true }),
   );
-  const ordinaryAccountReady =
-    activation.reason === 'membership_inactive' &&
-    !activation.needsPhone &&
-    !activation.needsActivation &&
-    !activation.isPendingActivation;
   if (
     activation.needsPhone ||
     activation.needsActivation ||
     activation.isPendingActivation ||
-    (!activation.isActive && !ordinaryAccountReady)
+    !activation.isActive
   ) {
     wx.navigateTo({ url: '/pages/meeting_activation/index' });
     return false;

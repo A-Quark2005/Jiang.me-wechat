@@ -152,7 +152,7 @@ async function ensureLoggedInAsync(options) {
  * Automatically log in unauthenticated users.
  *
  * @param {object} options Redirect options.
- * @returns {boolean} Always false so legacy callers can short-circuit while login continues.
+ * @returns {boolean} Always false so callers can short-circuit while login continues.
  */
 function redirectToLogin(options) {
   ensureLoggedInAsync({

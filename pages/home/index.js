@@ -6,7 +6,7 @@ const heroLayout = require('../../services/hero-layout');
 const loginGuard = require('../../services/login-guard');
 const displayFormatters = require('../../services/display-formatters');
 const tencentMeetingAccess = require('../../services/tencent-meeting-access');
-const wechatProfile = require('../../services/wechat-profile');
+const profileService = require('../../services/profile');
 
 const PAGE_KEY = 'home';
 const CACHE_MAX_AGE_MS = 5 * 60 * 1000;
@@ -101,38 +101,16 @@ function formatPhone(user, profile) {
   return displayFormatters.formatPhoneText(phone, { fallback: '未授权手机号' });
 }
 
-function resolveWechatProfile() {
-  return wechatProfile.getProfile() || {};
-}
-
 function mergeDisplayProfile(user, profile) {
-  const localWechatProfile = resolveWechatProfile();
   const displayName =
-    localWechatProfile.nickname ||
     profile.displayName ||
     user.displayName ||
     (sessionStore.getSession() && sessionStore.getSession().displayName) ||
     '';
   return {
     displayName,
-    avatarUrl: localWechatProfile.avatarUrl || profile.avatarUrl || user.avatarUrl || '',
+    avatarUrl: profile.avatarUrl || user.avatarUrl || '',
   };
-}
-
-function buildWechatProfileState(profile) {
-  const source = profile || resolveWechatProfile();
-  const displayName = source.nickname || '';
-  const avatarUrl = source.avatarUrl || '';
-  return {
-    displayNameText: displayName || '请填写昵称',
-    avatarUrl,
-    avatarText: String(displayName || '讲').trim().slice(0, 1) || '讲',
-    needsWechatProfile: !displayName || !avatarUrl,
-  };
-}
-
-function isCompleteWechatProfile(profile) {
-  return Boolean(profile && profile.nickname && profile.avatarUrl);
 }
 
 function resolveEntitlementSummary(entitlements) {
@@ -146,20 +124,11 @@ function resolveEntitlementSummary(entitlements) {
     };
   }
   const expiresAt = active.expiresAt || active.validUntil || '';
-  const remaining = active.remainingCount || active.remainingUses || '';
-  const durationHours = active.durationHours || '';
-  const type = String(active.type || '').toLowerCase();
-  const sourceId = String(active.sourceId || '').toLowerCase();
-  const isHourPass = type === 'hour_pass' || sourceId === 'meeting-hour-pass';
   return {
-    title: active.name || active.title || '当前会议权益',
+    title: active.name || active.title || '高级账号',
     detail: expiresAt
-      ? `有效期至 ${displayFormatters.formatDateText(expiresAt, { includeTime: isHourPass, fallback: expiresAt })}`
-      : remaining
-        ? `剩余 ${remaining} 次`
-        : durationHours && isHourPass
-          ? `${durationHours}小时权益`
-          : '已开通 · 可立即使用',
+      ? `高级账号有效期至 ${displayFormatters.formatDateText(expiresAt, { includeTime: true, fallback: expiresAt })}`
+      : '高级账号已开通',
     tone: 'ok',
   };
 }
@@ -356,6 +325,7 @@ Page({
     endDateLabel: '',
     submitting: false,
     submitButtonText: '立即预定',
+    savingWechatProfile: false,
   },
 
   onLoad() {
@@ -374,8 +344,6 @@ Page({
       ...buildLabels(nextData),
       ...heroLayout.buildHeroLayoutData(),
     });
-    this.setData(buildWechatProfileState());
-    this.promptWechatProfileIfNeeded();
     const cached = recentCache(cachedDashboard(), CACHE_MAX_AGE_MS);
     if (cached) {
       this.setData({
@@ -409,7 +377,10 @@ Page({
       user: null,
       profile: null,
       phoneText: '点击登录后授权手机号',
-      ...buildWechatProfileState(),
+      avatarText: '讲',
+      avatarUrl: '',
+      displayNameText: '用户昵称',
+      needsWechatProfile: true,
       entitlementSummary: {
         title: '当前会议权益',
         detail: '暂时无法读取账号 · 请稍后刷新',
@@ -509,31 +480,14 @@ Page({
     }, { viaTab: true });
   },
 
-  onChooseAvatar(event) {
-    const avatarUrl = event.detail && event.detail.avatarUrl;
-    const profile = wechatProfile.saveAvatarUrl(avatarUrl);
-    if (profile) {
-      this.setData(buildWechatProfileState(profile));
-    }
-  },
-
-  onNicknameInput(event) {
-    const nickname = event.detail && event.detail.value;
-    const profile = wechatProfile.saveNickname(nickname);
-    if (profile) {
-      this.setData(buildWechatProfileState(profile));
-    }
-  },
-
   promptWechatProfileIfNeeded() {
-    const profile = wechatProfile.getProfile();
-    if (isCompleteWechatProfile(profile)) {
+    if (!this.data.needsWechatProfile) {
       return;
     }
     this.setData({
       showWechatProfileModal: true,
-      profileDraftNickname: profile && profile.nickname ? profile.nickname : '',
-      profileDraftAvatarUrl: profile && profile.avatarUrl ? profile.avatarUrl : '',
+      profileDraftNickname: this.data.displayNameText === '用户昵称' ? '' : this.data.displayNameText,
+      profileDraftAvatarUrl: this.data.avatarUrl || '',
     });
   },
 
@@ -547,19 +501,39 @@ Page({
     this.setData({ profileDraftNickname: event.detail.value });
   },
 
-  confirmWechatProfile() {
+  async confirmWechatProfile() {
     const nickname = String(this.data.profileDraftNickname || '').trim();
     const avatarUrl = String(this.data.profileDraftAvatarUrl || '').trim();
     if (!nickname || !avatarUrl) {
       wx.showToast({ title: '请填写昵称并选择头像', icon: 'none' });
       return;
     }
-    wechatProfile.saveNickname(nickname);
-    const profile = wechatProfile.saveAvatarUrl(avatarUrl);
-    this.setData({
-      showWechatProfileModal: false,
-      ...buildWechatProfileState(profile),
-    });
+    if (this.data.savingWechatProfile) return;
+    this.setData({ savingWechatProfile: true });
+    try {
+      let finalAvatarUrl = avatarUrl;
+      if (!/^https?:\/\//i.test(finalAvatarUrl)) {
+        const uploaded = await profileService.uploadAvatar(finalAvatarUrl);
+        finalAvatarUrl = uploaded.avatarUrl || uploaded.url || finalAvatarUrl;
+      }
+      await profileService.updateResume({
+        displayName: nickname,
+        avatarUrl: finalAvatarUrl,
+      });
+      this.setData({
+        displayNameText: nickname,
+        avatarUrl: finalAvatarUrl,
+        avatarText: String(nickname || '讲').trim().slice(0, 1) || '讲',
+        needsWechatProfile: false,
+        showWechatProfileModal: false,
+        savingWechatProfile: false,
+      });
+      refreshState.mark(['home', 'resume']);
+      this.loadAuthenticatedDashboard();
+    } catch (error) {
+      wx.showToast({ title: error && error.message ? error.message : '保存失败', icon: 'none' });
+      this.setData({ savingWechatProfile: false });
+    }
   },
 
   openEntitlements() {

@@ -38,11 +38,11 @@
       <view class="section-title">修改履历</view>
       <view class="field">
         <view class="field-label">标题</view>
-        <input class="input" value="{{editForm.title}}" data-field="title" bindinput="updateEditField" placeholder="请输入标题" />
+        <input class="input" value="{{editForm.title}}" data-field="title" bindinput="updateEditField" maxlength="64" placeholder="请输入标题" />
       </view>
       <view class="field">
         <view class="field-label">详情</view>
-        <textarea class="textarea" value="{{editForm.detailText}}" data-field="detailText" bindinput="updateEditField" placeholder="可分行填写详情" />
+        <textarea class="textarea" value="{{editForm.detailText}}" data-field="detailText" bindinput="updateEditField" maxlength="1200" placeholder="可分行填写详情" />
       </view>
       <view class="row action-row">
         <button class="ghost-button row-flex-button" bindtap="cancelEdit" disabled="{{submitting}}">取消</button>
