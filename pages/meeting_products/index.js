@@ -25,7 +25,7 @@ function productIdOf(product) {
 
 function productPriceOf(product) {
   const raw = product.priceText || product.amountText || product.price || '';
-  return String(raw || '').replace(/^[¥￥]\s*/, '').trim();
+  return String(raw || '').replace(/^[￥¥\s]*/, '').trim();
 }
 
 /**
@@ -122,16 +122,21 @@ Page({
     }
     this.setData({ paying: true, errorMessage: '' });
     try {
+      if (productId === 'meeting_hour_pass') {
+        this.setData({ paying: false });
+        wx.navigateTo({ url: '/pages/meeting_hour_purchase/index' });
+        return;
+      }
       const ready = await tencentMeetingAccess.ensureReady({ targetUrl: '/pages/meeting_products/index' });
       if (!ready) {
         this.setData({ paying: false });
         return;
       }
       const order = await service.createWechatMiniProgramOrder(productId);
-      if (!order || !order.paymentParams) {
+      if (!order || (!order.paymentParams && !order.virtualPaymentParams)) {
         throw new Error('支付参数异常，请稍后重试');
       }
-      await service.requestPayment(order.paymentParams);
+      await service.payOrder(order);
       if (order.orderId) {
         const orderDetail = await service.confirmPaidOrder(order.orderId);
         dashboardCache.invalidateDashboardRelated();

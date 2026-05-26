@@ -126,27 +126,13 @@
 .home-profile-pending-row {
   display: flex;
   align-items: center;
-  gap: 12rpx;
-  margin-top: 8rpx;
+  margin-top: 4rpx;
 }
 
 .home-profile-pending-text {
-  font-size: 20rpx;
-  line-height: 28rpx;
+  font-size: 22rpx;
+  line-height: 32rpx;
   color: rgba(255, 244, 199, 0.96);
-}
-
-.home-profile-pending-button {
-  min-width: 128rpx;
-  height: 48rpx;
-  margin: 0;
-  padding: 0 16rpx;
-  border: 1rpx solid rgba(255, 255, 255, 0.36);
-  border-radius: 999rpx;
-  background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
-  font-size: 20rpx;
-  line-height: 48rpx;
 }
 
 .home-profile-phone {

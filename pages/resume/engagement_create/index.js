@@ -2,6 +2,7 @@ const profileService = require('../../../services/profile');
 const refreshState = require('../../../services/refresh-state');
 const dashboardCache = require('../../../services/dashboard-cache');
 const loginGuard = require('../../../services/login-guard');
+const share = require('../../../services/share');
 
 Page({
   data: {
@@ -38,6 +39,21 @@ Page({
       title: '邀请你确认服务履历',
       path: '/pages/resume/index',
     };
+  },
+
+  onShareTimeline() {
+    const invite = this.data.invite;
+    if (invite && invite.token) {
+      const path = String(invite.path || '').replace(/^\//, '');
+      return share.defaultShareTimeline({
+        title: invite.title || '邀请你确认服务履历',
+        query: path.includes('?') ? path.split('?').slice(1).join('?') : '',
+      });
+    }
+    return share.defaultShareTimeline({
+      title: '创建讲了么服务履历',
+      query: '',
+    });
   },
 
   onLoad() {

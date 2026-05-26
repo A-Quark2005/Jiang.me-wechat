@@ -96,6 +96,17 @@ async function loginWithMiniProgram() {
  * @returns {Promise<object>} Backend registration result.
  */
 async function bindPhoneWithCode(phoneCode) {
+  if (sessionStore.getAccessToken()) {
+    const result = await request({
+      path: '/api/me/phone/wechat-mini-program',
+      method: 'POST',
+      data: { phoneCode },
+    });
+    if (result && (result.session || result.token || result.accessToken)) {
+      sessionStore.saveSession(result);
+    }
+    return result;
+  }
   const result = await requestWithFreshMiniLoginCode((miniLoginCode) => request({
     path: '/api/auth/wechat-mini-program/register',
     method: 'POST',

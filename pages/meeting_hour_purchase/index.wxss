@@ -1,96 +1,257 @@
 .hour-page {
   min-height: 100vh;
-  padding: 24rpx 16px calc(32rpx + env(safe-area-inset-bottom));
+  padding: 18rpx 16px calc(150rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
 }
 
-.hour-card {
-  padding: 32rpx 28rpx;
-  border-radius: 16rpx;
+.hour-product-card,
+.hour-section-card,
+.hour-summary-card {
   background: #ffffff;
+  border-radius: 16rpx;
   border: 1rpx solid #ebebeb;
 }
 
+.hour-product-card {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  min-height: 160rpx;
+  padding: 24rpx 28rpx;
+}
+
+.hour-product-icon {
+  width: 88rpx;
+  height: 88rpx;
+  flex-shrink: 0;
+}
+
+.hour-product-copy {
+  min-width: 0;
+  flex: 1;
+}
+
 .hour-title {
-  font-size: 34rpx;
-  line-height: 1.4;
+  font-size: 30rpx;
+  line-height: 45rpx;
+  color: #333333;
+  font-weight: 500;
+}
+
+.hour-subtitle {
+  margin-top: 4rpx;
+  font-size: 24rpx;
+  line-height: 36rpx;
+  color: #b0b8c9;
+}
+
+.hour-unit-price {
+  display: flex;
+  align-items: baseline;
+  flex-shrink: 0;
   color: #333333;
   font-weight: 600;
 }
 
-.hour-subtitle {
-  margin-top: 8rpx;
-  font-size: 24rpx;
-  line-height: 1.5;
-  color: #6b7280;
+.hour-unit-symbol {
+  font-size: 20rpx;
 }
 
-.hour-form {
-  margin-top: 40rpx;
+.hour-unit-value {
+  font-size: 52rpx;
+  line-height: 60rpx;
 }
 
-.hour-label {
-  font-size: 26rpx;
-  line-height: 1.4;
+.hour-unit-tail {
+  margin-left: 4rpx;
+  font-size: 22rpx;
+  color: #b0b8c9;
+  font-weight: 400;
+}
+
+.hour-section-card,
+.hour-summary-card {
+  margin-top: 16rpx;
+  padding: 28rpx;
+}
+
+.hour-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.hour-section-title {
+  font-size: 30rpx;
+  line-height: 45rpx;
   color: #333333;
+  font-weight: 500;
+}
+
+.hour-section-meta {
+  font-size: 24rpx;
+  line-height: 36rpx;
+  color: #b0b8c9;
 }
 
 .hour-input-row {
   display: flex;
   align-items: center;
-  gap: 18rpx;
-  margin-top: 18rpx;
+  gap: 16rpx;
+  margin-top: 24rpx;
 }
 
 .hour-stepper {
-  width: 88rpx;
-  height: 88rpx;
+  width: 96rpx;
+  height: 96rpx;
   padding: 0;
   border-radius: 16rpx;
   background: #eef5ff;
   color: #0071fe;
-  font-size: 34rpx;
-  line-height: 88rpx;
+  font-size: 44rpx;
+  line-height: 96rpx;
+}
+
+.hour-stepper.disabled,
+.hour-stepper[disabled] {
+  color: #b0b8c9;
+  background: #f4f6f9;
+}
+
+.hour-input-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+  height: 96rpx;
+  border-radius: 16rpx;
+  background: #f7f8fa;
 }
 
 .hour-input {
-  flex: 1;
-  height: 88rpx;
-  border-radius: 16rpx;
-  background: #f7f8fa;
+  width: 150rpx;
+  height: 96rpx;
   text-align: center;
-  font-size: 34rpx;
+  font-size: 40rpx;
+  line-height: 96rpx;
   color: #333333;
+  font-weight: 600;
 }
 
-.hour-hint {
-  margin-top: 14rpx;
-  font-size: 22rpx;
-  line-height: 1.5;
-  color: #9ca3af;
+.hour-input-unit {
+  margin-left: 8rpx;
+  font-size: 24rpx;
+  line-height: 36rpx;
+  color: #6b7280;
 }
 
-.hour-price-row {
+.hour-presets {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12rpx;
+  margin-top: 22rpx;
+}
+
+.hour-preset {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 64rpx;
+  border-radius: 8rpx;
+  background: #f7f8fa;
+  color: #6b7280;
+  font-size: 24rpx;
+  line-height: 36rpx;
+}
+
+.hour-preset.active {
+  color: #0071fe;
+  background: #eef5ff;
+  font-weight: 500;
+}
+
+.hour-summary-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 40rpx;
-  padding-top: 28rpx;
-  border-top: 1rpx solid #f0f2f5;
+  gap: 20rpx;
+  min-height: 52rpx;
 }
 
-.hour-price-label {
+.hour-summary-row + .hour-summary-row {
+  margin-top: 8rpx;
+}
+
+.hour-summary-label {
   font-size: 26rpx;
+  line-height: 39rpx;
+  color: #6b7280;
+}
+
+.hour-summary-value {
+  font-size: 26rpx;
+  line-height: 39rpx;
   color: #333333;
 }
 
-.hour-price-value {
-  font-size: 40rpx;
-  line-height: 1.2;
+.hour-summary-divider {
+  height: 1rpx;
+  margin: 20rpx 0;
+  background: #f0f2f5;
+}
+
+.hour-summary-row.total {
+  min-height: 64rpx;
+}
+
+.hour-total-price {
+  font-size: 44rpx;
+  line-height: 56rpx;
+  color: #0071fe;
+  font-weight: 600;
+}
+
+.hour-bottom-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+  padding: 18rpx 32rpx calc(18rpx + env(safe-area-inset-bottom));
+  background: #ffffff;
+  box-shadow: 0 -8rpx 24rpx rgba(0, 0, 0, 0.06);
+}
+
+.hour-bottom-price {
+  min-width: 0;
+  flex: 1;
+}
+
+.hour-bottom-label {
+  display: block;
+  font-size: 22rpx;
+  line-height: 30rpx;
+  color: #b0b8c9;
+}
+
+.hour-bottom-value {
+  display: block;
+  margin-top: 2rpx;
+  font-size: 38rpx;
+  line-height: 46rpx;
   color: #0071fe;
   font-weight: 600;
 }
 
 .hour-submit {
-  margin-top: 42rpx;
+  width: 280rpx;
+  height: 88rpx;
+  border-radius: 8rpx;
+  flex-shrink: 0;
 }

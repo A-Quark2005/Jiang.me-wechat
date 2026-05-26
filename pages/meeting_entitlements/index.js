@@ -38,10 +38,10 @@ function catalogProducts(products) {
 
 function billingModeOf(product) {
   const productId = productIdOf(product);
-  if (productId === 'meeting-single') return 'single';
-  if (productId === 'meeting-week-pass') return 'week_pass';
-  if (productId === 'meeting-half-month-pass') return 'half_month_pass';
-  if (productId === 'meeting-month-pass') return 'month_pass';
+  if (productId === 'meeting_single') return 'single';
+  if (productId === 'meeting_week_pass') return 'week_pass';
+  if (productId === 'meeting_half_pass') return 'half_month_pass';
+  if (productId === 'meeting_month_pass') return 'month_pass';
   if (productId === 'meeting-recording-pack') return 'recording_pack';
   return String(product.billingMode || product.mode || product.type || product.code || productLabel(product)).toLowerCase();
 }
@@ -109,13 +109,13 @@ function buildPlanCards(products, selectedPlanId) {
 function entitlementTypeLabel(entitlement) {
   const type = String(entitlement && entitlement.type ? entitlement.type : '').toLowerCase();
   const sourceId = String(entitlement && entitlement.sourceId ? entitlement.sourceId : '').toLowerCase();
-  if (type === 'hour_pass' || sourceId === 'meeting-hour-pass') {
+  if (type === 'hour_pass' || sourceId === 'meeting_hour_pass') {
     return '小时会员';
   }
   if (type === 'duration') {
     return '不限次会议卡';
   }
-  if (sourceId === 'meeting-single') {
+  if (sourceId === 'meeting_single') {
     return '高级账号';
   }
   if (type === 'recording_pack') {
@@ -127,6 +127,8 @@ function entitlementTypeLabel(entitlement) {
 function buildEntitlementCards(entitlements) {
   return entitlements.map((entitlement) => {
     const expiresAt = entitlement.expiresAt || entitlement.validUntil || '';
+    const status = String(entitlement.status || '').toLowerCase();
+    const active = status === 'active';
     const summaryParts = [];
     if (expiresAt) {
       summaryParts.push(
@@ -140,8 +142,8 @@ function buildEntitlementCards(entitlements) {
       title: productLabel(entitlement),
       badge: entitlementTypeLabel(entitlement),
       summary: summaryParts.join(' · ') || '已生效',
-      statusText: String(entitlement.status || '').toLowerCase() === 'active' ? '生效中' : '已失效',
-      active: String(entitlement.status || '').toLowerCase() === 'active',
+      statusText: active ? '生效中' : '已使用',
+      active,
     };
   });
 }
@@ -157,10 +159,12 @@ Page({
     planCards: [],
     entitlementCards: [],
     selectedPlanId: '',
-    selectedPlan: null,
+    selectedPlan: null,
+
     sleepImageUrl: '/assets/ui/sleep.png',
     emptyStateText: '暂无可用卡',
-    recommendPlanTitle: '高级会议卡',
+    recommendPlanTitle: '高级会议卡',
+
     activation: null,
     showPendingActivationNotice: false,
     pendingActivationText: '',
@@ -185,7 +189,7 @@ Page({
     try {
       const [entitlementsRaw, productsRaw, activationRaw] = await Promise.all([
         service.getEntitlements({ forceRefresh }),
-        service.getProducts({ forceRefresh }),
+        service.getProducts({ forceRefresh }),
         service.getTencentMeetingActivation({ forceRefresh }),
       ]);
       const rawProducts = catalogProducts(normalizeList(productsRaw, ['items', 'products']));
@@ -203,9 +207,9 @@ Page({
         products: rawProducts,
         planCards,
         selectedPlanId,
-        selectedPlan,
+        selectedPlan,
         emptyStateText: '暂无可用卡',
-        recommendPlanTitle: '高级会议卡',
+        recommendPlanTitle: '高级会议卡',
         ...activationState,
       });
       refreshState.touch(PAGE_KEY);
@@ -258,10 +262,10 @@ Page({
     this.setData({ paying: true, errorMessage: '' });
     try {
       const order = await service.createWechatMiniProgramOrder(productId);
-      if (!order || !order.paymentParams) {
+      if (!order || (!order.paymentParams && !order.virtualPaymentParams)) {
         throw new Error('支付参数异常，请稍后重试');
       }
-      await service.requestPayment(order.paymentParams);
+      await service.payOrder(order);
       if (order.orderId) {
         const orderDetail = await service.confirmPaidOrder(order.orderId);
         dashboardCache.invalidateDashboardRelated();
@@ -325,7 +329,6 @@ Page({
   openHourPurchase() {
     wx.navigateTo({ url: '/pages/meeting_hour_purchase/index' });
   },
-
 
   productLabel,
 });

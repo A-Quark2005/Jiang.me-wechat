@@ -56,17 +56,26 @@
 
 .activation-panel {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   width: 100%;
   margin-top: -1rpx;
   min-height: calc(100vh - 682rpx);
-  padding: 206rpx 32rpx 48rpx;
+  padding: 0 32rpx 48rpx;
   background: #ffffff;
   border-radius: 56rpx 56rpx 0 0;
   box-sizing: border-box;
 }
 
 .activation-panel-copy {
-  margin-bottom: 28rpx;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: auto;
+  margin-bottom: 72rpx;
+  text-align: center;
 }
 
 .activation-panel-copy-center {
@@ -93,7 +102,7 @@
   width: 686rpx;
   height: 80rpx;
   padding: 0;
-  margin: 0;
+  margin: 0 auto;
   background: #0071fe;
   border-radius: 8rpx;
   box-shadow: 0 8rpx 24rpx rgba(0, 113, 254, 0.267);

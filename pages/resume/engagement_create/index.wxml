@@ -12,40 +12,42 @@
     </radio-group>
   </view>
 
-  <view class="surface-card engagement-create-form-card">
-    <view class="field">
-      <view class="field-label">履历标题</view>
-      <input
-        class="input engagement-create-input"
-        value="{{form.title}}"
-        data-field="title"
-        bindinput="updateField"
-        placeholder="例如：AI产品设计咨询"
-        maxlength="40"
-      />
+  <view class="surface-card engagement-create-card">
+    <view class="engagement-create-tip-section">
+      <view class="section-title">{{helperTitleText}}</view>
+      <view class="section-subtitle">{{helperBodyText}}</view>
+      <view wx:if="{{invite}}" class="success-box engagement-create-success">{{inviteReadyText}}</view>
+      <view wx:if="{{errorMessage}}" class="error-box">{{errorMessage}}</view>
+      <view wx:if="{{invite}}" class="engagement-create-invite-actions">
+        <button class="primary-button action-button" open-type="share" bindtap="openShare">发给微信联系人</button>
+        <button class="outline-button action-button" bindtap="openDetail">查看履历</button>
+      </view>
     </view>
 
-    <view class="field">
-      <view class="field-label">服务内容</view>
-      <textarea
-        class="textarea engagement-create-textarea"
-        value="{{form.detailText}}"
-        data-field="detailText"
-        bindinput="updateField"
-        placeholder="可分行填写服务时间、内容、结果与备注"
-        maxlength="300"
-      />
-    </view>
-  </view>
+    <view class="engagement-create-form-section">
+      <view class="field">
+        <view class="field-label">履历标题</view>
+        <input
+          class="input engagement-create-input"
+          value="{{form.title}}"
+          data-field="title"
+          bindinput="updateField"
+          placeholder="例如：AI产品设计咨询"
+          maxlength="40"
+        />
+      </view>
 
-  <view class="surface-card engagement-create-tip-card">
-    <view class="section-title">{{helperTitleText}}</view>
-    <view class="section-subtitle">{{helperBodyText}}</view>
-    <view wx:if="{{invite}}" class="success-box engagement-create-success">{{inviteReadyText}}</view>
-    <view wx:if="{{errorMessage}}" class="error-box">{{errorMessage}}</view>
-    <view wx:if="{{invite}}" class="engagement-create-invite-actions">
-      <button class="primary-button action-button" open-type="share" bindtap="openShare">发给微信联系人</button>
-      <button class="outline-button action-button" bindtap="openDetail">查看履历</button>
+      <view class="field">
+        <view class="field-label">服务内容</view>
+        <textarea
+          class="textarea engagement-create-textarea"
+          value="{{form.detailText}}"
+          data-field="detailText"
+          bindinput="updateField"
+          placeholder="可分行填写服务时间、内容、结果与备注"
+          maxlength="300"
+        />
+      </view>
     </view>
   </view>
 

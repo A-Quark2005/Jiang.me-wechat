@@ -1,23 +1,71 @@
-<view class="page page-plain hour-page">
-  <view class="hour-card">
-    <view class="hour-title">购买小时卡</view>
-    <view class="hour-subtitle">按实际需要购买腾讯会议时长</view>
+<view class="page page-with-bar page-plain hour-page">
+  <view class="hour-product-card">
+    <image class="hour-product-icon" src="/assets/ui/card-ticket-icon.svg" mode="aspectFit"></image>
+    <view class="hour-product-copy">
+      <view class="hour-title">购买小时卡</view>
+      <view class="hour-subtitle">按小时购买，灵活延长高级账号权益</view>
+    </view>
+    <view class="hour-unit-price">
+      <text class="hour-unit-symbol">¥</text>
+      <text class="hour-unit-value">2.50</text>
+      <text class="hour-unit-tail">/小时</text>
+    </view>
+  </view>
 
-    <view class="hour-form">
-      <view class="hour-label">所需小时数</view>
-      <view class="hour-input-row">
-        <button class="hour-stepper" bindtap="decreaseHours">-</button>
-        <input class="hour-input" type="number" value="{{hours}}" bindinput="onHoursInput" maxlength="3"></input>
-        <button class="hour-stepper" bindtap="increaseHours">+</button>
+  <view class="hour-summary-card">
+    <view class="hour-summary-row">
+      <text class="hour-summary-label">单价</text>
+      <text class="hour-summary-value">¥2.50 / 小时</text>
+    </view>
+    <view class="hour-summary-row">
+      <text class="hour-summary-label">购买时长</text>
+      <text class="hour-summary-value">{{hours}} 小时</text>
+    </view>
+    <view class="hour-summary-divider"></view>
+    <view class="hour-summary-row total">
+      <text class="hour-summary-label">应付金额</text>
+      <text class="hour-total-price">¥{{amountText}}</text>
+    </view>
+  </view>
+
+  <view class="hour-section-card">
+    <view class="hour-section-head">
+      <view class="hour-section-title">所需时长</view>
+      <view class="hour-section-meta">最多 240 小时</view>
+    </view>
+
+    <view class="hour-input-row">
+      <button class="hour-stepper {{hours <= 1 ? 'disabled' : ''}}" disabled="{{hours <= 1 || paying}}" bindtap="decreaseHours">-</button>
+      <view class="hour-input-wrap">
+        <input
+          class="hour-input"
+          type="number"
+          value="{{hours}}"
+          bindinput="onHoursInput"
+          maxlength="3"
+          disabled="{{paying}}"
+        ></input>
+        <text class="hour-input-unit">小时</text>
       </view>
-      <view class="hour-hint">¥2.50 / 小时，至少购买 1 小时</view>
+      <button class="hour-stepper" disabled="{{paying}}" bindtap="increaseHours">+</button>
     </view>
 
-    <view class="hour-price-row">
-      <view class="hour-price-label">应付金额</view>
-      <view class="hour-price-value">¥{{amountText}}</view>
+    <view class="hour-presets">
+      <view
+        wx:for="{{presetHours}}"
+        wx:key="*this"
+        class="hour-preset {{hours === item ? 'active' : ''}}"
+        data-hours="{{item}}"
+        bindtap="choosePreset"
+      >{{item}} 小时</view>
     </view>
+  </view>
 
-    <button class="primary-button hour-submit" loading="{{paying}}" bindtap="buyHours">立即购买</button>
+  <view class="hour-bottom-bar">
+    <view class="hour-bottom-price">
+      <text class="hour-bottom-label">合计</text>
+      <text class="hour-bottom-value">¥{{amountText}}</text>
+    </view>
+    <button class="primary-button hour-submit" loading="{{paying}}" disabled="{{paying}}" bindtap="buyHours">立即购买</button>
   </view>
 </view>

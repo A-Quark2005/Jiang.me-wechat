@@ -20,6 +20,7 @@ Page({
   data: {
     hours: 1,
     amountText: amountText(1),
+    presetHours: [1, 2, 4, 8],
     paying: false,
   },
 
@@ -43,6 +44,11 @@ Page({
     this.setHours(event.detail.value);
   },
 
+  choosePreset(event) {
+    if (this.data.paying) return;
+    this.setHours(event.currentTarget.dataset.hours);
+  },
+
   decreaseHours() {
     this.setHours(this.data.hours - 1);
   },
@@ -58,11 +64,11 @@ Page({
     const hours = normalizeHours(this.data.hours);
     this.setData({ paying: true });
     try {
-      const order = await service.createWechatMiniProgramOrder('meeting-hour-pass', { hours });
-      if (!order || !order.paymentParams) {
+      const order = await service.createWechatMiniProgramOrder('meeting_hour_pass', { hours });
+      if (!order || (!order.paymentParams && !order.virtualPaymentParams)) {
         throw new Error('支付参数异常，请稍后重试');
       }
-      await service.requestPayment(order.paymentParams);
+      await service.payOrder(order);
       if (order.orderId) {
         const orderDetail = await service.confirmPaidOrder(order.orderId);
         dashboardCache.invalidateDashboardRelated();

@@ -3,6 +3,7 @@ const refreshState = require('../../../services/refresh-state');
 const dashboardCache = require('../../../services/dashboard-cache');
 const displayFormatters = require('../../../services/display-formatters');
 const loginGuard = require('../../../services/login-guard');
+const share = require('../../../services/share');
 
 /**
  * Normalize engagement payloads from profile APIs into a flat list.
@@ -266,6 +267,22 @@ Page({
       title: item.pendingChange ? '邀请你确认履历变更' : '邀请你确认服务履历',
       path: `/pages/resume/engagement_detail/index?id=${encodeURIComponent(this.data.id || item.id || '')}`,
     };
+  },
+
+  onShareTimeline() {
+    const invite = this.data.invite;
+    if (invite && invite.token) {
+      const path = String(invite.path || '').replace(/^\//, '');
+      return share.defaultShareTimeline({
+        title: invite.title || '邀请你确认服务履历',
+        query: path.includes('?') ? path.split('?').slice(1).join('?') : '',
+      });
+    }
+    const item = this.data.item || {};
+    return share.defaultShareTimeline({
+      title: item.pendingChange ? '邀请你确认履历变更' : '讲了么服务履历',
+      query: `id=${encodeURIComponent(this.data.id || item.id || '')}`,
+    });
   },
 
   async shareConfirmation() {

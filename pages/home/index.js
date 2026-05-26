@@ -117,7 +117,16 @@ function isOwnUploadedAvatarUrl(value) {
   return String(value || '').startsWith(`${apiClient.backendBaseUrl()}/uploads/`);
 }
 
-function resolveEntitlementSummary(entitlements) {
+function resolveEntitlementSummary(entitlements, rawActivation) {
+  const activation = displayFormatters.normalizeMeetingActivationState(rawActivation);
+  if (rawActivation && activation.status && !activation.isActive) {
+    return {
+      title: '账号未激活',
+      detail: '激活后可使用完整会议功能',
+      tone: 'activation',
+      targetUrl: '/pages/meeting_activation/index',
+    };
+  }
   const list = safeArray(entitlements && (entitlements.items || entitlements.entitlements || entitlements));
   const active = list.find((item) => String(item.status || '').toLowerCase() === 'active') || list[0];
   if (!active) {
@@ -125,6 +134,7 @@ function resolveEntitlementSummary(entitlements) {
       title: '当前会议权益',
       detail: '未开通 · 可按需购买',
       tone: 'warn',
+      targetUrl: '/pages/meeting_entitlements/index',
     };
   }
   const expiresAt = active.expiresAt || active.validUntil || '';
@@ -134,6 +144,7 @@ function resolveEntitlementSummary(entitlements) {
       ? `高级账号有效期至 ${displayFormatters.formatDateText(expiresAt, { includeTime: true, fallback: expiresAt })}`
       : '高级账号已开通',
     tone: 'ok',
+    targetUrl: '/pages/meeting_entitlements/index',
   };
 }
 
@@ -205,9 +216,7 @@ function buildPendingActivationState(rawActivation) {
   return {
     activation,
     showPendingActivationNotice,
-    pendingActivationText: showPendingActivationNotice
-      ? '腾讯会议企业号待激活，请查看短信或激活链接。'
-      : '',
+    pendingActivationText: showPendingActivationNotice ? '待激活' : '',
   };
 }
 
@@ -448,7 +457,7 @@ Page({
     const profile = (bootstrap && bootstrap.profile) || (sessionRecord && sessionRecord.profile) || {};
     const displayProfile = mergeDisplayProfile(user, profile);
     const displayName = displayProfile.displayName;
-    const entitlementSummary = resolveEntitlementSummary(entitlements);
+    const entitlementSummary = resolveEntitlementSummary(entitlements, dashboard && dashboard.activation);
     const nextViewState = {
       session: sessionStore.getSession(),
       user,
@@ -459,7 +468,9 @@ Page({
       needsWechatProfile: !displayName || !displayProfile.avatarUrl,
       displayNameText: displayName || '用户昵称',
       entitlementSummary,
-      entitlementActionText: entitlementSummary.tone === 'ok' ? '去查看' : '去开通',
+      entitlementActionText: entitlementSummary.tone === 'activation'
+        ? '去激活'
+        : (entitlementSummary.tone === 'ok' ? '去查看' : '去开通'),
       guestMode: false,
       ...activationViewState,
       resumeSummary: resolveResumeSummary(
@@ -541,8 +552,14 @@ Page({
   },
 
   openEntitlements() {
-    loginGuard.guardAction('/pages/meeting_entitlements/index', () => {
-      wx.switchTab({ url: '/pages/meeting_entitlements/index' });
+    const summary = this.data.entitlementSummary || {};
+    const targetUrl = summary.targetUrl || '/pages/meeting_entitlements/index';
+    loginGuard.guardAction(targetUrl, () => {
+      if (targetUrl === '/pages/meeting_activation/index') {
+        wx.navigateTo({ url: targetUrl });
+        return;
+      }
+      wx.switchTab({ url: targetUrl });
     }, { viaTab: true, requireRegistration: true });
   },
 
@@ -654,10 +671,7 @@ Page({
         subject,
         startTime: start.toISOString(),
         endTime: end.toISOString(),
-        startTimeIso: start.toISOString(),
-        endTimeIso: end.toISOString(),
         durationMinutes: durationMinutesBetween(start, end),
-        timeZone: 'Asia/Shanghai',
       });
       const meetingCode = meeting.meetingCode || meeting.roomId || meeting.meetingId || meeting.id || '';
       const meetingLink = meeting.meetingLink || meeting.joinUrl || meeting.link || '';

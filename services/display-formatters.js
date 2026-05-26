@@ -134,7 +134,7 @@ function normalizeMeetingProductTitle(value) {
   const text = String(value || '').trim();
   if (!text) return '';
   if (text === 'tencent_meeting_entitlement_product') return '会议卡券';
-  if (text === 'meeting-hour-pass') return '会议小时会员';
+  if (text === 'meeting_hour_pass') return '会议小时会员';
   return text;
 }
 

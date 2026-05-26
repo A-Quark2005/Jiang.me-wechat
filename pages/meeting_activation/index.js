@@ -78,18 +78,16 @@ function buildActivationViewState(rawActivation) {
     primaryButtonText: activation.isActive
       ? '返回继续使用'
       : activation.needsActivation
-        ? (activation.isPendingActivation ? '重新发送激活邀请' : '继续启用腾讯会议')
+        ? (activation.isPendingActivation ? '重新发送激活邀请' : '激活讲了么账号')
         : activation.needsPhone
           ? '授权手机号并继续'
           : '检查腾讯会议状态',
     panelTitleText: activation.isActive
       ? '腾讯会议能力已可用'
-      : activation.needsActivation
-        ? (activation.isPendingActivation ? '完成腾讯会议激活' : '继续启用腾讯会议')
-        : activation.needsPhone
-          ? '补充手机号后继续'
-          : '检查腾讯会议状态',
-    panelSubtitleText: statusMeta.detail || '请确认当前账号接入状态。',
+      : '您的账号暂未开通讲了么',
+    panelSubtitleText: activation.isActive
+      ? (statusMeta.detail || '请确认当前账号接入状态。')
+      : '激活后才可使用完整功能',
     brandTaglineText: activation.isActive
       ? '已完成账号接入，可继续使用'
       : '腾讯会议，会开会',
@@ -178,7 +176,7 @@ Page({
   async handleGetPhoneNumber(event) {
     const detail = event.detail || {};
     if (detail.errMsg && !String(detail.errMsg).includes('ok')) {
-      this.setData({ errorMessage: '需要授权手机号后才能继续启用腾讯会议' });
+      this.setData({ errorMessage: '需要授权手机号后才能激活讲了么账号' });
       return;
     }
     const phoneCode = detail.code || '';

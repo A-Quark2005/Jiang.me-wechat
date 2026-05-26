@@ -1,7 +1,10 @@
 const apiClient = require('./services/api-client');
 const sessionStore = require('./services/session-store');
+const share = require('./services/share');
 const LOCAL_RESET_STAMP_KEY = 'jiangleme.local-reset-stamp';
 const LOCAL_RESET_VERSION = '2026-05-23-full-reset-v2';
+
+share.installDefaultPageShare();
 
 /**
  * Perform a one-time local state reset across all mini-program environments.

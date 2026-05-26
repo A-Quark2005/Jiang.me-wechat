@@ -376,10 +376,7 @@ Page({
         subject,
         startTime: start.toISOString(),
         endTime: end.toISOString(),
-        startTimeIso: start.toISOString(),
-        endTimeIso: end.toISOString(),
         durationMinutes: durationMinutesBetween(start, end),
-        timeZone: 'Asia/Shanghai',
       });
       const meetingCode = meeting.meetingCode || meeting.roomId || meeting.meetingId || meeting.id || '';
       const meetingLink = meeting.meetingLink || meeting.joinUrl || meeting.link || '';

@@ -33,13 +33,18 @@
   color: #ffffff;
 }
 
-.engagement-create-form-card {
-  margin-top: 0;
+.engagement-create-card {
+  margin-top: 16rpx;
 }
 
-.engagement-create-tip-card {
-  margin-top: 16rpx;
-  min-height: 228rpx;
+.engagement-create-tip-section {
+  min-height: 160rpx;
+}
+
+.engagement-create-form-section {
+  margin-top: 28rpx;
+  padding-top: 28rpx;
+  border-top: 1rpx solid #f0f2f5;
 }
 
 .engagement-create-input {

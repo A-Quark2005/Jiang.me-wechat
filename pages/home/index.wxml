@@ -9,7 +9,7 @@
       <view class="home-brand">
         <view class="home-brand-copy">
           <view class="home-brand-name">讲了么</view>
-          <view class="home-brand-tagline">腾讯会议，官方授权</view>
+          <view class="home-brand-tagline">腾讯会议，会开会</view>
         </view>
       </view>
 
@@ -22,7 +22,6 @@
           <view class="home-profile-name">{{displayNameText}}</view>
           <view wx:if="{{showPendingActivationNotice}}" class="home-profile-pending-row">
             <view class="home-profile-pending-text">{{pendingActivationText}}</view>
-            <button class="home-profile-pending-button" loading="{{sendingActivationInvite}}" bindtap="resendActivationInvite">重发链接</button>
           </view>
           <view class="home-profile-phone">{{phoneText}}</view>
         </view>
