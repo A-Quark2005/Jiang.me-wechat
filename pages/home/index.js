@@ -421,6 +421,22 @@ Page({
     }
     try {
       const app = getApp();
+      const pendingReferralCode =
+        (app && app.globalData && app.globalData.pendingReferralCode) ||
+        wx.getStorageSync('jiangleme.pending-referral-code') ||
+        '';
+      if (pendingReferralCode) {
+        try {
+          await entitlementsService.acceptReferral(pendingReferralCode);
+          if (app && app.globalData) {
+            app.globalData.pendingReferralCode = '';
+          }
+          wx.removeStorageSync('jiangleme.pending-referral-code');
+          refreshState.mark(['entitlements']);
+        } catch {
+          // Do not block the home page when the referral has already been claimed or expired.
+        }
+      }
       const pendingInviteToken =
         app && app.globalData ? app.globalData.pendingEngagementInviteToken : '';
       if (pendingInviteToken) {

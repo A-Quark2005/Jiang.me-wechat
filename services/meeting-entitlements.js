@@ -95,6 +95,31 @@ function getOrder(orderId) {
   return request({ path: `/api/payments/${encodeURIComponent(orderId)}` });
 }
 
+function getReferralDashboard(options) {
+  const requestOptions = options || {};
+  return request({
+    path: '/api/me/referrals',
+    cacheKey: 'meeting_referrals',
+    maxAgeMs: 30 * 1000,
+    forceRefresh: Boolean(requestOptions.forceRefresh),
+  });
+}
+
+function acceptReferral(code) {
+  return request({
+    path: '/api/me/referrals/accept',
+    method: 'POST',
+    data: { code },
+  });
+}
+
+function redeemReferralReward(inviteeUserId) {
+  return request({
+    path: `/api/me/referrals/${encodeURIComponent(inviteeUserId)}/redeem`,
+    method: 'POST',
+  });
+}
+
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -175,12 +200,15 @@ module.exports = {
   getEntitlements,
   getOrder,
   getOrders,
+  getReferralDashboard,
   confirmPaidOrder,
-  getTencentMeetingActivation,
-  getProducts,
+  getTencentMeetingActivation,
+  getProducts,
   payOrder,
   requestPayment,
   requestVirtualPayment,
+  acceptReferral,
+  redeemReferralReward,
   sendTencentMeetingActivationInvite,
   syncPaymentStatus,
 };

@@ -27,6 +27,10 @@ const PAGE_SHARE_COPY = {
     title: '讲了么会议卡',
     timelineTitle: '讲了么会议卡',
   },
+  '/pages/referral_invite/index': {
+    title: '邀请好友使用讲了么',
+    timelineTitle: '讲了么邀请好友',
+  },
   '/pages/orders/index': {
     title: '讲了么订单',
     timelineTitle: '讲了么订单',

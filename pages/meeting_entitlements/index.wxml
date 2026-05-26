@@ -47,6 +47,18 @@
         <view class="entitlements-divider"></view>
       </view>
 
+      <view class="entitlements-recommend-card tappable" bindtap="openReferralInvite">
+        <image class="entitlements-recommend-icon-image" src="/assets/ui/referral-invite-icon.png" mode="aspectFit"></image>
+        <view class="row-main">
+          <view class="entitlements-recommend-title">邀请好友，送24小时权益卡</view>
+          <view class="entitlements-recommend-meta">好友激活讲了么账号后可兑现</view>
+        </view>
+        <view class="entitlements-recommend-action">
+          <text>去邀请</text>
+          <image class="entitlements-arrow-icon" src="/assets/ui/arrow-light.svg" mode="aspectFit"></image>
+        </view>
+      </view>
+
       <view class="entitlements-recommend-card tappable" bindtap="openHourPurchase">
         <image class="entitlements-recommend-icon-image" src="/assets/ui/card-ticket-icon.svg" mode="aspectFit"></image>
         <view class="row-main">

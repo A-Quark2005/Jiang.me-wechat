@@ -1,0 +1,148 @@
+.referral-page {
+  min-height: 100vh;
+  padding: 18rpx 16px calc(140rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+.referral-hero,
+.referral-section {
+  background: #ffffff;
+  border-radius: 16rpx;
+  border: 1rpx solid #ebebeb;
+}
+
+.referral-hero {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding: 28rpx;
+}
+
+.referral-hero-icon {
+  width: 96rpx;
+  height: 96rpx;
+  flex-shrink: 0;
+}
+
+.referral-hero-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.referral-hero-title,
+.referral-section-title {
+  font-size: 30rpx;
+  line-height: 45rpx;
+  color: #333333;
+  font-weight: 500;
+}
+
+.referral-hero-subtitle {
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  line-height: 36rpx;
+  color: #8b95a5;
+}
+
+.referral-section {
+  margin-top: 16rpx;
+  padding: 28rpx;
+}
+
+.referral-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240rpx;
+  font-size: 24rpx;
+  line-height: 36rpx;
+  color: #b0b8c9;
+}
+
+.referral-list {
+  margin-top: 20rpx;
+}
+
+.referral-row {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  min-height: 112rpx;
+  padding: 18rpx 0;
+  border-top: 1rpx solid #f0f2f5;
+}
+
+.referral-row:first-child {
+  border-top: 0;
+}
+
+.referral-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: #eef5ff;
+  color: #0071fe;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.referral-row-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.referral-name {
+  font-size: 28rpx;
+  line-height: 40rpx;
+  color: #333333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.referral-status {
+  margin-top: 4rpx;
+  font-size: 22rpx;
+  line-height: 32rpx;
+  color: #9ca3af;
+}
+
+.referral-status.activated {
+  color: #0071fe;
+}
+
+.referral-status.rewarded {
+  color: #0f9d58;
+}
+
+.referral-redeem-button {
+  width: 132rpx;
+  height: 64rpx;
+  padding: 0;
+  border-radius: 8rpx;
+  background: #0071fe;
+  color: #ffffff;
+  font-size: 24rpx;
+  line-height: 64rpx;
+  flex-shrink: 0;
+}
+
+.referral-bottom-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  padding: 18rpx 32rpx calc(18rpx + env(safe-area-inset-bottom));
+  background: #ffffff;
+  box-shadow: 0 -8rpx 24rpx rgba(0, 0, 0, 0.06);
+}
+
+.referral-share-button {
+  height: 88rpx;
+  border-radius: 8rpx;
+}

@@ -330,5 +330,9 @@ Page({
     wx.navigateTo({ url: '/pages/meeting_hour_purchase/index' });
   },
 
+  openReferralInvite() {
+    wx.navigateTo({ url: '/pages/referral_invite/index' });
+  },
+
   productLabel,
 });

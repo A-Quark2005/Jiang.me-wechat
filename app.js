@@ -26,9 +26,23 @@ App({
   globalData: {
     backendBaseUrl: 'https://api.whkerdb.top',
     pendingEngagementInviteToken: '',
+    pendingReferralCode: '',
   },
 
-  onLaunch() {
+  onLaunch(options) {
     resetLocalStateIfNeeded();
+    this.captureReferralCode(options);
+  },
+
+  onShow(options) {
+    this.captureReferralCode(options);
+  },
+
+  captureReferralCode(options) {
+    const query = (options && options.query) || {};
+    const code = query.ref || query.referral || '';
+    if (!code) return;
+    this.globalData.pendingReferralCode = String(code);
+    wx.setStorageSync('jiangleme.pending-referral-code', String(code));
   },
 });

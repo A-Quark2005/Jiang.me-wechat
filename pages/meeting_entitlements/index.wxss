@@ -5,6 +5,7 @@
   padding-top: 18rpx;
   padding-left: 0;
   padding-right: 0;
+  padding-bottom: 0;
   box-sizing: border-box;
 }
 
@@ -128,7 +129,7 @@
 .entitlements-recommend-fixed {
   margin-top: auto;
   padding-top: 24rpx;
-  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  padding-bottom: calc(8rpx + env(safe-area-inset-bottom));
 }
 
 .entitlements-divider-row {
