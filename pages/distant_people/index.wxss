@@ -1,0 +1,81 @@
+.distant-page {
+  min-height: 100vh;
+  padding: 18rpx 16px 32rpx;
+  box-sizing: border-box;
+}
+
+.distant-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.distant-card {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  min-height: 144rpx;
+  padding: 24rpx 28rpx;
+}
+
+.distant-logo {
+  width: 92rpx;
+  height: 92rpx;
+  flex-shrink: 0;
+}
+
+.distant-logo.fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16rpx;
+  background: #eef5ff;
+  color: #0071fe;
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+.distant-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.distant-title {
+  font-size: 30rpx;
+  line-height: 42rpx;
+  color: #152033;
+  font-weight: 600;
+}
+
+.distant-meta,
+.distant-domain {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 24rpx;
+  line-height: 34rpx;
+  color: #9ca3af;
+}
+
+.distant-meta {
+  margin-top: 4rpx;
+}
+
+.distant-domain {
+  color: #0071fe;
+}
+
+.distant-empty {
+  min-height: 220rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b0b8c9;
+  font-size: 26rpx;
+}
+
+.distant-arrow {
+  width: 32rpx;
+  height: 32rpx;
+  flex: 0 0 32rpx;
+}

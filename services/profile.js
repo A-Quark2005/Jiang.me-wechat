@@ -87,6 +87,29 @@ function getCertificationOrganizations(options) {
   });
 }
 
+function getCertificationOrganizationMembers(organizationId, options) {
+  const requestOptions = options || {};
+  const limit = Number(requestOptions.limit || 50);
+  const offset = Number(requestOptions.offset || 0);
+  return request({
+    path: `/api/certification/organizations/${encodeURIComponent(organizationId)}/members?limit=${encodeURIComponent(limit)}&offset=${encodeURIComponent(offset)}`,
+    cacheKey: `certification_members_${organizationId}_${limit}_${offset}`,
+    maxAgeMs: 30 * 1000,
+    forceRefresh: Boolean(requestOptions.forceRefresh),
+  });
+}
+
+function getPublicResume(userId, options) {
+  const requestOptions = options || {};
+  return request({
+    path: `/api/resume/public/${encodeURIComponent(userId)}`,
+    auth: false,
+    cacheKey: `public_resume_${userId}`,
+    maxAgeMs: 30 * 1000,
+    forceRefresh: Boolean(requestOptions.forceRefresh),
+  });
+}
+
 function sendCertificationEmailCode(payload) {
   return request({
     path: '/api/me/certification/email-code',
@@ -185,8 +208,10 @@ module.exports = {
   createEngagement,
   getCredentials,
   getCertificationOrganizations,
+  getCertificationOrganizationMembers,
   getEngagements,
   getEngagementInvite,
+  getPublicResume,
   getResume,
   previewEngagementInvite,
   rejectEngagement,

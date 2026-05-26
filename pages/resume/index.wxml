@@ -78,6 +78,24 @@
         </view>
       </view>
 
+      <view class="surface-card feature-card tappable" bindtap="openDistantPeople">
+        <view class="row">
+          <view class="row feature-row">
+            <view class="feature-icon distant-people-icon">
+              <image class="feature-icon-image" src="/assets/ui/tab-service-active.svg" mode="aspectFit"></image>
+            </view>
+            <view class="row-main">
+              <view class="row-title">远方的人</view>
+              <view class="row-meta">按认证组织发现更多人的公开资料</view>
+            </view>
+          </view>
+          <view class="page-link page-link-with-icon tap-target-inline">
+            <text>查看</text>
+            <image class="page-link-icon" src="/assets/ui/arrow-light.svg" mode="aspectFit"></image>
+          </view>
+        </view>
+      </view>
+
     </view>
 
     <view wx:if="{{showWechatProfileModal}}" class="wechat-profile-modal-mask" catchtouchmove="noop" bindtap="closeWechatProfileEditor">

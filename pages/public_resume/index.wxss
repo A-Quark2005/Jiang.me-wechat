@@ -1,0 +1,106 @@
+.public-resume-page {
+  min-height: 100vh;
+  padding: 18rpx 16px 32rpx;
+  box-sizing: border-box;
+}
+
+.public-profile-card {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  min-height: 150rpx;
+}
+
+.public-avatar {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.public-avatar.fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef5ff;
+  color: #0071fe;
+  font-size: 36rpx;
+  font-weight: 600;
+}
+
+.public-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #152033;
+  font-size: 34rpx;
+  font-weight: 700;
+  line-height: 48rpx;
+}
+
+.public-tier {
+  margin-top: 6rpx;
+  color: #7d8799;
+  font-size: 26rpx;
+  line-height: 36rpx;
+}
+
+.public-section {
+  margin-top: 16rpx;
+}
+
+.public-text,
+.public-empty {
+  margin-top: 16rpx;
+  color: #8b95a5;
+  font-size: 26rpx;
+  line-height: 42rpx;
+}
+
+.public-empty {
+  text-align: center;
+}
+
+.public-credential,
+.public-engagement {
+  padding: 18rpx 0;
+  border-top: 1rpx solid #f0f2f5;
+}
+
+.public-credential {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+}
+
+.public-credential:first-of-type,
+.public-engagement:first-of-type {
+  border-top: 0;
+}
+
+.public-credential-logo {
+  width: 72rpx;
+  height: 72rpx;
+  flex-shrink: 0;
+}
+
+.public-credential-title,
+.public-engagement-title {
+  color: #152033;
+  font-size: 28rpx;
+  font-weight: 600;
+  line-height: 40rpx;
+}
+
+.public-credential-meta,
+.public-engagement-meta,
+.public-engagement-summary {
+  margin-top: 4rpx;
+  color: #9ca3af;
+  font-size: 24rpx;
+  line-height: 36rpx;
+}
+
+.public-engagement-summary {
+  color: #6b7280;
+}

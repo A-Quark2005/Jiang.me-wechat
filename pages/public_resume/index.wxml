@@ -1,0 +1,49 @@
+<view class="page page-plain public-resume-page">
+  <view wx:if="{{loading}}" class="surface-card">
+    <view class="section-title">正在读取资料</view>
+  </view>
+
+  <view wx:elif="{{errorMessage}}" class="surface-card">
+    <view class="section-title">读取失败</view>
+    <view class="error-box">{{errorMessage}}</view>
+    <button class="primary-button action-button" bindtap="loadResume">重新加载</button>
+  </view>
+
+  <block wx:else>
+    <view class="surface-card public-profile-card">
+      <image wx:if="{{resume.avatarUrl}}" class="public-avatar" src="{{resume.avatarUrl}}" mode="aspectFill"></image>
+      <view wx:else class="public-avatar fallback">{{avatarText}}</view>
+      <view class="row-main">
+        <view class="public-name">{{resume.displayName}}</view>
+        <view class="public-tier">{{resume.accountTierText}}</view>
+      </view>
+    </view>
+
+    <view class="surface-card public-section">
+      <view class="section-title">自我介绍</view>
+      <view class="public-text">{{selfIntroductionText}}</view>
+    </view>
+
+    <view class="surface-card public-section">
+      <view class="section-title">认证</view>
+      <view wx:if="{{credentials.length === 0}}" class="public-empty">暂无认证</view>
+      <view wx:for="{{credentials}}" wx:key="id" class="public-credential">
+        <image wx:if="{{item.logoUrl}}" class="public-credential-logo" src="{{item.logoUrl}}" mode="aspectFit"></image>
+        <view class="row-main">
+          <view class="public-credential-title">{{item.title}}</view>
+          <view class="public-credential-meta">{{item.emailMasked}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="surface-card public-section">
+      <view class="section-title">服务履历</view>
+      <view wx:if="{{engagements.length === 0}}" class="public-empty">暂无公开履历</view>
+      <view wx:for="{{engagements}}" wx:key="id" class="public-engagement">
+        <view class="public-engagement-title">{{item.title}}</view>
+        <view class="public-engagement-meta">{{item.counterpartName}}</view>
+        <view wx:if="{{item.summary}}" class="public-engagement-summary">{{item.summary}}</view>
+      </view>
+    </view>
+  </block>
+</view>

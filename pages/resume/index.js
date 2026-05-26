@@ -196,6 +196,10 @@ Page({
     wx.navigateTo({ url: '/pages/resume/engagement_create/index' });
   },
 
+  openDistantPeople() {
+    wx.navigateTo({ url: '/pages/distant_people/index' });
+  },
+
   openWechatProfileEditor() {
     this.setData({
       showWechatProfileModal: true,

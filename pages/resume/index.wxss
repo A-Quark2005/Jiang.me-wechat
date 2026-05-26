@@ -264,6 +264,10 @@
   background: #f0f5ff;
 }
 
+.distant-people-icon {
+  background: #eef5ff;
+}
+
 .feature-icon-image {
   width: 22px;
   height: 22px;

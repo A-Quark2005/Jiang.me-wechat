@@ -1,0 +1,25 @@
+<view class="page page-plain distant-page">
+  <view wx:if="{{loading}}" class="surface-card">
+    <view class="section-title">正在读取组织</view>
+  </view>
+
+  <view wx:elif="{{errorMessage}}" class="surface-card">
+    <view class="section-title">读取失败</view>
+    <view class="error-box">{{errorMessage}}</view>
+    <button class="primary-button action-button" bindtap="loadOrganizations">重新加载</button>
+  </view>
+
+  <view wx:else class="distant-list">
+    <view wx:if="{{organizations.length === 0}}" class="surface-card distant-empty">暂无可查看组织</view>
+    <view wx:for="{{organizations}}" wx:key="id" class="surface-card distant-card tappable" data-id="{{item.id}}" bindtap="openOrganization">
+      <image wx:if="{{item.logoUrl}}" class="distant-logo" src="{{item.logoUrl}}" mode="aspectFit"></image>
+      <view wx:else class="distant-logo fallback">{{item.initial}}</view>
+      <view class="distant-main">
+        <view class="distant-title">{{item.name}}</view>
+        <view class="distant-meta">{{item.description}}</view>
+        <view class="distant-domain">{{item.domainText}}</view>
+      </view>
+      <image class="distant-arrow" src="/assets/ui/arrow-light.svg" mode="aspectFit"></image>
+    </view>
+  </view>
+</view>

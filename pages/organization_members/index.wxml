@@ -1,0 +1,31 @@
+<view class="page page-plain members-page">
+  <view wx:if="{{organization}}" class="surface-card members-org-card">
+    <image wx:if="{{organization.logoUrl}}" class="members-org-logo" src="{{organization.logoUrl}}" mode="aspectFit"></image>
+    <view wx:else class="members-org-logo fallback">{{organizationInitial}}</view>
+    <view class="members-main">
+      <view class="members-org-title">{{organization.name}}</view>
+      <view class="members-org-meta">已认证该组织的人</view>
+    </view>
+  </view>
+
+  <view wx:if="{{loading && members.length === 0}}" class="surface-card members-empty">正在读取成员</view>
+  <view wx:elif="{{errorMessage && members.length === 0}}" class="surface-card">
+    <view class="section-title">读取失败</view>
+    <view class="error-box">{{errorMessage}}</view>
+    <button class="primary-button action-button" bindtap="reload">重新加载</button>
+  </view>
+
+  <view wx:else class="members-list">
+    <view wx:if="{{members.length === 0}}" class="surface-card members-empty">暂无公开资料</view>
+    <view wx:for="{{members}}" wx:key="id" class="surface-card member-card tappable" data-id="{{item.id}}" bindtap="openPublicResume">
+      <image wx:if="{{item.avatarUrl}}" class="member-avatar" src="{{item.avatarUrl}}" mode="aspectFill"></image>
+      <view wx:else class="member-avatar fallback">{{item.initial}}</view>
+      <view class="members-main">
+        <view class="member-name">{{item.displayName}}</view>
+        <view class="member-meta">{{item.verifiedText}}</view>
+      </view>
+      <image class="members-arrow" src="/assets/ui/arrow-light.svg" mode="aspectFit"></image>
+    </view>
+    <button wx:if="{{hasMore}}" class="secondary-button members-more" loading="{{loadingMore}}" bindtap="loadMore">加载更多</button>
+  </view>
+</view>

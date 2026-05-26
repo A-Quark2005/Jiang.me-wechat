@@ -1,0 +1,114 @@
+.members-page {
+  min-height: 100vh;
+  padding: 18rpx 16px 32rpx;
+  box-sizing: border-box;
+}
+
+.members-org-card,
+.member-card {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.members-org-card {
+  min-height: 150rpx;
+  padding: 24rpx 28rpx;
+}
+
+.members-org-logo {
+  width: 92rpx;
+  height: 92rpx;
+  flex-shrink: 0;
+}
+
+.members-org-logo.fallback,
+.member-avatar.fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef5ff;
+  color: #0071fe;
+  font-weight: 600;
+}
+
+.members-org-logo.fallback {
+  border-radius: 16rpx;
+  font-size: 32rpx;
+}
+
+.members-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.members-org-title,
+.member-name {
+  color: #152033;
+  font-weight: 600;
+}
+
+.members-org-title {
+  font-size: 32rpx;
+  line-height: 46rpx;
+}
+
+.members-org-meta,
+.member-meta {
+  margin-top: 4rpx;
+  color: #9ca3af;
+  font-size: 24rpx;
+  line-height: 34rpx;
+}
+
+.members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  margin-top: 16rpx;
+}
+
+.member-card {
+  min-height: 132rpx;
+  padding: 24rpx 28rpx;
+}
+
+.member-avatar {
+  width: 84rpx;
+  height: 84rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.member-avatar.fallback {
+  font-size: 30rpx;
+}
+
+.member-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 30rpx;
+  line-height: 42rpx;
+}
+
+.members-empty {
+  min-height: 220rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b0b8c9;
+  font-size: 26rpx;
+}
+
+.members-more {
+  width: 100%;
+  height: 82rpx;
+  margin-top: 8rpx;
+}
+
+.members-arrow {
+  width: 32rpx;
+  height: 32rpx;
+  flex: 0 0 32rpx;
+}

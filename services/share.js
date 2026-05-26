@@ -43,6 +43,18 @@ const PAGE_SHARE_COPY = {
     title: '讲了么认证',
     timelineTitle: '讲了么认证',
   },
+  '/pages/distant_people/index': {
+    title: '远方的人',
+    timelineTitle: '远方的人',
+  },
+  '/pages/organization_members/index': {
+    title: '远方的人',
+    timelineTitle: '远方的人',
+  },
+  '/pages/public_resume/index': {
+    title: '讲了么个人资料',
+    timelineTitle: '讲了么个人资料',
+  },
   '/pages/resume/edit_self/index': {
     title: '完善讲了么资料',
     timelineTitle: '讲了么资料',
