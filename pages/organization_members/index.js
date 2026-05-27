@@ -1,6 +1,7 @@
 const profileService = require('../../services/profile');
 const displayFormatters = require('../../services/display-formatters');
 const loginGuard = require('../../services/login-guard');
+const share = require('../../services/share');
 
 const PAGE_SIZE = 50;
 
@@ -89,5 +90,32 @@ Page({
     const id = String(event.currentTarget.dataset.id || '');
     if (!id) return;
     wx.navigateTo({ url: `/pages/public_resume/index?id=${encodeURIComponent(id)}` });
+  },
+
+  onShareAppMessage() {
+    return share.defaultShareAppMessage({
+      title: this.shareTitle(),
+      path: `/pages/organization_members/index?id=${encodeURIComponent(this.data.organizationId || '')}`,
+      imageUrl: this.organizationShareImage(),
+    });
+  },
+
+  onShareTimeline() {
+    return share.defaultShareTimeline({
+      title: this.shareTitle(),
+      query: `id=${encodeURIComponent(this.data.organizationId || '')}`,
+      imageUrl: this.organizationShareImage(),
+    });
+  },
+
+  shareTitle() {
+    const organization = this.data.organization || {};
+    const name = String(organization.name || '').trim();
+    return name ? `推荐你看看${name}的人` : '推荐你看看远方的人';
+  },
+
+  organizationShareImage() {
+    const organization = this.data.organization || {};
+    return organization.logoUrl || share.DEFAULT_IMAGE_URL;
   },
 });

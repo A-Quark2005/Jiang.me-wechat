@@ -63,13 +63,15 @@ function isWechatSessionKeyError(error) {
   return message.includes('缺少微信会话信息') || message.includes('session_key') || message.includes('重新登录');
 }
 
-function requestWechatMiniProgramOrder(productId, purchaseOptions) {
+function requestWechatMiniProgramOrder(productId, purchaseOptions, options) {
+  const requestOptions = options || {};
   return request({
     path: '/api/payments/wechat-mini-program/orders',
     method: 'POST',
     data: {
       productId,
       purchaseOptions: purchaseOptions || undefined,
+      paymentChannel: requestOptions.paymentChannel || undefined,
     },
   });
 }
@@ -157,9 +159,9 @@ function requestPayment(paymentParams) {
   });
 }
 
-async function createWechatMiniProgramOrder(productId, purchaseOptions) {
+async function createWechatMiniProgramOrder(productId, purchaseOptions, options) {
   try {
-    return await requestWechatMiniProgramOrder(productId, purchaseOptions);
+    return await requestWechatMiniProgramOrder(productId, purchaseOptions, options);
   } catch (error) {
     if (!isWechatSessionKeyError(error)) {
       throw error;
@@ -167,7 +169,7 @@ async function createWechatMiniProgramOrder(productId, purchaseOptions) {
   }
   sessionStore.clearSession();
   await auth.loginWithMiniProgram();
-  return requestWechatMiniProgramOrder(productId, purchaseOptions);
+  return requestWechatMiniProgramOrder(productId, purchaseOptions, options);
 }
 
 function requestVirtualPayment(paymentParams) {

@@ -132,7 +132,7 @@ Page({
         this.setData({ paying: false });
         return;
       }
-      const order = await service.createWechatMiniProgramOrder(productId);
+      const order = await service.createWechatMiniProgramOrder(productId, null, { paymentChannel: 'wechat_mini_program' });
       if (!order || (!order.paymentParams && !order.virtualPaymentParams)) {
         throw new Error('支付参数异常，请稍后重试');
       }

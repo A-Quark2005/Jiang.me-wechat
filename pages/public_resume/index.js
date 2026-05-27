@@ -1,6 +1,11 @@
 const profileService = require('../../services/profile');
 const loginGuard = require('../../services/login-guard');
 const paymentService = require('../../services/meeting-entitlements');
+const share = require('../../services/share');
+
+const SHARE_CANVAS_ID = 'publicResumeShareCanvas';
+const SHARE_IMAGE_WIDTH = 500;
+const SHARE_IMAGE_HEIGHT = 400;
 
 function listFrom(raw, keys) {
   if (Array.isArray(raw)) return raw;
@@ -27,6 +32,7 @@ Page({
     contactButtonText: '缴纳定金，认识一下',
     contactActionLoading: false,
     consultingFeeText: '',
+    shareImagePath: '',
   },
 
   onLoad(options) {
@@ -52,6 +58,7 @@ Page({
         credentials: listFrom(resume.certifiedQualifications || resume.credentials, ['items', 'credentials']),
         engagements: listFrom(resume.relatedExperiences || resume.engagements, ['items', 'engagements']),
       });
+      this.prepareShareImage();
       this.loadContactAccess(true);
     } catch (error) {
       this.setData({
@@ -143,6 +150,48 @@ Page({
       },
     });
   },
+
+  onShareAppMessage() {
+    return share.defaultShareAppMessage({
+      title: this.shareTitle(),
+      path: `/pages/public_resume/index?id=${encodeURIComponent(this.data.userId || '')}`,
+      imageUrl: this.data.shareImagePath || share.DEFAULT_IMAGE_URL,
+    });
+  },
+
+  onShareTimeline() {
+    return share.defaultShareTimeline({
+      title: this.shareTitle(),
+      query: `id=${encodeURIComponent(this.data.userId || '')}`,
+      imageUrl: this.data.shareImagePath || share.DEFAULT_IMAGE_URL,
+    });
+  },
+
+  shareTitle() {
+    const resume = this.data.resume || {};
+    const displayName = String(resume.displayName || '').trim() || '这位朋友';
+    return `推荐你认识${displayName}`;
+  },
+
+  async prepareShareImage() {
+    const resume = this.data.resume;
+    if (!resume) return;
+    try {
+      const avatarPath = await downloadImage(resume.avatarUrl);
+      const imagePath = await drawShareImage(this, {
+        avatarPath,
+        avatarText: this.data.avatarText,
+        displayName: resume.displayName,
+        accountTierText: resume.accountTierText,
+        consultingFeeText: this.data.consultingFeeText,
+        selfIntroductionText: this.data.selfIntroductionText,
+        credentials: this.data.credentials,
+      });
+      this.setData({ shareImagePath: imagePath });
+    } catch {
+      this.setData({ shareImagePath: '' });
+    }
+  },
 });
 
 function moneyText(cents) {
@@ -164,4 +213,126 @@ function confirmDialog(options) {
       },
     });
   });
+}
+
+function downloadImage(url) {
+  const value = String(url || '').trim();
+  if (!/^https?:\/\//i.test(value)) return Promise.resolve('');
+  return new Promise((resolve) => {
+    wx.downloadFile({
+      url: value,
+      success(result) {
+        resolve(result.statusCode >= 200 && result.statusCode < 300 ? result.tempFilePath : '');
+      },
+      fail() {
+        resolve('');
+      },
+    });
+  });
+}
+
+function drawShareImage(page, input) {
+  return new Promise((resolve, reject) => {
+    const ctx = wx.createCanvasContext(SHARE_CANVAS_ID, page);
+    ctx.setFillStyle('#f7f8fa');
+    ctx.fillRect(0, 0, SHARE_IMAGE_WIDTH, SHARE_IMAGE_HEIGHT);
+    drawRoundRect(ctx, 30, 30, 440, 340, 24, '#ffffff');
+    ctx.setFillStyle('#0071fe');
+    ctx.fillRect(30, 30, 440, 10);
+    drawAvatar(ctx, input.avatarPath, input.avatarText);
+    ctx.setFillStyle('#111827');
+    ctx.setFontSize(30);
+    ctx.fillText(ellipsis(input.displayName || '未命名用户', 10), 150, 108);
+    ctx.setFillStyle('#6b7280');
+    ctx.setFontSize(19);
+    ctx.fillText(input.accountTierText || '普通账号', 150, 140);
+    ctx.setFillStyle('#374151');
+    ctx.setFontSize(21);
+    ctx.fillText(input.consultingFeeText || '咨询费：¥250.00/小时', 150, 178);
+    const credential = firstCredentialText(input.credentials);
+    if (credential) {
+      ctx.setFillStyle('#eef5ff');
+      ctx.fillRect(150, 198, 250, 36);
+      ctx.setFillStyle('#0071fe');
+      ctx.setFontSize(18);
+      ctx.fillText(ellipsis(credential, 16), 164, 222);
+    }
+    ctx.setFillStyle('#4b5563');
+    ctx.setFontSize(20);
+    drawWrappedText(ctx, input.selfIntroductionText || '暂无自我介绍', 58, 274, 384, 30, 2);
+    ctx.setFillStyle('#9ca3af');
+    ctx.setFontSize(18);
+    ctx.fillText('讲了么 · 腾讯会议，会开会', 58, 338);
+    ctx.draw(false, () => {
+      wx.canvasToTempFilePath({
+        canvasId: SHARE_CANVAS_ID,
+        width: SHARE_IMAGE_WIDTH,
+        height: SHARE_IMAGE_HEIGHT,
+        destWidth: SHARE_IMAGE_WIDTH * 2,
+        destHeight: SHARE_IMAGE_HEIGHT * 2,
+        success(result) {
+          resolve(result.tempFilePath);
+        },
+        fail: reject,
+      }, page);
+    });
+  });
+}
+
+function drawAvatar(ctx, avatarPath, avatarText) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(90, 116, 44, 0, Math.PI * 2);
+  ctx.clip();
+  if (avatarPath) {
+    ctx.drawImage(avatarPath, 46, 72, 88, 88);
+  } else {
+    ctx.setFillStyle('#eef5ff');
+    ctx.fillRect(46, 72, 88, 88);
+    ctx.setFillStyle('#0071fe');
+    ctx.setFontSize(34);
+    ctx.fillText(String(avatarText || '讲').slice(0, 1), 74, 128);
+  }
+  ctx.restore();
+}
+
+function drawRoundRect(ctx, x, y, width, height, radius, fillStyle) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.arcTo(x + width, y, x + width, y + height, radius);
+  ctx.arcTo(x + width, y + height, x, y + height, radius);
+  ctx.arcTo(x, y + height, x, y, radius);
+  ctx.arcTo(x, y, x + width, y, radius);
+  ctx.closePath();
+  ctx.setFillStyle(fillStyle);
+  ctx.fill();
+}
+
+function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
+  const source = String(text || '').replace(/\s+/g, ' ').trim();
+  let line = '';
+  let lineCount = 0;
+  for (let index = 0; index < source.length; index += 1) {
+    const next = line + source[index];
+    if (ctx.measureText(next).width > maxWidth && line) {
+      lineCount += 1;
+      ctx.fillText(lineCount >= maxLines ? `${ellipsis(line, 18)}...` : line, x, y);
+      if (lineCount >= maxLines) return;
+      line = source[index];
+      y += lineHeight;
+    } else {
+      line = next;
+    }
+  }
+  if (line) ctx.fillText(line, x, y);
+}
+
+function firstCredentialText(credentials) {
+  const item = Array.isArray(credentials) && credentials.length ? credentials[0] : null;
+  return item ? String(item.title || item.organizationName || '').trim() : '';
+}
+
+function ellipsis(text, maxLength) {
+  const value = String(text || '');
+  return value.length > maxLength ? `${value.slice(0, maxLength)}...` : value;
 }

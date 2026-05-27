@@ -64,7 +64,7 @@ Page({
     const hours = normalizeHours(this.data.hours);
     this.setData({ paying: true });
     try {
-      const order = await service.createWechatMiniProgramOrder('meeting_hour_pass', { hours });
+      const order = await service.createWechatMiniProgramOrder('meeting_hour_pass', { hours }, { paymentChannel: 'wechat_mini_program' });
       if (!order || (!order.paymentParams && !order.virtualPaymentParams)) {
         throw new Error('支付参数异常，请稍后重试');
       }

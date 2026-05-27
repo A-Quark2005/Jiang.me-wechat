@@ -52,3 +52,4 @@
     </view>
   </block>
 </view>
+<canvas canvas-id="publicResumeShareCanvas" class="share-canvas" style="width: 500px; height: 400px;"></canvas>

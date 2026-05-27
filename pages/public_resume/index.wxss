@@ -136,3 +136,11 @@
   justify-content: center;
   box-sizing: border-box;
 }
+
+.share-canvas {
+  position: fixed;
+  left: -10000px;
+  top: -10000px;
+  opacity: 0;
+  pointer-events: none;
+}
