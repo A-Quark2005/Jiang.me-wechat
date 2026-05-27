@@ -15,6 +15,7 @@ Page({
     form: {
       selfIntroduction: '',
       visible: true,
+      consultingFee: '250',
     },
   },
 
@@ -54,6 +55,7 @@ Page({
         form: {
           selfIntroduction: resume.selfIntroduction || '',
           visible: resume.visible !== false,
+          consultingFee: centsToYuanText(resume.consultingFeeCentsPerHour),
         },
       });
     } catch (error) {
@@ -85,6 +87,11 @@ Page({
     this.setData({ 'form.visible': event.detail.value });
   },
 
+  updateConsultingFee(event) {
+    const raw = String(event.detail.value || '').replace(/[^\d.]/g, '');
+    this.setData({ 'form.consultingFee': raw });
+  },
+
   /**
    * Persist the edited self introduction and resume visibility settings.
    *
@@ -97,6 +104,7 @@ Page({
       const resume = await profileService.updateSelfIntroduction({
         selfIntroduction: form.selfIntroduction,
         visible: form.visible,
+        consultingFeeCentsPerHour: yuanToCents(form.consultingFee),
       });
       dashboardCache.patchResume(() => resume);
       wx.showToast({ title: '已保存', icon: 'success' });
@@ -125,3 +133,14 @@ Page({
     });
   },
 });
+
+function centsToYuanText(value) {
+  const cents = Number(value || 25000);
+  return (cents / 100).toFixed(2).replace(/\.00$/, '');
+}
+
+function yuanToCents(value) {
+  const amount = Number(value || 250);
+  if (!Number.isFinite(amount)) return 25000;
+  return Math.round(Math.min(Math.max(amount, 1), 100000) * 100);
+}

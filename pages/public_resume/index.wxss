@@ -49,6 +49,21 @@
   margin-top: 16rpx;
 }
 
+.public-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+}
+
+.consulting-fee-badge {
+  flex-shrink: 0;
+  color: #6b7280;
+  font-size: 24rpx;
+  font-weight: 400;
+  line-height: 32rpx;
+}
+
 .public-text,
 .public-empty {
   margin-top: 16rpx;
@@ -103,4 +118,21 @@
 
 .public-engagement-summary {
   color: #6b7280;
+}
+
+.contact-action-bar {
+  margin: 32rpx 0 0;
+  box-sizing: border-box;
+}
+
+.contact-action-button {
+  display: flex;
+  width: 100% !important;
+  max-width: none;
+  height: 92rpx;
+  margin-left: 0;
+  margin-right: 0;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }

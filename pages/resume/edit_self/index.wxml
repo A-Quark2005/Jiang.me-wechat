@@ -13,6 +13,18 @@
       </view>
       <switch checked="{{form.visible}}" bindchange="updateVisible" />
     </view>
+    <view class="field consult-fee-field">
+      <view class="consult-fee-row">
+        <view class="field-label">咨询费</view>
+        <view class="consult-fee-control">
+          <input class="input consult-fee-input" type="digit" value="{{form.consultingFee}}" bindinput="updateConsultingFee" placeholder="250" />
+          <view class="consult-fee-unit">元/小时</view>
+        </view>
+      </view>
+      <view class="row-meta consult-fee-desc">1. 开启公开展示后，讲了么将提供简历托管与流量曝光服务，并按实际成交收取服务费。</view>
+      <view class="row-meta consult-fee-desc">2. 为减少无效打扰，他人需先缴纳 2 小时咨询定金后才能查看你的手机号；该定金将自动抵扣服务费，你本人无需另行缴费。</view>
+      <view class="row-meta consult-fee-desc">3. 缴费后，对方有权要求你提供 2 小时试讲服务；第 3 小时起可继续按咨询费付费。</view>
+    </view>
     <view wx:if="{{errorMessage}}" class="error-box">{{errorMessage}}</view>
   </view>
 

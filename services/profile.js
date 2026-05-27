@@ -110,6 +110,31 @@ function getPublicResume(userId, options) {
   });
 }
 
+function getContactDepositAccess(userId, options) {
+  const requestOptions = options || {};
+  return request({
+    path: `/api/me/contact-deposits/access/${encodeURIComponent(userId)}`,
+    cacheKey: `contact_deposit_access_${userId}`,
+    maxAgeMs: 10 * 1000,
+    forceRefresh: Boolean(requestOptions.forceRefresh),
+  });
+}
+
+function createContactDepositOrder(userId) {
+  return request({
+    path: '/api/me/contact-deposits/orders',
+    method: 'POST',
+    data: { targetUserId: userId },
+  });
+}
+
+function syncContactDepositStatus(id) {
+  return request({
+    path: `/api/me/contact-deposits/${encodeURIComponent(id)}/sync-status`,
+    method: 'POST',
+  });
+}
+
 function sendCertificationEmailCode(payload) {
   return request({
     path: '/api/me/certification/email-code',
@@ -209,6 +234,7 @@ module.exports = {
   getCredentials,
   getCertificationOrganizations,
   getCertificationOrganizationMembers,
+  getContactDepositAccess,
   getEngagements,
   getEngagementInvite,
   getPublicResume,
@@ -218,9 +244,11 @@ module.exports = {
   requestEngagementDelete,
   requestEngagementUpdate,
   sendCertificationEmailCode,
+  createContactDepositOrder,
   updateEngagementVisibility,
   updateResume,
   verifyCertificationEmail,
   uploadAvatar,
   updateSelfIntroduction,
+  syncContactDepositStatus,
 };

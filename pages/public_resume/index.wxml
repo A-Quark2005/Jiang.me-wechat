@@ -18,9 +18,11 @@
         <view class="public-tier">{{resume.accountTierText}}</view>
       </view>
     </view>
-
     <view class="surface-card public-section">
-      <view class="section-title">自我介绍</view>
+      <view class="public-section-head">
+        <view class="section-title">自我介绍</view>
+        <view class="consulting-fee-badge">{{consultingFeeText}}</view>
+      </view>
       <view class="public-text">{{selfIntroductionText}}</view>
     </view>
 
@@ -44,6 +46,9 @@
         <view class="public-engagement-meta">{{item.counterpartName}}</view>
         <view wx:if="{{item.summary}}" class="public-engagement-summary">{{item.summary}}</view>
       </view>
+    </view>
+    <view class="contact-action-bar">
+      <button class="primary-button contact-action-button" loading="{{contactActionLoading}}" disabled="{{contactActionLoading}}" bindtap="handleContactDeposit">{{contactButtonText}}</button>
     </view>
   </block>
 </view>
