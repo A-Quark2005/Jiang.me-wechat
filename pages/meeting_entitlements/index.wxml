@@ -43,7 +43,7 @@
     <view class="entitlements-history-row">
       <view class="entitlements-history-button tappable" bindtap="openHistory">
         <text>历史会议</text>
-        <text class="entitlements-history-arrow">›</text>
+        <image class="entitlements-history-arrow" src="/assets/ui/arrow-light.svg" mode="aspectFit"></image>
       </view>
     </view>
 
