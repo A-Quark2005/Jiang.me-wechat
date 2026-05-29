@@ -338,6 +338,10 @@ Page({
     wx.navigateTo({ url: '/pages/orders/index' });
   },
 
+  openHistory() {
+    wx.navigateTo({ url: '/pages/meeting_history/index' });
+  },
+
   openProducts() {
     wx.navigateTo({ url: '/pages/meeting_products/index' });
   },

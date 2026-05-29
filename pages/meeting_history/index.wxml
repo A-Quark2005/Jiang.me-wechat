@@ -1,0 +1,42 @@
+<view class="page page-plain meeting-history-page">
+  <view class="history-search-bar">
+    <view class="history-search">
+      <view class="history-search-icon">⌕</view>
+      <input
+        class="history-search-input"
+        value="{{keyword}}"
+        placeholder="会议名称、会议号"
+        confirm-type="search"
+        bindinput="onKeywordInput"
+        bindconfirm="search"
+      />
+    </view>
+  </view>
+
+  <view class="history-content">
+    <view wx:if="{{loading && items.length === 0}}" class="history-state">正在读取历史会议</view>
+    <view wx:elif="{{errorMessage && items.length === 0}}" class="history-state">
+      <view class="error-box">{{errorMessage}}</view>
+      <button class="primary-button action-button" bindtap="reload">重新加载</button>
+    </view>
+    <view wx:elif="{{groups.length === 0}}" class="history-empty">暂无历史会议</view>
+
+    <block wx:for="{{groups}}" wx:key="dateKey">
+      <view class="history-date-row">
+        <view class="history-date-main">{{item.dateText}}</view>
+        <view class="history-date-year">{{item.yearText}}</view>
+      </view>
+      <view wx:for="{{item.items}}" wx:for-item="meeting" wx:key="id" class="history-card tappable">
+        <view class="history-code">{{meeting.meetingCodeText}}</view>
+        <view class="history-title-row">
+          <view class="history-title">{{meeting.subjectText}}</view>
+          <view class="history-arrow">›</view>
+        </view>
+        <view class="history-meta">时间：{{meeting.timeText}}</view>
+      </view>
+    </block>
+
+    <view wx:if="{{loading && items.length > 0}}" class="history-more">正在加载</view>
+    <view wx:elif="{{!hasMore && items.length > 0}}" class="history-more">已显示全部</view>
+  </view>
+</view>

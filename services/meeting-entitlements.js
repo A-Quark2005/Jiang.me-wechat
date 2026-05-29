@@ -58,6 +58,20 @@ function createTencentMeeting(input) {
   });
 }
 
+function getTencentMeetingHistory(options) {
+  const requestOptions = options || {};
+  const params = [];
+  if (requestOptions.page) params.push(`page=${encodeURIComponent(String(requestOptions.page))}`);
+  if (requestOptions.pageSize) params.push(`pageSize=${encodeURIComponent(String(requestOptions.pageSize))}`);
+  if (requestOptions.keyword) params.push(`keyword=${encodeURIComponent(String(requestOptions.keyword))}`);
+  return request({
+    path: `/api/tencent-meeting/history-meetings${params.length ? `?${params.join('&')}` : ''}`,
+    cacheKey: requestOptions.keyword ? '' : `meeting_history_${requestOptions.page || 1}_${requestOptions.pageSize || 20}`,
+    maxAgeMs: 30 * 1000,
+    forceRefresh: Boolean(requestOptions.forceRefresh),
+  });
+}
+
 function isWechatSessionKeyError(error) {
   const message = error && error.message ? String(error.message) : '';
   return message.includes('缺少微信会话信息') || message.includes('session_key') || message.includes('重新登录');
@@ -203,6 +217,7 @@ module.exports = {
   getOrder,
   getOrders,
   getReferralDashboard,
+  getTencentMeetingHistory,
   confirmPaidOrder,
   getTencentMeetingActivation,
   getProducts,

@@ -40,6 +40,13 @@
       <view class="entitlements-empty-text">{{emptyStateText}}</view>
     </view>
 
+    <view class="entitlements-history-row">
+      <view class="entitlements-history-button tappable" bindtap="openHistory">
+        <text>历史会议</text>
+        <text class="entitlements-history-arrow">›</text>
+      </view>
+    </view>
+
     <view class="entitlements-recommend entitlements-recommend-fixed">
       <view class="entitlements-divider-row">
         <view class="entitlements-divider"></view>

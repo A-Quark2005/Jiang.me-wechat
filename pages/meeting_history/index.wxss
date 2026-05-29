@@ -1,0 +1,137 @@
+.meeting-history-page {
+  min-height: 100vh;
+  padding: 0 0 40rpx;
+  background: #f6f6f6;
+}
+
+.history-search-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 20;
+  padding: 24rpx 32rpx;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.history-search {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  height: 72rpx;
+  margin: 0;
+  padding: 0 18rpx;
+  border: 1rpx solid #d8d8d8;
+  border-radius: 8rpx;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.history-content {
+  padding-top: 120rpx;
+}
+
+.history-search-icon {
+  width: 40rpx;
+  font-size: 44rpx;
+  line-height: 1;
+  color: #4b5563;
+}
+
+.history-search-input {
+  flex: 1;
+  min-width: 0;
+  height: 70rpx;
+  font-size: 28rpx;
+  color: #111111;
+}
+
+.history-date-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 88rpx;
+  padding: 0 48rpx;
+  background: transparent;
+  box-sizing: border-box;
+}
+
+.history-date-main {
+  font-size: 32rpx;
+  line-height: 1.4;
+  color: #111111;
+}
+
+.history-date-year {
+  font-size: 28rpx;
+  line-height: 1.4;
+  color: #6b7280;
+}
+
+.history-card {
+  padding: 28rpx 48rpx 30rpx;
+  background: #ffffff;
+  border-bottom: 1rpx solid #eeeeee;
+}
+
+.history-code {
+  margin-bottom: 18rpx;
+  font-size: 28rpx;
+  line-height: 1.3;
+  color: #9ca3af;
+}
+
+.history-title-row {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.history-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 34rpx;
+  line-height: 1.35;
+  color: #111111;
+}
+
+.history-arrow {
+  flex-shrink: 0;
+  font-size: 56rpx;
+  line-height: 1;
+  color: #4b5563;
+}
+
+.history-meta {
+  margin-top: 18rpx;
+  font-size: 26rpx;
+  line-height: 1.45;
+  color: #6b7280;
+}
+
+.history-state,
+.history-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 520rpx;
+  padding: 0 48rpx;
+  font-size: 28rpx;
+  line-height: 1.5;
+  color: #9ca3af;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.history-more {
+  padding: 28rpx 0 0;
+  font-size: 24rpx;
+  line-height: 1.4;
+  text-align: center;
+  color: #9ca3af;
+}
