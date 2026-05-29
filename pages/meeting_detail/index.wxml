@@ -1,0 +1,92 @@
+<view class="meeting-detail-page">
+  <view class="detail-nav" style="height: {{navHeight}}px; padding-top: {{navTop}}px;">
+    <view class="detail-nav-back" bindtap="goBack">‹</view>
+    <view class="detail-nav-title"></view>
+    <view class="detail-nav-spacer" style="width: {{capsuleRight}}px;"></view>
+  </view>
+
+  <view wx:if="{{loading && !detail}}" class="detail-state">正在读取会议详情</view>
+  <view wx:elif="{{errorMessage && !detail}}" class="detail-state">
+    <view class="detail-error">{{errorMessage}}</view>
+    <button class="detail-reload" bindtap="reload">重新加载</button>
+  </view>
+
+  <block wx:elif="{{detail}}">
+    <view class="detail-hero">
+      <view class="detail-title">{{detail.meeting.titleText}}</view>
+      <view class="detail-time">{{detail.meeting.timeText}} (GMT+08:00) 中国标准时间</view>
+      <view class="detail-code-row" bindtap="copyMeetingCode">
+        <text class="detail-code-label">会议号：</text>
+        <text class="detail-code">{{detail.meeting.codeText}}</text>
+        <text class="detail-copy">复制</text>
+      </view>
+
+      <view wx:if="{{detail.meeting.creator}}" class="detail-chip-row">
+        <view class="detail-chip-label">发起人</view>
+        <view class="detail-chip-text">{{detail.meeting.creator}}</view>
+      </view>
+
+      <view class="detail-chip-row">
+        <view class="detail-chip-label">已参会</view>
+        <view wx:if="{{detail.participants.available}}" class="detail-chip-text">{{detail.participants.countText}}</view>
+        <view wx:else class="detail-chip-muted">{{detail.participants.reason}}</view>
+      </view>
+    </view>
+
+    <view wx:if="{{detail.participants.available}}" class="stats-panel">
+      <view class="stat-item">
+        <view class="stat-icon">↺</view>
+        <view class="stat-value">{{detail.participants.latestJoinText}}</view>
+        <view class="stat-label">最近入会</view>
+      </view>
+      <view class="stat-separator"></view>
+      <view class="stat-item">
+        <view class="stat-icon">◷</view>
+        <view class="stat-value">{{detail.participants.durationText}}</view>
+        <view class="stat-label">参会时长</view>
+      </view>
+    </view>
+
+    <view class="section-block">
+      <view class="section-title">录制</view>
+      <view wx:if="{{recordsLoading}}" class="section-empty">正在读取录制</view>
+      <view wx:elif="{{detail.records.hasRecords}}">
+        <view
+          wx:for="{{detail.records.recordFiles}}"
+          wx:key="key"
+          class="record-row {{item.playable ? '' : 'record-row-disabled'}}"
+          data-url="{{item.playableUrl}}"
+          bindtap="openRecord"
+        >
+          <view class="record-cover">
+            <view class="record-play">▶</view>
+            <view class="record-duration">{{item.durationText}}</view>
+          </view>
+          <view class="record-main">
+            <view class="record-title">{{detail.meeting.titleText}}</view>
+            <view class="record-meta">{{item.timeText}}{{item.sizeText ? ' · ' + item.sizeText : ''}}</view>
+            <view wx:if="{{item.summaryCount}}" class="record-meta">含会议纪要 {{item.summaryCount}} 份</view>
+          </view>
+          <view wx:if="{{item.playable}}" class="record-action">回看</view>
+          <view wx:else class="record-action record-action-muted">不可看</view>
+        </view>
+      </view>
+      <view wx:elif="{{detail.records.reason}}" class="section-empty">{{detail.records.reason}}</view>
+      <view wx:else class="section-empty">暂无录制</view>
+    </view>
+
+    <view class="section-block">
+      <view class="section-title">会议文档</view>
+      <view wx:if="{{docsLoading}}" class="section-empty">正在读取会议文档</view>
+      <view wx:elif="{{detail.docs.available && detail.docs.hasDocs}}">
+        <view wx:for="{{detail.docs.items}}" wx:key="key" class="doc-row">
+          <view class="doc-title">{{item.titleText}}</view>
+        </view>
+      </view>
+      <view wx:elif="{{!detail.docs.available}}" class="section-empty">{{detail.docs.reason}}</view>
+      <view wx:else class="section-empty">暂无会议文档</view>
+    </view>
+
+    <view class="meeting-ended">{{detail.meeting.statusText}}</view>
+  </block>
+</view>

@@ -64,7 +64,7 @@ Page({
   data: {
     loading: false,
     errorMessage: '',
-    keyword: '',
+    meetingCode: '',
     page: 1,
     hasMore: true,
     items: [],
@@ -88,8 +88,8 @@ Page({
     }
   },
 
-  onKeywordInput(event) {
-    this.setData({ keyword: event.detail.value || '' });
+  onMeetingCodeInput(event) {
+    this.setData({ meetingCode: event.detail.value || '' });
   },
 
   search() {
@@ -98,6 +98,18 @@ Page({
 
   reload() {
     this.loadFirstPage(true);
+  },
+
+  openMeetingDetail(event) {
+    const meetingId = event.currentTarget.dataset.meetingId || '';
+    if (!meetingId) {
+      return;
+    }
+    const meeting = this.data.items.find((item) => item.meetingId === meetingId) || {};
+    wx.setStorageSync('meeting_detail_seed', meeting);
+    wx.navigateTo({
+      url: `/pages/meeting_detail/index?meetingId=${encodeURIComponent(meetingId)}&meetingCode=${encodeURIComponent(meeting.meetingCode || '')}`,
+    });
   },
 
   async loadFirstPage(forceRefresh) {
@@ -115,7 +127,7 @@ Page({
       const result = await service.getTencentMeetingHistory({
         page,
         pageSize: PAGE_SIZE,
-        keyword: this.data.keyword.trim(),
+        meetingCode: this.data.meetingCode.trim(),
         forceRefresh,
       });
       const nextItems = (result.items || result.meetings || []).map(normalizeMeeting);

@@ -1,4 +1,4 @@
-const { request } = require('./api-client');
+const { readCachedPayload, request } = require('./api-client');
 const auth = require('./auth');
 const sessionStore = require('./session-store');
 
@@ -61,15 +61,39 @@ function createTencentMeeting(input) {
 function getTencentMeetingHistory(options) {
   const requestOptions = options || {};
   const params = [];
+  const meetingCode = String(requestOptions.meetingCode || '').replace(/\D/g, '');
   if (requestOptions.page) params.push(`page=${encodeURIComponent(String(requestOptions.page))}`);
   if (requestOptions.pageSize) params.push(`pageSize=${encodeURIComponent(String(requestOptions.pageSize))}`);
-  if (requestOptions.keyword) params.push(`keyword=${encodeURIComponent(String(requestOptions.keyword))}`);
+  if (meetingCode) params.push(`meetingCode=${encodeURIComponent(meetingCode)}`);
   return request({
     path: `/api/tencent-meeting/history-meetings${params.length ? `?${params.join('&')}` : ''}`,
-    cacheKey: requestOptions.keyword ? '' : `meeting_history_${requestOptions.page || 1}_${requestOptions.pageSize || 20}`,
+    cacheKey: meetingCode ? '' : `meeting_history_${requestOptions.page || 1}_${requestOptions.pageSize || 20}`,
     maxAgeMs: 30 * 1000,
     forceRefresh: Boolean(requestOptions.forceRefresh),
   });
+}
+
+function getTencentMeetingHistorySection(meetingId, section, options) {
+  const requestOptions = options || {};
+  const params = [];
+  const sectionPath = section ? `/${encodeURIComponent(String(section))}` : '';
+  const sectionKey = section || 'detail';
+  if (requestOptions.meetingCode) params.push(`meetingCode=${encodeURIComponent(String(requestOptions.meetingCode))}`);
+  return request({
+    path: `/api/tencent-meeting/history-meetings/${encodeURIComponent(String(meetingId || ''))}${sectionPath}${params.length ? `?${params.join('&')}` : ''}`,
+    cacheKey: `meeting_history_${sectionKey}_${meetingId || ''}_${requestOptions.meetingCode || ''}`,
+    maxAgeMs: 30 * 1000,
+    forceRefresh: Boolean(requestOptions.forceRefresh),
+  });
+}
+
+function meetingHistorySectionCacheKey(meetingId, section, options) {
+  const requestOptions = options || {};
+  return `meeting_history_${section || 'detail'}_${meetingId || ''}_${requestOptions.meetingCode || ''}`;
+}
+
+function getCachedTencentMeetingHistorySection(meetingId, section, options) {
+  return readCachedPayload(meetingHistorySectionCacheKey(meetingId, section, options), 30 * 1000);
 }
 
 function isWechatSessionKeyError(error) {
@@ -217,6 +241,8 @@ module.exports = {
   getOrder,
   getOrders,
   getReferralDashboard,
+  getCachedTencentMeetingHistorySection,
+  getTencentMeetingHistorySection,
   getTencentMeetingHistory,
   confirmPaidOrder,
   getTencentMeetingActivation,

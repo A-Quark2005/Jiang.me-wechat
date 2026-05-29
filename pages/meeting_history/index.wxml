@@ -4,10 +4,10 @@
       <view class="history-search-icon">⌕</view>
       <input
         class="history-search-input"
-        value="{{keyword}}"
-        placeholder="会议名称、会议号"
+        value="{{meetingCode}}"
+        placeholder="会议号"
         confirm-type="search"
-        bindinput="onKeywordInput"
+        bindinput="onMeetingCodeInput"
         bindconfirm="search"
       />
     </view>
@@ -26,7 +26,14 @@
         <view class="history-date-main">{{item.dateText}}</view>
         <view class="history-date-year">{{item.yearText}}</view>
       </view>
-      <view wx:for="{{item.items}}" wx:for-item="meeting" wx:key="id" class="history-card tappable">
+      <view
+        wx:for="{{item.items}}"
+        wx:for-item="meeting"
+        wx:key="id"
+        class="history-card tappable"
+        data-meeting-id="{{meeting.meetingId}}"
+        bindtap="openMeetingDetail"
+      >
         <view class="history-code">{{meeting.meetingCodeText}}</view>
         <view class="history-title-row">
           <view class="history-title">{{meeting.subjectText}}</view>

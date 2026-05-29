@@ -233,6 +233,7 @@ module.exports = {
   backendBaseUrl,
   invalidateCaches,
   primeCache,
+  readCachedPayload,
   resetCacheState,
   request,
 };
