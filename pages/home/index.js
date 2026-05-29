@@ -128,7 +128,7 @@ function resolveEntitlementSummary(entitlements, rawActivation) {
     };
   }
   const list = safeArray(entitlements && (entitlements.items || entitlements.entitlements || entitlements));
-  const active = list.find((item) => String(item.status || '').toLowerCase() === 'active') || list[0];
+  const active = list.find((item) => String(item.status || '').toLowerCase() === 'active');
   if (!active) {
     return {
       title: '当前会议权益',

@@ -98,6 +98,15 @@ function buildActivationViewState(rawActivation) {
   };
 }
 
+function showActivationSmsNotice() {
+  wx.showModal({
+    title: '请留意腾讯会议短信',
+    content: '激活短信由“腾讯”发送。如果暂时没有看到，请检查短信拦截、垃圾短信或骚扰短信列表。',
+    showCancel: false,
+    confirmText: '知道了',
+  });
+}
+
 Page({
   data: {
     loading: true,
@@ -192,6 +201,7 @@ Page({
         bindingPhone: false,
         successMessage: result.inviteMessage || '启用通知已发送',
       });
+      showActivationSmsNotice();
       refreshState.mark(['home', 'entitlements']);
       await this.loadActivation(true);
     } catch (error) {
@@ -211,6 +221,7 @@ Page({
         sending: false,
         successMessage: result.inviteMessage || '启用通知已发送',
       });
+      showActivationSmsNotice();
       await this.loadActivation(true);
     } catch (error) {
       this.setData({

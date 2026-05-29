@@ -124,8 +124,24 @@ function entitlementTypeLabel(entitlement) {
   return '会议权益';
 }
 
+function isAvailableEntitlement(entitlement) {
+  const status = String(entitlement && entitlement.status ? entitlement.status : '').toLowerCase();
+  if (status !== 'active') {
+    return false;
+  }
+  const expiresAt = entitlement.expiresAt || entitlement.validUntil || '';
+  if (!expiresAt) {
+    return true;
+  }
+  const timestamp = Date.parse(expiresAt);
+  if (Number.isNaN(timestamp)) {
+    return true;
+  }
+  return timestamp > Date.now();
+}
+
 function buildEntitlementCards(entitlements) {
-  return entitlements.map((entitlement) => {
+  return entitlements.filter(isAvailableEntitlement).map((entitlement) => {
     const expiresAt = entitlement.expiresAt || entitlement.validUntil || '';
     const status = String(entitlement.status || '').toLowerCase();
     const active = status === 'active';
@@ -176,7 +192,7 @@ Page({
       return;
     }
     if (!this.data.hasLoaded || refreshState.consume(PAGE_KEY) || refreshState.isExpired(PAGE_KEY, CACHE_MAX_AGE_MS)) {
-      this.loadPage(true);
+      this.loadPage(false);
     }
   },
 

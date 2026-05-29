@@ -1,7 +1,7 @@
 <view class="page page-plain orders-page">
   <view class="tab-strip">
-    <view class="tab-chip tappable {{activeAllTabClass}}" data-tab="all" bindtap="switchTab">全部订单</view>
-    <view class="tab-chip tappable {{activeExpiredTabClass}}" data-tab="expired" bindtap="switchTab">已失效权益</view>
+    <view class="tab-chip tappable {{activeMeetingTabClass}}" data-tab="meeting" bindtap="switchTab">腾讯会议</view>
+    <view class="tab-chip tappable {{activeContactDepositTabClass}}" data-tab="contact_deposit" bindtap="switchTab">咨询定金</view>
   </view>
 
   <view wx:if="{{loading}}" class="surface-card">正在读取订单</view>

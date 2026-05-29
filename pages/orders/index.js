@@ -15,6 +15,37 @@ function statusTextOf(item) {
   return String(item.status || item.orderStatus || '').toLowerCase();
 }
 
+function entitlementStatusOf(item) {
+  return String(
+    item.entitlementStatus ||
+      (item.entitlement && item.entitlement.status) ||
+      '',
+  ).toLowerCase();
+}
+
+function entitlementExpiresAtOf(item) {
+  return (
+    item.entitlementExpiresAt ||
+    item.expiresAt ||
+    item.validUntil ||
+    (item.entitlement && (item.entitlement.expiresAt || item.entitlement.validUntil)) ||
+    ''
+  );
+}
+
+function isExpiredEntitlement(item) {
+  const entitlementStatus = entitlementStatusOf(item);
+  if (['expired', 'used', 'cancelled', 'canceled'].includes(entitlementStatus)) {
+    return true;
+  }
+  const expiresAt = entitlementExpiresAtOf(item);
+  if (!expiresAt) {
+    return false;
+  }
+  const timestamp = Date.parse(expiresAt);
+  return Number.isFinite(timestamp) && timestamp < Date.now();
+}
+
 /**
  * Normalize price fields into fixed unit/value fragments for card rendering.
  *
@@ -37,8 +68,7 @@ function buildAmountFragments(item) {
 }
 
 function normalizeOrder(item) {
-  const statusText = statusTextOf(item);
-  const expired = ['expired', 'invalid', 'closed', 'cancelled'].includes(statusText);
+  const expired = isExpiredEntitlement(item);
   const friendlyTitle =
     (item.extraData && item.extraData.product && item.extraData.product.name) ||
     (item.extraData && item.extraData.product && item.extraData.product.title) ||
@@ -54,7 +84,9 @@ function normalizeOrder(item) {
   return {
     ...item,
     ...buildAmountFragments(item),
-    statusText,
+    statusText: statusTextOf(item),
+    entitlementStatusText: entitlementStatusOf(item),
+    entitlementExpired: expired,
     isExpired: expired,
     iconClass: expired ? 'ticket-icon-expired' : '',
     statusClass: expired ? 'order-status-expired' : '',
@@ -88,9 +120,9 @@ Page({
     loading: true,
     hasLoaded: false,
     errorMessage: '',
-    activeTab: 'all',
-    activeAllTabClass: 'tab-chip-active',
-    activeExpiredTabClass: 'muted-chip',
+    activeTab: 'meeting',
+    activeMeetingTabClass: 'tab-chip-active',
+    activeContactDepositTabClass: 'muted-chip',
     orders: [],
     visibleOrders: [],
   },
@@ -129,8 +161,8 @@ Page({
         this.applyFilter();
         saveCachedOrdersPage({
           activeTab: this.data.activeTab,
-          activeAllTabClass: this.data.activeAllTabClass,
-          activeExpiredTabClass: this.data.activeExpiredTabClass,
+          activeMeetingTabClass: this.data.activeMeetingTabClass,
+          activeContactDepositTabClass: this.data.activeContactDepositTabClass,
           orders: this.data.orders,
           visibleOrders: this.data.visibleOrders,
         });
@@ -153,19 +185,22 @@ Page({
   },
 
   switchTab(event) {
-    const activeTab = event.currentTarget.dataset.tab || 'all';
+    const activeTab = event.currentTarget.dataset.tab || 'meeting';
     this.setData({
       activeTab,
-      activeAllTabClass: activeTab === 'all' ? 'tab-chip-active' : '',
-      activeExpiredTabClass: activeTab === 'expired' ? 'tab-chip-active muted-chip' : 'muted-chip',
+      activeMeetingTabClass: activeTab === 'meeting' ? 'tab-chip-active' : 'muted-chip',
+      activeContactDepositTabClass: activeTab === 'contact_deposit' ? 'tab-chip-active muted-chip' : 'muted-chip',
     }, () => this.applyFilter());
   },
 
   applyFilter() {
     const tab = this.data.activeTab;
     const visibleOrders = this.data.orders.filter((item) => {
-      if (tab === 'all') return true;
-      return ['expired', 'invalid', 'closed', 'cancelled'].includes(statusTextOf(item));
+      const sourceType = String(item.sourceType || '').toLowerCase();
+      if (tab === 'contact_deposit') {
+        return sourceType === 'contact_deposit';
+      }
+      return sourceType !== 'contact_deposit';
     });
     this.setData({ visibleOrders });
   },

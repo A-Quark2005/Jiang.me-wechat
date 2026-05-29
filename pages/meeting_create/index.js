@@ -102,6 +102,22 @@ function normalizeList(raw, keys) {
   return [];
 }
 
+function isAvailableEntitlement(entitlement) {
+  const status = String(entitlement && entitlement.status ? entitlement.status : '').toLowerCase();
+  if (status !== 'active') {
+    return false;
+  }
+  const expiresAt = entitlement.expiresAt || entitlement.validUntil || '';
+  if (!expiresAt) {
+    return true;
+  }
+  const timestamp = Date.parse(expiresAt);
+  if (Number.isNaN(timestamp)) {
+    return true;
+  }
+  return timestamp > Date.now();
+}
+
 /**
  * Normalize display name and phone fragments for the meeting create hero.
  *
@@ -317,7 +333,7 @@ Page({
     try {
       const entitlementsRaw = await service.getEntitlements();
       const entitlements = normalizeList(entitlementsRaw, ['items', 'entitlements']);
-      const active = entitlements.find((item) => String(item.status || '').toLowerCase() === 'active') || entitlements[0];
+      const active = entitlements.find(isAvailableEntitlement);
       if (!active) {
         this.setData({
           entitlementSummaryTitle: '当前会议权益',

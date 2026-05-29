@@ -75,7 +75,7 @@
         <image class="entitlements-recommend-icon-image" src="/assets/ui/card-ticket-icon.svg" mode="aspectFit"></image>
         <view class="row-main">
           <view class="entitlements-recommend-title">{{recommendPlanTitle}}</view>
-          <view class="entitlements-recommend-meta">购买后可使用高级账号功能</view>
+          <view class="entitlements-recommend-meta">不限时会议、AI能力、无限云空间</view>
         </view>
         <view class="entitlements-recommend-action">
           <text>去选购</text>
