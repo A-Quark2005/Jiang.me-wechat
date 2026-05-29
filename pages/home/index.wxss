@@ -1,13 +1,14 @@
 .home-page {
   min-height: 100vh;
-  padding: 0 0 24rpx;
+  padding: 24rpx 0 24rpx;
   background: #0071fe;
+  box-sizing: border-box;
 }
 
 .home-hero {
   position: relative;
   height: 654rpx;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .home-hero-art {

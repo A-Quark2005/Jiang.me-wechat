@@ -95,7 +95,7 @@
           </view>
         </view>
 
-        <view wx:if="{{errorMessage}}" class="error-box">{{errorMessage}}</view>
+        <view wx:if="{{submitErrorMessage}}" class="error-box">{{submitErrorMessage}}</view>
 
         <button
           class="primary-button home-book-button"

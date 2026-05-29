@@ -307,6 +307,7 @@ Page({
   data: {
     loading: true,
     errorMessage: '',
+    submitErrorMessage: '',
     session: null,
     user: null,
     profile: null,
@@ -362,6 +363,7 @@ Page({
       this.setData({
         loading: false,
         errorMessage: '',
+        submitErrorMessage: '',
         ...cached,
       });
     }
@@ -386,6 +388,7 @@ Page({
     this.setData({
       loading: false,
       errorMessage: '',
+      submitErrorMessage: '',
       session: null,
       user: null,
       profile: null,
@@ -415,9 +418,9 @@ Page({
       return;
     }
     if (!this.data.session) {
-      this.setData({ loading: true, errorMessage: '' });
+      this.setData({ loading: true, errorMessage: '', submitErrorMessage: '' });
     } else {
-      this.setData({ errorMessage: '' });
+      this.setData({ errorMessage: '', submitErrorMessage: '' });
     }
     try {
       const app = getApp();
@@ -671,11 +674,11 @@ Page({
     const start = toTimestamp(this.data.startDate, this.data.startTime);
     const end = toTimestamp(this.data.endDate, this.data.endTime);
     if (end.getTime() <= start.getTime()) {
-      this.setData({ errorMessage: '结束时间需要晚于开始时间' });
+      this.setData({ submitErrorMessage: '结束时间需要晚于开始时间' });
       return;
     }
 
-    this.setData({ submitting: true, errorMessage: '', submitButtonText: '正在预定' });
+    this.setData({ submitting: true, submitErrorMessage: '', submitButtonText: '正在预定' });
     try {
       const ready = await tencentMeetingAccess.ensureReady({ targetUrl: '/pages/home/index' });
       if (!ready) {
@@ -731,7 +734,7 @@ Page({
       this.setData({
         submitting: false,
         submitButtonText: '立即预定',
-        errorMessage: activationPending
+        submitErrorMessage: activationPending
           ? '腾讯会议账号待激活，请查看短信或激活链接后再预定会议。'
           : rawMessage,
       });
