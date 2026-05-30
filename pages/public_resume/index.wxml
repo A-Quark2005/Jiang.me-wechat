@@ -11,11 +11,17 @@
 
   <block wx:else>
     <view class="surface-card public-profile-card">
-      <image wx:if="{{resume.avatarUrl}}" class="public-avatar" src="{{resume.avatarUrl}}" mode="aspectFill"></image>
-      <view wx:else class="public-avatar fallback">{{avatarText}}</view>
-      <view class="row-main">
-        <view class="public-name">{{resume.displayName}}</view>
-        <view class="public-tier">{{resume.accountTierText}}</view>
+      <view class="public-profile-main">
+        <image wx:if="{{resume.avatarUrl}}" class="public-avatar" src="{{resume.avatarUrl}}" mode="aspectFill"></image>
+        <view wx:else class="public-avatar fallback">{{avatarText}}</view>
+        <view class="public-profile-copy">
+          <view class="public-name">{{resume.displayName}}</view>
+          <view class="public-tier">{{resume.accountTierText}}</view>
+        </view>
+      </view>
+      <view class="public-share-button">
+        <image class="public-share-icon" src="/assets/ui/share-outline-black.svg" mode="aspectFit"></image>
+        <button class="public-share-native" open-type="share" aria-label="分享"></button>
       </view>
     </view>
     <view class="surface-card public-section">
