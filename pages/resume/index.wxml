@@ -20,6 +20,9 @@
           <view class="account-name tappable" bindtap="openWechatProfileEditor">{{displayNameText}}</view>
           <view class="account-tier {{accountTierClass}}">{{accountTierText}}</view>
         </view>
+        <view class="account-public-link tappable" bindtap="openOwnPublicResume" aria-label="查看个人资料">
+          <image class="account-public-link-icon" src="/assets/ui/share-outline-black.svg" mode="aspectFit"></image>
+        </view>
       </view>
 
       <view class="surface-card intro-card tappable" bindtap="openEditSelf">

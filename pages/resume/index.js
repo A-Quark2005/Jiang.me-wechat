@@ -200,6 +200,16 @@ Page({
     wx.navigateTo({ url: '/pages/distant_people/index' });
   },
 
+  openOwnPublicResume() {
+    const session = sessionStore.getSession() || {};
+    const userId = session.userId || '';
+    if (!userId) {
+      wx.showToast({ title: '暂时无法读取账号', icon: 'none' });
+      return;
+    }
+    wx.navigateTo({ url: `/pages/public_resume/index?id=${encodeURIComponent(userId)}` });
+  },
+
   openWechatProfileEditor() {
     this.setData({
       showWechatProfileModal: true,

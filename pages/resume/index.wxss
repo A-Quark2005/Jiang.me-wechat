@@ -74,6 +74,22 @@
   color: #7d8799;
 }
 
+.account-public-link {
+  display: flex;
+  width: 72rpx;
+  height: 72rpx;
+  margin-left: auto;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 72rpx;
+}
+
+.account-public-link-icon {
+  display: block;
+  width: 44rpx;
+  height: 44rpx;
+}
+
 .wechat-profile-modal-mask {
   position: fixed;
   inset: 0;
