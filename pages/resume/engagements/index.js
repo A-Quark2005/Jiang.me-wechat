@@ -57,6 +57,18 @@ function formatMonthLabel(item) {
   );
 }
 
+function counterpartNameOf(item) {
+  return item.counterpartName || item.counterpartProfileName || item.counterpartProfileId || item.counterpartUserId || '未知';
+}
+
+function summaryTextOf(item) {
+  if (item.summary) return item.summary;
+  if (Array.isArray(item.detailLines) && item.detailLines.length) {
+    return item.detailLines.join('，');
+  }
+  return item.description || item.detailText || '';
+}
+
 /**
  * Ensure only visible segment tabs can become active.
  *
@@ -109,7 +121,8 @@ Page({
         statusClass: isPending(item) ? 'engagement-status-pending' : 'status-ok',
         titleText: item.title || '服务履历',
         metaPrefixText: sideOf(item) === 'received' ? '被服务方' : '服务方',
-        counterpartNameText: item.providerName || item.providerProfileName || item.providerProfileId || item.receiverName || item.receiverProfileName || item.receiverProfileId || '未知',
+        counterpartNameText: counterpartNameOf(item),
+        summaryText: summaryTextOf(item),
         arrowText: '›',
       }));
       this.setData({ loading: false, hasLoaded: true, allItems }, () => this.applyFilter());

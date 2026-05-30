@@ -63,7 +63,7 @@ function waitingForOtherConfirmation(item) {
  * @returns {string} Counterpart display name.
  */
 function counterpartNameOf(item) {
-  return item.providerName || item.providerProfileName || item.providerProfileId || item.receiverName || item.receiverProfileName || item.receiverProfileId || '未知';
+  return item.counterpartName || item.counterpartProfileName || item.counterpartProfileId || item.counterpartUserId || '未知';
 }
 
 /**
