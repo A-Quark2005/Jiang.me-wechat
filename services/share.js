@@ -1,6 +1,8 @@
 ﻿const DEFAULT_TITLE = '讲了么';
 const DEFAULT_PATH = '/pages/home/index';
 const DEFAULT_IMAGE_URL = '/assets/ui/share-cover.jpg';
+const sessionStore = require('./session-store');
+let copyUrlHandlerInstalled = false;
 
 const PAGE_SHARE_COPY = {
   '/pages/home/index': {
@@ -79,6 +81,10 @@ function normalizePath(path) {
   return value.startsWith('/') ? value : `/${value}`;
 }
 
+function routeOnly(path) {
+  return normalizePath(String(path || '').split('?')[0]);
+}
+
 function currentPagePath() {
   try {
     const page = getCurrentPages().slice(-1)[0];
@@ -108,13 +114,71 @@ function buildCurrentPath() {
   return query ? `${path}?${query}` : path;
 }
 
+function currentUserShareRef() {
+  const record = sessionStore.getSessionRecord() || {};
+  const session = record.session || {};
+  const user = record.user || {};
+  const value = String(user.public_id || user.publicId || user.id || session.publicId || session.userId || '').trim().toLowerCase();
+  return /^u_[0-9a-z]{3,30}$/.test(value) ? value : '';
+}
+
+function setQueryParam(query, key, value) {
+  const normalizedValue = String(value || '').trim();
+  const parts = String(query || '').replace(/^\?/, '').split('&').filter(Boolean);
+  const filtered = parts.filter((part) => {
+    const splitIndex = part.indexOf('=');
+    const currentKey = splitIndex >= 0 ? part.slice(0, splitIndex) : part;
+    return decodeURIComponentSafe(currentKey) !== key;
+  });
+  if (normalizedValue) {
+    filtered.push(`${encodeURIComponent(key)}=${encodeURIComponent(normalizedValue)}`);
+  }
+  return filtered.join('&');
+}
+
+function appendShareRefToPath(path) {
+  const normalizedPath = normalizePath(path);
+  const splitIndex = normalizedPath.indexOf('?');
+  const route = splitIndex >= 0 ? normalizedPath.slice(0, splitIndex) : normalizedPath;
+  const rawQuery = splitIndex >= 0 ? normalizedPath.slice(splitIndex + 1) : '';
+  const query = setQueryParam(rawQuery, 'sr', currentUserShareRef());
+  return query ? `${route}?${query}` : route;
+}
+
+function appendShareRefToQuery(query) {
+  return setQueryParam(query, 'sr', currentUserShareRef());
+}
+
+function copyUrlQuery() {
+  try {
+    const page = getCurrentPages().slice(-1)[0];
+    if (page && page.route === 'pages/public_resume/index' && page.data && page.data.userId) {
+      return `id=${encodeURIComponent(String(page.data.userId))}`;
+    }
+    if (page && page.route === 'pages/organization_members/index' && page.data && page.data.organizationId) {
+      return `id=${encodeURIComponent(String(page.data.organizationId))}`;
+    }
+  } catch {
+    return currentPageQuery();
+  }
+  return currentPageQuery();
+}
+
+function decodeURIComponentSafe(value) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 function copyForPath(path) {
-  return PAGE_SHARE_COPY[normalizePath(path)] || {};
+  return PAGE_SHARE_COPY[routeOnly(path)] || {};
 }
 
 function defaultShareAppMessage(options) {
   const config = options || {};
-  const path = config.path || buildCurrentPath();
+  const path = appendShareRefToPath(config.path || buildCurrentPath());
   const copy = copyForPath(path);
   return {
     title: config.title || copy.title || DEFAULT_TITLE,
@@ -127,12 +191,25 @@ function defaultShareTimeline(options) {
   const config = options || {};
   const path = config.path || currentPagePath();
   const copy = copyForPath(path);
-  const query = String(config.query || currentPageQuery() || '').replace(/^\?/, '');
+  const query = appendShareRefToQuery(config.query || currentPageQuery() || '');
   return {
     title: config.title || copy.timelineTitle || copy.title || DEFAULT_TITLE,
     query,
     imageUrl: config.imageUrl || copy.imageUrl || DEFAULT_IMAGE_URL,
   };
+}
+
+function copyUrlShareParams() {
+  return {
+    query: appendShareRefToQuery(copyUrlQuery()),
+  };
+}
+
+function installCopyUrlShareRef() {
+  if (copyUrlHandlerInstalled) return;
+  if (typeof wx === 'undefined' || typeof wx.onCopyUrl !== 'function') return;
+  wx.onCopyUrl(copyUrlShareParams);
+  copyUrlHandlerInstalled = true;
 }
 
 function enableShareMenu() {
@@ -144,6 +221,7 @@ function enableShareMenu() {
 }
 
 function installDefaultPageShare() {
+  installCopyUrlShareRef();
   const originalPage = Page;
   Page = function withDefaultShare(options) {
     const definition = options || {};
@@ -183,6 +261,7 @@ module.exports = {
   defaultShareAppMessage,
   defaultShareTimeline,
   enableShareMenu,
+  installCopyUrlShareRef,
   installDefaultPageShare,
 };
 

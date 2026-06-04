@@ -6,6 +6,10 @@
       <view class="members-org-title">{{organization.name}}</view>
       <view class="members-org-meta">已认证该组织的人</view>
     </view>
+    <view class="members-share-button">
+      <image class="members-share-icon" src="/assets/ui/share-outline-black.svg" mode="aspectFit"></image>
+      <button class="members-share-native" aria-label="share" bindtap="showShareOptions"></button>
+    </view>
   </view>
 
   <view wx:if="{{loading && members.length === 0}}" class="surface-card members-empty">正在读取成员</view>
@@ -27,5 +31,15 @@
       <image class="members-arrow" src="/assets/ui/arrow-light.svg" mode="aspectFit"></image>
     </view>
     <button wx:if="{{hasMore}}" class="secondary-button members-more" loading="{{loadingMore}}" bindtap="loadMore">加载更多</button>
+  </view>
+</view>
+
+<view wx:if="{{sharePanelVisible}}" class="wechat-share-mask" catchtap="hideShareOptions">
+  <view class="wechat-share-sheet" catchtap="noop">
+    <button class="wechat-share-item" open-type="share">{{shareMenuText.friend}}</button>
+    <view class="wechat-share-line"></view>
+    <button class="wechat-share-item" loading="{{miniProgramCodeLoading}}" disabled="{{miniProgramCodeLoading}}" bindtap="handleMiniProgramCode">{{shareMenuText.code}}</button>
+    <view class="wechat-share-gap"></view>
+    <button class="wechat-share-cancel" bindtap="hideShareOptions">{{shareMenuText.cancel}}</button>
   </view>
 </view>

@@ -33,12 +33,45 @@ Page({
     contactActionLoading: false,
     consultingFeeText: '',
     shareImagePath: '',
+    sharePanelVisible: false,
+    miniProgramCodeLoading: false,
+    miniProgramCodeUrl: '',
+    shareMenuText: {
+      friend: '\u8f6c\u53d1\u5f53\u524d\u9875\u9762\u5230\u804a\u5929',
+      code: '\u83b7\u53d6\u5f53\u524d\u9875\u9762\u5c0f\u7a0b\u5e8f\u7801',
+      cancel: '\u53d6\u6d88',
+    },
   },
 
-  onLoad(options) {
-    const userId = decodeURIComponent(options.id || '');
-    this.setData({ userId });
-    this.loadResume(true);
+  async onLoad(options) {
+    const rawScene = String(options.scene || '').trim();
+    const scene = decodeScene(rawScene);
+    const directUserId = decodeURIComponent(options.id || scene.id || '');
+    const directShareRef = String(options.sr || options.shareRef || '').trim().toLowerCase();
+    const hasDirectShareRef = /^u_[0-9a-z]{3,30}$/.test(directShareRef);
+    if (directUserId) {
+      this.setData({ userId: directUserId });
+      this.loadResume(true);
+      return;
+    }
+    if (/^sc[0-9a-z]{3,30}$/i.test(rawScene)) {
+      try {
+        const resolved = await profileService.resolvePublicResumeMiniProgramScene(rawScene);
+        const app = getApp();
+        if (app && app.globalData && resolved.shareRef && !hasDirectShareRef) {
+          app.globalData.sessionShareRef = String(resolved.shareRef || '').toLowerCase();
+        }
+        this.setData({ userId: resolved.targetUserId || '' });
+        this.loadResume(true);
+      } catch (error) {
+        this.setData({
+          loading: false,
+          errorMessage: error && error.message ? error.message : '分享码无效',
+        });
+      }
+      return;
+    }
+    this.setData({ loading: false, errorMessage: '资料不存在' });
   },
 
   async loadResume(forceRefresh) {
@@ -151,6 +184,47 @@ Page({
     });
   },
 
+  showShareOptions() {
+    this.setData({ sharePanelVisible: true });
+  },
+
+  hideShareOptions() {
+    this.setData({ sharePanelVisible: false });
+  },
+
+  noop() {},
+
+  async handleMiniProgramCode() {
+    if (!loginGuard.guardPage('/pages/public_resume/index', { requireRegistration: true })) {
+      return;
+    }
+    this.setData({ miniProgramCodeLoading: true });
+    try {
+      const result = await profileService.createPublicResumeMiniProgramCode(this.data.userId);
+      const imageUrl = result && (result.imageUrl || result.url);
+      this.setData({
+        miniProgramCodeUrl: imageUrl || '',
+        miniProgramCodeLoading: false,
+        sharePanelVisible: false,
+      });
+      if (imageUrl) {
+        wx.previewImage({
+          urls: [imageUrl],
+          current: imageUrl,
+        });
+      } else {
+        wx.showToast({ title: '小程序码生成失败', icon: 'none' });
+      }
+    } catch (error) {
+      this.setData({ miniProgramCodeLoading: false });
+      wx.showModal({
+        title: '生成失败',
+        content: error && error.message ? error.message : '请稍后重试',
+        showCancel: false,
+      });
+    }
+  },
+
   onShareAppMessage() {
     return share.defaultShareAppMessage({
       title: this.shareTitle(),
@@ -196,6 +270,32 @@ Page({
 
 function moneyText(cents) {
   return `¥${(Number(cents || 0) / 100).toFixed(2)}`;
+}
+
+function decodeScene(raw) {
+  const value = String(raw || '').trim();
+  if (!value) return {};
+  let decoded = value;
+  try {
+    decoded = decodeURIComponent(value);
+  } catch {
+    decoded = value;
+  }
+  return decoded
+    .replace(/^\?/, '')
+    .split('&')
+    .filter(Boolean)
+    .reduce((result, pair) => {
+      const splitIndex = pair.indexOf('=');
+      const key = splitIndex >= 0 ? pair.slice(0, splitIndex) : pair;
+      const itemValue = splitIndex >= 0 ? pair.slice(splitIndex + 1) : '';
+      try {
+        result[decodeURIComponent(key)] = decodeURIComponent(itemValue);
+      } catch {
+        result[key] = itemValue;
+      }
+      return result;
+    }, {});
 }
 
 function confirmDialog(options) {

@@ -21,7 +21,7 @@
       </view>
       <view class="public-share-button">
         <image class="public-share-icon" src="/assets/ui/share-outline-black.svg" mode="aspectFit"></image>
-        <button class="public-share-native" open-type="share" aria-label="分享"></button>
+        <button class="public-share-native" aria-label="share" bindtap="showShareOptions"></button>
       </view>
     </view>
     <view class="surface-card public-section">
@@ -57,5 +57,15 @@
       <button class="primary-button contact-action-button" loading="{{contactActionLoading}}" disabled="{{contactActionLoading}}" bindtap="handleContactDeposit">{{contactButtonText}}</button>
     </view>
   </block>
+</view>
+
+<view wx:if="{{sharePanelVisible}}" class="wechat-share-mask" catchtap="hideShareOptions">
+  <view class="wechat-share-sheet" catchtap="noop">
+    <button class="wechat-share-item" open-type="share">{{shareMenuText.friend}}</button>
+    <view class="wechat-share-line"></view>
+    <button class="wechat-share-item" loading="{{miniProgramCodeLoading}}" disabled="{{miniProgramCodeLoading}}" bindtap="handleMiniProgramCode">{{shareMenuText.code}}</button>
+    <view class="wechat-share-gap"></view>
+    <button class="wechat-share-cancel" bindtap="hideShareOptions">{{shareMenuText.cancel}}</button>
+  </view>
 </view>
 <canvas canvas-id="publicResumeShareCanvas" class="share-canvas" style="width: 500px; height: 400px;"></canvas>

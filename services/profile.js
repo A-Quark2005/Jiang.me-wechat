@@ -121,10 +121,40 @@ function getContactDepositAccess(userId, options) {
 }
 
 function createContactDepositOrder(userId) {
+  const app = getApp();
+  const shareRef = app && app.globalData ? String(app.globalData.sessionShareRef || '') : '';
   return request({
     path: '/api/me/contact-deposits/orders',
     method: 'POST',
-    data: { targetUserId: userId },
+    data: { targetUserId: userId, shareRef },
+  });
+}
+
+function createPublicResumeMiniProgramCode(userId) {
+  return request({
+    path: `/api/me/resume/public/${encodeURIComponent(userId)}/mini-program-code`,
+    method: 'POST',
+  });
+}
+
+function resolvePublicResumeMiniProgramScene(scene) {
+  return request({
+    path: `/api/resume/public-share-scenes/${encodeURIComponent(scene)}`,
+    auth: false,
+  });
+}
+
+function createOrganizationMembersMiniProgramCode(organizationId) {
+  return request({
+    path: `/api/me/certification/organizations/${encodeURIComponent(organizationId)}/members/mini-program-code`,
+    method: 'POST',
+  });
+}
+
+function resolveOrganizationMembersMiniProgramScene(scene) {
+  return request({
+    path: `/api/certification/organization-member-share-scenes/${encodeURIComponent(scene)}`,
+    auth: false,
   });
 }
 
@@ -245,7 +275,11 @@ module.exports = {
   requestEngagementUpdate,
   sendCertificationEmailCode,
   createContactDepositOrder,
+  createOrganizationMembersMiniProgramCode,
+  createPublicResumeMiniProgramCode,
   updateEngagementVisibility,
+  resolveOrganizationMembersMiniProgramScene,
+  resolvePublicResumeMiniProgramScene,
   updateResume,
   verifyCertificationEmail,
   uploadAvatar,

@@ -257,16 +257,16 @@ Page({
   onShareAppMessage() {
     const invite = this.data.invite;
     if (invite && invite.token) {
-      return {
+      return share.defaultShareAppMessage({
         title: invite.title || '邀请你确认服务履历',
         path: invite.path,
-      };
+      });
     }
     const item = this.data.item || {};
-    return {
+    return share.defaultShareAppMessage({
       title: item.pendingChange ? '邀请你确认履历变更' : '邀请你确认服务履历',
       path: `/pages/resume/engagement_detail/index?id=${encodeURIComponent(this.data.id || item.id || '')}`,
-    };
+    });
   },
 
   onShareTimeline() {

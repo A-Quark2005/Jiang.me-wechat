@@ -30,15 +30,15 @@ Page({
   onShareAppMessage() {
     const invite = this.data.invite;
     if (invite && invite.token) {
-      return {
+      return share.defaultShareAppMessage({
         title: invite.title || '邀请你确认服务履历',
         path: invite.path,
-      };
+      });
     }
-    return {
+    return share.defaultShareAppMessage({
       title: '邀请你确认服务履历',
       path: '/pages/resume/index',
-    };
+    });
   },
 
   onShareTimeline() {
