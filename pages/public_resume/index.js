@@ -132,7 +132,7 @@ Page({
       : moneyText(this.data.resume && this.data.resume.consultingFeeCentsPerHour);
     const confirmed = await confirmDialog({
       title: '确认缴纳',
-      content: `需支付 ${amountText}，按 ${feeText}/小时计算，共 2 小时。支付后将展示对方手机号。\n\n缴费后您有权要求对方提供 2 小时试讲服务，中途无需二次付费。第三个小时开始继续付费即可。`,
+      content: `需支付 ${amountText}，按 ${feeText}/小时计算，共 2 小时。支付后将展示对方手机号。\n\n缴费后您有权要求对方提供 2 小时试讲服务，中途无需二次付费。第三个小时开始继续付费即可。\n\n如果对方长时间未通过好友申请，或您认为对方授课风格不合适，可向平台提交退款申请。`,
     });
     if (!confirmed) return;
     this.setData({ contactActionLoading: true });

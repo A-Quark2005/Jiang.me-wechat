@@ -249,6 +249,15 @@ Page({
   },
 
   goBack() {
+    const redirectTarget = loginGuard.normalizeUrl(this.data.redirectTarget);
+    if (redirectTarget && redirectTarget !== '/pages/meeting_activation/index') {
+      if (loginGuard.isTabPage(redirectTarget)) {
+        wx.switchTab({ url: redirectTarget });
+        return;
+      }
+      wx.redirectTo({ url: redirectTarget });
+      return;
+    }
     wx.navigateBack({
       fail() {
         wx.switchTab({ url: '/pages/home/index' });

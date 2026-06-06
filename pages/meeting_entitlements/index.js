@@ -40,8 +40,6 @@ function billingModeOf(product) {
   const productId = productIdOf(product);
   if (productId === 'meeting_single') return 'single';
   if (productId === 'meeting_week_pass') return 'week_pass';
-  if (productId === 'meeting_half_pass') return 'half_month_pass';
-  if (productId === 'meeting_month_pass') return 'month_pass';
   if (productId === 'meeting-recording-pack') return 'recording_pack';
   return String(product.billingMode || product.mode || product.type || product.code || productLabel(product)).toLowerCase();
 }
@@ -75,15 +73,11 @@ function buildPlanCards(products, selectedPlanId) {
   const badgeByMode = {
     single: '按次',
     week_pass: '7 天',
-    half_month_pass: '15 天',
-    month_pass: '30 天',
     recording_pack: '资料',
   };
   const actionTextByMode = {
     single: '购买单次券',
     week_pass: '购买 7 天卡',
-    half_month_pass: '购买 15 天卡',
-    month_pass: '购买 30 天卡',
     recording_pack: '购买资料包',
   };
   const plans = products.map((product) => {

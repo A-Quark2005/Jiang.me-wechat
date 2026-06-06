@@ -3,6 +3,7 @@ const refreshState = require('../../services/refresh-state');
 const apiClient = require('../../services/api-client');
 const loginGuard = require('../../services/login-guard');
 const sessionStore = require('../../services/session-store');
+const tencentMeetingAccess = require('../../services/tencent-meeting-access');
 
 const PAGE_KEY = 'resume';
 const CACHE_MAX_AGE_MS = 5 * 60 * 1000;
@@ -183,7 +184,9 @@ Page({
     wx.navigateTo({ url: '/pages/resume/edit_self/index' });
   },
 
-  openCredentials() {
+  async openCredentials() {
+    const ready = await tencentMeetingAccess.ensureReady({ targetUrl: '/pages/resume/credentials/index' });
+    if (!ready) return;
     wx.navigateTo({ url: '/pages/resume/credentials/index' });
   },
 

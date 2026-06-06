@@ -1,6 +1,7 @@
 const profileService = require('../../../services/profile');
 const refreshState = require('../../../services/refresh-state');
 const loginGuard = require('../../../services/login-guard');
+const tencentMeetingAccess = require('../../../services/tencent-meeting-access');
 
 const PAGE_KEY = 'credentials';
 const CACHE_MAX_AGE_MS = 5 * 60 * 1000;
@@ -79,10 +80,12 @@ Page({
     canSendCode: false,
   },
 
-  onShow() {
+  async onShow() {
     if (!loginGuard.guardPage('/pages/resume/credentials/index')) {
       return;
     }
+    const ready = await tencentMeetingAccess.ensureReady({ targetUrl: '/pages/resume/credentials/index' });
+    if (!ready) return;
     if (!this.data.hasLoaded || refreshState.consume(PAGE_KEY) || refreshState.isExpired(PAGE_KEY, CACHE_MAX_AGE_MS)) {
       this.loadCredentials(true);
     }

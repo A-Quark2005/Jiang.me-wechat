@@ -49,7 +49,9 @@
           </view>
           <view class="row-main">
             <view class="home-entitlement-title">{{entitlementSummary.title}}</view>
-            <view class="home-entitlement-meta">{{entitlementSummary.detail}}</view>
+            <view class="home-entitlement-meta">
+              <view wx:for="{{entitlementSummary.detailLines}}" wx:key="*this" class="home-entitlement-meta-line">{{item}}</view>
+            </view>
           </view>
         </view>
         <view class="home-entitlement-action">

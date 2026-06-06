@@ -123,6 +123,7 @@ function resolveEntitlementSummary(entitlements, rawActivation) {
     return {
       title: '账号未激活',
       detail: '激活后可使用完整会议功能',
+      detailLines: ['激活后可使用完整会议功能'],
       tone: 'activation',
       targetUrl: '/pages/meeting_activation/index',
     };
@@ -132,17 +133,24 @@ function resolveEntitlementSummary(entitlements, rawActivation) {
   if (!active) {
     return {
       title: '当前会议权益',
-      detail: '未开通 · 可按需购买',
+      detail: '2人不限时会议，3-100人40分钟会议',
+      detailLines: ['2人不限时会议，3-100人40分钟会议'],
       tone: 'warn',
       targetUrl: '/pages/meeting_entitlements/index',
     };
   }
   const expiresAt = active.expiresAt || active.validUntil || '';
+  const expiresText = expiresAt
+    ? `有效期至 ${displayFormatters.formatDateText(expiresAt, { includeTime: true, fallback: expiresAt })}`
+    : '';
   return {
     title: active.name || active.title || '高级账号',
     detail: expiresAt
-      ? `高级账号有效期至 ${displayFormatters.formatDateText(expiresAt, { includeTime: true, fallback: expiresAt })}`
-      : '高级账号已开通',
+      ? `500人不限时会议 · ${expiresText}`
+      : '500人不限时会议',
+    detailLines: expiresText
+      ? [`500人不限时会议 · ${expiresText}`]
+      : ['500人不限时会议'],
     tone: 'ok',
     targetUrl: '/pages/meeting_entitlements/index',
   };
@@ -489,7 +497,7 @@ Page({
       entitlementSummary,
       entitlementActionText: entitlementSummary.tone === 'activation'
         ? '去激活'
-        : (entitlementSummary.tone === 'ok' ? '去查看' : '去开通'),
+        : (entitlementSummary.tone === 'ok' ? '去查看' : '去升级'),
       guestMode: false,
       ...activationViewState,
       resumeSummary: resolveResumeSummary(
