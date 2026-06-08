@@ -2,6 +2,7 @@ const profileService = require('../../services/profile');
 const loginGuard = require('../../services/login-guard');
 const paymentService = require('../../services/meeting-entitlements');
 const share = require('../../services/share');
+const displayFormatters = require('../../services/display-formatters');
 
 const SHARE_CANVAS_ID = 'publicResumeShareCanvas';
 const SHARE_IMAGE_WIDTH = 500;
@@ -18,6 +19,27 @@ function listFrom(raw, keys) {
   return [];
 }
 
+function engagementSide(item) {
+  const value = String(item && (item.side || item.kind) || '').toLowerCase();
+  if (value.includes('provider') || value.includes('provided')) return 'provider';
+  if (value.includes('receiver') || value.includes('received') || value.includes('purchased')) return 'receiver';
+  return '';
+}
+
+function numberEngagements(items) {
+  return items.map((item, index) => {
+    const dateText = displayFormatters.formatDateText(item.confirmedAt || item.createdAt || item.startedAt, {
+      includeTime: false,
+    });
+    return {
+      ...item,
+      displayNumber: index + 1,
+      dateText,
+      metaText: [item.counterpartName, dateText].filter(Boolean).join(' · '),
+    };
+  });
+}
+
 Page({
   data: {
     userId: '',
@@ -27,7 +49,8 @@ Page({
     avatarText: '人',
     selfIntroductionText: '暂无自我介绍',
     credentials: [],
-    engagements: [],
+    serviceEngagements: [],
+    consumptionEngagements: [],
     contactAccess: null,
     contactButtonText: '缴纳定金，认识一下',
     contactActionLoading: false,
@@ -79,6 +102,7 @@ Page({
     try {
       const resume = await profileService.getPublicResume(this.data.userId, { forceRefresh });
       const displayName = String(resume.displayName || '未命名用户').trim() || '未命名用户';
+      const engagements = listFrom(resume.relatedExperiences || resume.engagements, ['items', 'engagements']);
       this.setData({
         loading: false,
         resume: {
@@ -89,7 +113,8 @@ Page({
         selfIntroductionText: resume.selfIntroduction || '暂无自我介绍',
         consultingFeeText: `咨询费：${moneyText(resume.consultingFeeCentsPerHour)}/小时`,
         credentials: listFrom(resume.certifiedQualifications || resume.credentials, ['items', 'credentials']),
-        engagements: listFrom(resume.relatedExperiences || resume.engagements, ['items', 'engagements']),
+        serviceEngagements: numberEngagements(engagements.filter((item) => engagementSide(item) === 'provider')),
+        consumptionEngagements: numberEngagements(engagements.filter((item) => engagementSide(item) === 'receiver')),
       });
       this.prepareShareImage();
       this.loadContactAccess(true);

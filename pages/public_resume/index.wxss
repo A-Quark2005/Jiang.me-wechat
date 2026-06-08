@@ -129,6 +129,10 @@
   line-height: 42rpx;
 }
 
+.public-text {
+  white-space: pre-wrap;
+}
+
 .public-empty {
   text-align: center;
 }

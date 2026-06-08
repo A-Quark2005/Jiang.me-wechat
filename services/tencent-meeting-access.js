@@ -12,6 +12,7 @@ const meetingEntitlements = require('./meeting-entitlements');
  *
  * @param {object} options Guard options.
  * @param {string} options.targetUrl Route that initiated the action.
+ * @param {boolean} options.forceRefresh Whether to bypass cached activation state.
  * @returns {Promise<boolean>} True when the action may continue.
  */
 async function ensureReady(options) {
@@ -26,7 +27,7 @@ async function ensureReady(options) {
   }
 
   const activation = displayFormatters.normalizeMeetingActivationState(
-    await meetingEntitlements.getTencentMeetingActivation({ forceRefresh: true }),
+    await meetingEntitlements.getTencentMeetingActivation({ forceRefresh: config.forceRefresh !== false }),
   );
   if (
     activation.needsPhone ||

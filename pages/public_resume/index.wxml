@@ -25,14 +25,6 @@
       </view>
     </view>
     <view class="surface-card public-section">
-      <view class="public-section-head">
-        <view class="section-title">自我介绍</view>
-        <view class="consulting-fee-badge">{{consultingFeeText}}</view>
-      </view>
-      <view class="public-text">{{selfIntroductionText}}</view>
-    </view>
-
-    <view class="surface-card public-section">
       <view class="section-title">认证</view>
       <view wx:if="{{credentials.length === 0}}" class="public-empty">暂无认证</view>
       <view wx:for="{{credentials}}" wx:key="id" class="public-credential">
@@ -45,12 +37,30 @@
     </view>
 
     <view class="surface-card public-section">
+      <view class="public-section-head">
+        <view class="section-title">自我介绍</view>
+        <view class="consulting-fee-badge">{{consultingFeeText}}</view>
+      </view>
+      <view class="public-text">{{selfIntroductionText}}</view>
+    </view>
+
+    <view class="surface-card public-section">
       <view class="section-title">服务履历</view>
-      <view wx:if="{{engagements.length === 0}}" class="public-empty">暂无公开履历</view>
-      <view wx:for="{{engagements}}" wx:key="id" class="public-engagement">
-        <view class="public-engagement-title">{{item.title}}</view>
-        <view class="public-engagement-meta">{{item.counterpartName}}</view>
-        <view wx:if="{{item.summary}}" class="public-engagement-summary">{{item.summary}}</view>
+      <view wx:if="{{serviceEngagements.length === 0}}" class="public-empty">暂无公开履历</view>
+      <view wx:for="{{serviceEngagements}}" wx:key="id" class="public-engagement">
+        <view class="public-engagement-title">{{item.displayNumber}}. {{item.title}}</view>
+        <view wx:if="{{item.metaText}}" class="public-engagement-meta">{{item.metaText}}</view>
+        <view wx:for="{{item.detailLines}}" wx:for-item="line" wx:key="*this" class="public-engagement-summary">{{line}}</view>
+      </view>
+    </view>
+
+    <view class="surface-card public-section">
+      <view class="section-title">消费履历</view>
+      <view wx:if="{{consumptionEngagements.length === 0}}" class="public-empty">暂无公开履历</view>
+      <view wx:for="{{consumptionEngagements}}" wx:key="id" class="public-engagement">
+        <view class="public-engagement-title">{{item.displayNumber}}. {{item.title}}</view>
+        <view wx:if="{{item.metaText}}" class="public-engagement-meta">{{item.metaText}}</view>
+        <view wx:for="{{item.detailLines}}" wx:for-item="line" wx:key="*this" class="public-engagement-summary">{{line}}</view>
       </view>
     </view>
     <view class="contact-action-bar">

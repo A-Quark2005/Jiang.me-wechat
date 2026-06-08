@@ -84,11 +84,14 @@ Page({
     if (!loginGuard.guardPage('/pages/resume/credentials/index')) {
       return;
     }
-    const ready = await tencentMeetingAccess.ensureReady({ targetUrl: '/pages/resume/credentials/index' });
-    if (!ready) return;
+    const readyPromise = tencentMeetingAccess.ensureReady({
+      targetUrl: '/pages/resume/credentials/index',
+      forceRefresh: false,
+    });
     if (!this.data.hasLoaded || refreshState.consume(PAGE_KEY) || refreshState.isExpired(PAGE_KEY, CACHE_MAX_AGE_MS)) {
       this.loadCredentials(true);
     }
+    await readyPromise;
   },
 
   async loadCredentials(forceRefresh) {
