@@ -1,7 +1,8 @@
 const profileService = require('../../../services/profile');
 const refreshState = require('../../../services/refresh-state');
 const loginGuard = require('../../../services/login-guard');
-const tencentMeetingAccess = require('../../../services/tencent-meeting-access');
+const auth = require('../../../services/auth');
+const sessionStore = require('../../../services/session-store');
 
 const PAGE_KEY = 'credentials';
 const CACHE_MAX_AGE_MS = 5 * 60 * 1000;
@@ -62,10 +63,25 @@ function isEmailAllowed(email, organization) {
   return Boolean(value && organization.emailDomains.includes(domain));
 }
 
+function hasBoundPhone() {
+  const record = sessionStore.getSessionRecord() || {};
+  const user = record.user || {};
+  const profile = record.profile || {};
+  return Boolean(
+    user.phoneMasked ||
+    user.phone ||
+    user.mobile ||
+    profile.phoneMasked ||
+    profile.phone
+  );
+}
+
 Page({
   data: {
     loading: true,
     hasLoaded: false,
+    needsPhone: false,
+    bindingPhone: false,
     errorMessage: '',
     credentials: [],
     organizations: [],
@@ -81,17 +97,52 @@ Page({
   },
 
   async onShow() {
-    if (!loginGuard.guardPage('/pages/resume/credentials/index')) {
+    const loggedIn = await loginGuard.ensureLoggedInAsync({
+      targetUrl: '/pages/resume/credentials/index',
+      navigateAfterLogin: false,
+      requireRegistration: true,
+    });
+    if (!loggedIn) {
       return;
     }
-    const readyPromise = tencentMeetingAccess.ensureReady({
-      targetUrl: '/pages/resume/credentials/index',
-      forceRefresh: false,
-    });
+    if (!hasBoundPhone()) {
+      this.setData({
+        loading: false,
+        hasLoaded: true,
+        needsPhone: true,
+        errorMessage: '',
+      });
+      return;
+    }
+    this.setData({ needsPhone: false });
     if (!this.data.hasLoaded || refreshState.consume(PAGE_KEY) || refreshState.isExpired(PAGE_KEY, CACHE_MAX_AGE_MS)) {
       this.loadCredentials(true);
     }
-    await readyPromise;
+  },
+
+  async handleGetPhoneNumber(event) {
+    const detail = event.detail || {};
+    if (detail.errMsg && !String(detail.errMsg).includes('ok')) {
+      this.setData({ errorMessage: '需要授权手机号后才能进行认证' });
+      return;
+    }
+    const phoneCode = detail.code || '';
+    if (!phoneCode) {
+      this.setData({ errorMessage: '未获取到手机号授权信息，请重试' });
+      return;
+    }
+    this.setData({ bindingPhone: true, errorMessage: '' });
+    try {
+      await auth.bindPhoneWithCode(phoneCode);
+      this.setData({ bindingPhone: false, needsPhone: false });
+      refreshState.mark(['home', 'resume', 'credentials']);
+      await this.loadCredentials(true);
+    } catch (error) {
+      this.setData({
+        bindingPhone: false,
+        errorMessage: error && error.message ? error.message : '手机号授权失败，请稍后重试',
+      });
+    }
   },
 
   async loadCredentials(forceRefresh) {
