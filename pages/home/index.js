@@ -11,6 +11,16 @@ const profileService = require('../../services/profile');
 const PAGE_KEY = 'home';
 const CACHE_MAX_AGE_MS = 5 * 60 * 1000;
 
+function shareLandingTargetOf(input) {
+  const rawValue = String(input || '').trim();
+  if (!rawValue) return '';
+  const value = decodeURIComponent(rawValue);
+  if (!value.startsWith('/pages/')) return '';
+  const route = value.split('?')[0];
+  if (loginGuard.isTabPage(route)) return '';
+  return value;
+}
+
 /**
  * Left-pad numeric date and time fragments.
  *
@@ -348,9 +358,12 @@ Page({
     submitting: false,
     submitButtonText: '立即预定',
     savingWechatProfile: false,
+    shareLandingTarget: '',
+    shareLandingNavigated: false,
   },
 
-  onLoad() {
+  onLoad(options) {
+    const shareLandingTarget = shareLandingTargetOf(options && options.target);
     const now = new Date();
     now.setMinutes(Math.ceil(now.getMinutes() / 10) * 10, 0, 0);
     const end = new Date(now.getTime() + 30 * 60 * 1000);
@@ -362,6 +375,7 @@ Page({
     };
     this.setData({
       backendBaseUrl: apiClient.backendBaseUrl(),
+      shareLandingTarget,
       ...nextData,
       ...buildLabels(nextData),
       ...heroLayout.buildHeroLayoutData(),
@@ -378,6 +392,9 @@ Page({
   },
 
   async onShow() {
+    if (this.openShareLandingTarget()) {
+      return;
+    }
     const loggedIn = await loginGuard.ensureLoggedInAsync({
       targetUrl: '/pages/home/index',
       navigateAfterLogin: false,
@@ -390,6 +407,17 @@ Page({
     if (!this.data.session || refreshState.consume(PAGE_KEY) || refreshState.isExpired(PAGE_KEY, CACHE_MAX_AGE_MS)) {
       this.loadAuthenticatedDashboard();
     }
+  },
+
+  openShareLandingTarget() {
+    if (!this.data.shareLandingTarget || this.data.shareLandingNavigated) {
+      return false;
+    }
+    this.setData({ shareLandingNavigated: true });
+    wx.navigateTo({
+      url: this.data.shareLandingTarget,
+    });
+    return true;
   },
 
   enterGuestMode() {

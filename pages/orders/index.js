@@ -5,6 +5,8 @@ const loginGuard = require('../../services/login-guard');
 
 const PAGE_KEY = 'orders';
 const CACHE_MAX_AGE_MS = 5 * 60 * 1000;
+const MEETING_SOURCE_TYPES = ['hour_pass', 'single', 'duration', 'recording_pack'];
+const CONTACT_DEPOSIT_SOURCE_TYPES = ['contact_deposit', 'demand_deposit'];
 
 function normalizeList(raw) {
   if (Array.isArray(raw)) return raw;
@@ -115,14 +117,28 @@ function recentCache(record, maxAgeMs) {
   return record.data || null;
 }
 
+function tabClassState(activeTab) {
+  return {
+    activeMeetingTabClass: activeTab === 'meeting' ? 'tab-chip-active' : 'muted-chip',
+    activeContactDepositTabClass: activeTab === 'contact_deposit' ? 'tab-chip-active' : 'muted-chip',
+  };
+}
+
+function orderBelongsToTab(item, tab) {
+  const sourceType = String(item.sourceType || '').toLowerCase();
+  if (tab === 'contact_deposit') {
+    return CONTACT_DEPOSIT_SOURCE_TYPES.includes(sourceType);
+  }
+  return MEETING_SOURCE_TYPES.includes(sourceType);
+}
+
 Page({
   data: {
     loading: true,
     hasLoaded: false,
     errorMessage: '',
     activeTab: 'meeting',
-    activeMeetingTabClass: 'tab-chip-active',
-    activeContactDepositTabClass: 'muted-chip',
+    ...tabClassState('meeting'),
     orders: [],
     visibleOrders: [],
   },
@@ -135,6 +151,7 @@ Page({
         hasLoaded: true,
         errorMessage: '',
         ...cached,
+        ...tabClassState(cached.activeTab || 'meeting'),
       });
     }
   },
@@ -161,8 +178,6 @@ Page({
         this.applyFilter();
         saveCachedOrdersPage({
           activeTab: this.data.activeTab,
-          activeMeetingTabClass: this.data.activeMeetingTabClass,
-          activeContactDepositTabClass: this.data.activeContactDepositTabClass,
           orders: this.data.orders,
           visibleOrders: this.data.visibleOrders,
         });
@@ -188,20 +203,13 @@ Page({
     const activeTab = event.currentTarget.dataset.tab || 'meeting';
     this.setData({
       activeTab,
-      activeMeetingTabClass: activeTab === 'meeting' ? 'tab-chip-active' : 'muted-chip',
-      activeContactDepositTabClass: activeTab === 'contact_deposit' ? 'tab-chip-active muted-chip' : 'muted-chip',
+      ...tabClassState(activeTab),
     }, () => this.applyFilter());
   },
 
   applyFilter() {
     const tab = this.data.activeTab;
-    const visibleOrders = this.data.orders.filter((item) => {
-      const sourceType = String(item.sourceType || '').toLowerCase();
-      if (tab === 'contact_deposit') {
-        return sourceType === 'contact_deposit';
-      }
-      return sourceType !== 'contact_deposit';
-    });
+    const visibleOrders = this.data.orders.filter((item) => orderBelongsToTab(item, tab));
     this.setData({ visibleOrders });
   },
 

@@ -1,4 +1,16 @@
 <view class="page page-plain distant-page">
+  <view class="segmented-strip distant-filter-strip">
+    <view
+      wx:for="{{filters}}"
+      wx:key="key"
+      class="segment-chip tappable {{item.className}}"
+      data-filter="{{item.key}}"
+      bindtap="switchFilter"
+    >
+      {{item.label}}
+    </view>
+  </view>
+
   <view wx:if="{{loading}}" class="surface-card">
     <view class="section-title">正在读取组织</view>
   </view>
@@ -10,8 +22,8 @@
   </view>
 
   <view wx:else class="distant-list">
-    <view wx:if="{{organizations.length === 0}}" class="surface-card distant-empty">暂无可查看组织</view>
-    <view wx:for="{{organizations}}" wx:key="id" class="surface-card distant-card tappable" data-id="{{item.id}}" bindtap="openOrganization">
+    <view wx:if="{{visibleOrganizations.length === 0}}" class="surface-card distant-empty">暂无可查看组织</view>
+    <view wx:for="{{visibleOrganizations}}" wx:key="id" class="surface-card distant-card tappable" data-id="{{item.id}}" bindtap="openOrganization">
       <image wx:if="{{item.logoUrl}}" class="distant-logo" src="{{item.logoUrl}}" mode="aspectFit"></image>
       <view wx:else class="distant-logo fallback">{{item.initial}}</view>
       <view class="distant-main">
@@ -21,5 +33,9 @@
       </view>
       <image class="distant-arrow" src="/assets/ui/arrow-light.svg" mode="aspectFit"></image>
     </view>
+  </view>
+
+  <view class="demand-entry-button" hover-class="demand-entry-button-hover" hover-stay-time="80" bindtap="openDemandEntry" aria-label="主动发单">
+    <image class="demand-entry-icon" src="/assets/ui/search.svg" mode="aspectFit"></image>
   </view>
 </view>

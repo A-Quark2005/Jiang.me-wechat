@@ -249,7 +249,7 @@ Page({
   buildDetailText(item) {
     if (!item) return '暂无服务内容';
     if (Array.isArray(item.detailLines) && item.detailLines.length) {
-      return item.detailLines.join('，');
+      return item.detailLines.join('\n');
     }
     return item.summary || item.description || item.detailText || '暂无服务内容';
   },

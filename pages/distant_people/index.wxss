@@ -1,7 +1,17 @@
 .distant-page {
   min-height: 100vh;
-  padding: 18rpx 16px 32rpx;
+  padding: 18rpx 16px 152rpx;
   box-sizing: border-box;
+}
+
+.distant-filter-strip {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  margin: -18rpx -32rpx 16rpx;
+  padding: 16rpx 32rpx 18rpx;
+  background: #ffffff;
+  border-bottom: 1rpx solid #eef2f7;
 }
 
 .distant-list {
@@ -41,6 +51,9 @@
 }
 
 .distant-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 30rpx;
   line-height: 42rpx;
   color: #152033;
@@ -78,4 +91,33 @@
   width: 32rpx;
   height: 32rpx;
   flex: 0 0 32rpx;
+}
+
+.demand-entry-button {
+  position: fixed;
+  right: 86rpx;
+  bottom: calc(250rpx + env(safe-area-inset-bottom));
+  z-index: 20;
+  width: 132rpx;
+  height: 132rpx;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #0071fe;
+  box-shadow: 0 16rpx 36rpx rgba(0, 113, 254, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  overflow: hidden;
+}
+
+.demand-entry-button-hover {
+  background: #0065e5;
+  transform: translateY(2rpx);
+}
+
+.demand-entry-icon {
+  width: 58rpx;
+  height: 58rpx;
 }

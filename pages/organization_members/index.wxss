@@ -93,6 +93,9 @@
 }
 
 .members-org-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 32rpx;
   line-height: 46rpx;
 }

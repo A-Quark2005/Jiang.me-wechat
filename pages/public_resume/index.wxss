@@ -182,7 +182,12 @@
 }
 
 .contact-action-bar {
-  margin: 32rpx 0 0;
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  margin: 32rpx -16px 0;
+  padding: 16rpx 16px calc(20rpx + env(safe-area-inset-bottom));
+  background: #f7f8fa;
   box-sizing: border-box;
 }
 

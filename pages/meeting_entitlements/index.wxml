@@ -4,7 +4,7 @@
     <view class="section-subtitle">请稍候。</view>
   </view>
 
-  <view wx:elif="{{errorMessage && entitlements.length === 0}}" class="surface-card">
+  <view wx:elif="{{errorMessage && unfinishedDemandCards.length === 0}}" class="surface-card">
     <view class="error-box">{{errorMessage}}</view>
     <button class="primary-button action-button" bindtap="loadPage">重新加载</button>
   </view>
@@ -20,16 +20,17 @@
       <button class="secondary-button entitlements-pending-button" loading="{{sendingActivationInvite}}" bindtap="resendActivationInvite">重发激活链接</button>
     </view>
 
-    <view wx:if="{{entitlementCards.length > 0}}" class="entitlements-list">
-      <view wx:for="{{entitlementCards}}" wx:key="id" class="surface-card entitlements-card">
-        <view class="entitlements-card-main">
-          <view class="entitlements-card-copy">
-            <view class="entitlements-card-title">{{item.title}}</view>
-            <view class="entitlements-card-summary">{{item.summary}}</view>
+    <view wx:if="{{unfinishedDemandCards.length > 0}}" class="unfinished-demands-list">
+      <view wx:for="{{unfinishedDemandCards}}" wx:key="id" class="surface-card unfinished-demand-card tappable" data-id="{{item.id}}" bindtap="openDemandDetail">
+        <view class="unfinished-demand-main">
+          <view class="unfinished-demand-copy">
+            <view class="unfinished-demand-title">{{item.title}}</view>
+            <view class="unfinished-demand-summary">{{item.summary}}</view>
+            <view wx:if="{{item.meta}}" class="unfinished-demand-meta">{{item.meta}}</view>
           </view>
-          <view class="entitlements-card-side">
-            <view class="entitlements-card-badge">{{item.badge}}</view>
-            <view class="entitlements-card-status {{item.active ? 'active' : 'inactive'}}">{{item.statusText}}</view>
+          <view class="unfinished-demand-side">
+            <view class="unfinished-demand-badge">{{item.badge}}</view>
+            <view class="unfinished-demand-status">{{item.statusText}}</view>
           </view>
         </view>
       </view>
@@ -38,6 +39,7 @@
     <view wx:else class="entitlements-empty">
       <image class="entitlements-empty-image" src="{{sleepImageUrl}}" mode="aspectFit"></image>
       <view class="entitlements-empty-text">{{emptyStateText}}</view>
+      <view class="entitlements-empty-button tappable" bindtap="openDistantPeople">远方的人</view>
     </view>
 
     <view class="entitlements-history-row">

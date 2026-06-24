@@ -42,43 +42,50 @@
   padding-top: 160rpx;
 }
 
-.entitlements-list {
+.unfinished-demands-list {
   display: flex;
   flex-direction: column;
   gap: 12rpx;
   margin: 0 16px;
 }
 
-.entitlements-card {
+.unfinished-demand-card {
   margin: 0;
 }
 
-.entitlements-card-main {
+.unfinished-demand-main {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 24rpx;
 }
 
-.entitlements-card-copy {
+.unfinished-demand-copy {
   min-width: 0;
   flex: 1;
 }
 
-.entitlements-card-title {
+.unfinished-demand-title {
   font-size: 30rpx;
   line-height: 1.45;
   color: #333333;
 }
 
-.entitlements-card-summary {
+.unfinished-demand-summary {
   margin-top: 8rpx;
   font-size: 24rpx;
   line-height: 1.5;
   color: #6b7280;
 }
 
-.entitlements-card-side {
+.unfinished-demand-meta {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  line-height: 1.5;
+  color: #b0b8c9;
+}
+
+.unfinished-demand-side {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -86,7 +93,7 @@
   flex-shrink: 0;
 }
 
-.entitlements-card-badge {
+.unfinished-demand-badge {
   min-width: 120rpx;
   padding: 8rpx 16rpx;
   border-radius: 999rpx;
@@ -97,17 +104,10 @@
   color: #0071fe;
 }
 
-.entitlements-card-status {
+.unfinished-demand-status {
   font-size: 22rpx;
   line-height: 30rpx;
-}
-
-.entitlements-card-status.active {
   color: #0f9d58;
-}
-
-.entitlements-card-status.inactive {
-  color: #9ca3af;
 }
 
 .entitlements-empty-image {
@@ -117,9 +117,25 @@
 
 .entitlements-empty-text {
   margin-top: 16rpx;
-  font-size: 22rpx;
-  line-height: 1.5;
+  font-size: 26rpx;
+  line-height: 1.45;
   color: #b0b8c9;
+  text-align: center;
+}
+
+.entitlements-empty-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 64rpx;
+  margin-top: 28rpx;
+  padding: 0 42rpx;
+  border-radius: 999rpx;
+  background: #111111;
+  font-size: 26rpx;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #ffffff;
 }
 
 .entitlements-history-row {

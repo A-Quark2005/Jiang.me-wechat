@@ -111,7 +111,7 @@ Page({
         },
         avatarText: displayName.slice(0, 1),
         selfIntroductionText: resume.selfIntroduction || '暂无自我介绍',
-        consultingFeeText: `咨询费：${moneyText(resume.consultingFeeCentsPerHour)}/小时`,
+        consultingFeeText: `价格：${moneyText(resume.consultingFeeCentsPerHour)}/小时`,
         credentials: listFrom(resume.certifiedQualifications || resume.credentials, ['items', 'credentials']),
         serviceEngagements: numberEngagements(engagements.filter((item) => engagementSide(item) === 'provider')),
         consumptionEngagements: numberEngagements(engagements.filter((item) => engagementSide(item) === 'receiver')),
@@ -157,7 +157,7 @@ Page({
       : moneyText(this.data.resume && this.data.resume.consultingFeeCentsPerHour);
     const confirmed = await confirmDialog({
       title: '确认缴纳',
-      content: `需支付 ${amountText}，按 ${feeText}/小时计算，共 2 小时。支付后将展示对方手机号。\n\n缴费后您有权要求对方提供 2 小时试讲服务，中途无需二次付费。第三个小时开始继续付费即可。\n\n如果对方长时间未通过好友申请，或您认为对方授课风格不合适，可向平台提交退款申请。`,
+      content: `为减少对对方的打扰，平台会先收取 2 小时试讲定金。按 ${feeText}/小时计算，本次需支付 ${amountText}。\n\n支付后将展示对方（与微信号绑定的）手机号。对方会提供 2 小时试讲服务，期间无需另行付费。\n\n若试讲满意，从第 3 小时起，双方可自行交易，平台不再收取其它费用。\n\n如有录屏、AI纪要等需求，可于小程序“权益”页自行购买会议权益。`,
     });
     if (!confirmed) return;
     this.setData({ contactActionLoading: true });
@@ -269,7 +269,13 @@ Page({
   shareTitle() {
     const resume = this.data.resume || {};
     const displayName = String(resume.displayName || '').trim() || '这位朋友';
-    return `推荐你认识${displayName}`;
+    const organizationNames = (this.data.credentials || [])
+      .map((item) => String(item.title || '').trim())
+      .filter(Boolean)
+      .filter((name, index, list) => list.indexOf(name) === index);
+    return organizationNames.length
+      ? `推荐你认识${displayName}（${organizationNames.join('、')}）`
+      : `推荐你认识${displayName}`;
   },
 
   async prepareShareImage() {
@@ -373,7 +379,7 @@ function drawShareImage(page, input) {
     ctx.fillText(input.accountTierText || '普通账号', 150, 140);
     ctx.setFillStyle('#374151');
     ctx.setFontSize(21);
-    ctx.fillText(input.consultingFeeText || '咨询费：¥250.00/小时', 150, 178);
+    ctx.fillText(input.consultingFeeText || '价格：¥250.00/小时', 150, 178);
     const credential = firstCredentialText(input.credentials);
     if (credential) {
       ctx.setFillStyle('#eef5ff');

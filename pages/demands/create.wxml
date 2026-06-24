@@ -1,0 +1,78 @@
+<view class="page page-with-bar demand-form-page">
+  <view class="surface-card form-card">
+    <view class="form-label">需求标题</view>
+    <input class="form-input" maxlength="80" placeholder="例如：AI 产品设计咨询" value="{{title}}" bindinput="onTitleInput"></input>
+    <view class="form-label">说明（可选）</view>
+    <textarea class="form-textarea" maxlength="1200" placeholder="补充需求背景、希望对方具备的经验等" value="{{description}}" bindinput="onDescriptionInput"></textarea>
+  </view>
+
+  <view class="surface-card form-card">
+    <view class="form-head">
+      <view class="form-title">投稿要求</view>
+      <view class="form-meta">不选组织时，所有人都可以投稿</view>
+    </view>
+    <view wx:if="{{loading}}" class="form-loading">正在读取组织</view>
+    <view wx:else class="org-list">
+      <view wx:for="{{organizations}}" wx:key="id" class="org-option {{item.selected ? 'active' : ''}}" data-id="{{item.id}}" bindtap="toggleOrganization">
+        <view class="org-title-row">
+          <view class="org-name">{{item.name}}</view>
+          <view wx:if="{{item.typeLabelText}}" class="org-type-label">{{item.typeLabelText}}</view>
+        </view>
+        <view class="org-rate">{{item.minFeeText}} - {{item.maxFeeText}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="settlement-panel">
+    <view class="settlement-rate-row">
+      <view>
+        <view class="settlement-title">时薪</view>
+        <view class="settlement-hint">{{settlementHint}}</view>
+      </view>
+      <view class="settlement-rate tappable" bindtap="editFee">¥{{feeText}}/小时</view>
+    </view>
+
+    <view wx:if="{{hasSelectedOrganizations}}" class="settlement-slider-area">
+      <slider
+        class="fee-slider"
+        min="{{minRequiredCents}}"
+        max="{{maxFeeCents}}"
+        step="100"
+        value="{{feeCentsPerHour}}"
+        activeColor="#0071fe"
+        backgroundColor="#e5eaf2"
+        block-color="#0071fe"
+        block-size="24"
+        bindchange="onFeeSliderChange"
+        bindchanging="onFeeSliderChange"
+      ></slider>
+      <view class="fee-range-row">
+        <text>¥{{minRequiredText}}</text>
+        <text>¥{{maxFeeText}}</text>
+      </view>
+    </view>
+    <view wx:else class="settlement-free-rate tappable" bindtap="editFee">点击设置时薪</view>
+
+    <view class="settlement-bottom-row">
+      <view class="bottom-total">
+        <text>合计</text>
+        <text class="bottom-price">¥{{amountText}}</text>
+      </view>
+      <button
+        wx:if="{{needsPhone}}"
+        class="primary-button bottom-submit"
+        open-type="getPhoneNumber"
+        bindgetphonenumber="handleGetPhoneNumber"
+        loading="{{bindingPhone}}"
+        disabled="{{bindingPhone || submitting}}"
+      >授权手机号并继续发布</button>
+      <button
+        wx:else
+        class="primary-button bottom-submit"
+        loading="{{submitting}}"
+        disabled="{{submitting || !canSubmit}}"
+        bindtap="submit"
+      >支付并发布</button>
+    </view>
+  </view>
+</view>

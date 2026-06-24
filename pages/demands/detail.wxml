@@ -1,0 +1,123 @@
+<view class="page demand-detail-page">
+  <view wx:if="{{loading}}" class="surface-card demand-empty">正在读取需求</view>
+  <view wx:elif="{{errorMessage}}" class="surface-card demand-empty">{{errorMessage}}</view>
+
+  <view wx:else>
+    <view class="surface-card demand-overview">
+      <view class="overview-top">
+        <view class="detail-status">{{demand.statusText}}</view>
+        <view class="overview-price">{{demand.feePerHourText}}</view>
+      </view>
+      <view class="overview-title">{{demand.title}}</view>
+      <view class="overview-meta">{{demand.overviewMetaText}}</view>
+      <view wx:if="{{demand.hasDescription}}" class="overview-desc">{{demand.description}}</view>
+      <view class="detail-org-row" wx:if="{{demand.hasOrganizations}}">
+        <view wx:for="{{demand.organizations}}" wx:for-item="org" wx:key="id" class="detail-org-chip">{{org.name}}</view>
+      </view>
+      <view wx:else class="detail-requirement">{{demand.requirementText}}</view>
+      <button wx:if="{{demand.showCancelAction}}" class="plain-danger-button overview-cancel" loading="{{operating}}" disabled="{{operating}}" bindtap="cancelDemand">取消并退款</button>
+    </view>
+
+    <view wx:if="{{demand.showSelectedContact}}" class="surface-card selected-card">
+      <view class="section-title">已选择</view>
+      <view class="selected-row">
+        <image class="selected-avatar" src="{{demand.selectedApplication.resume.avatarUrlResolved}}" mode="aspectFill"></image>
+        <view class="selected-main">
+          <view class="selected-name">{{demand.selectedApplication.resume.displayNameText}}</view>
+          <view class="selected-phone">{{demand.selectedApplication.phoneMasked}}</view>
+        </view>
+        <button class="ghost-button selected-copy" data-phone="{{demand.selectedApplication.phone}}" bindtap="copyPhone">复制手机号</button>
+      </view>
+    </view>
+
+    <view wx:if="{{demand.showCandidateList}}" class="surface-card candidates-card">
+      <view class="section-head">
+        <view>
+          <view class="section-title">投稿列表</view>
+          <view class="section-subtitle">{{demand.candidateCountText}}</view>
+        </view>
+      </view>
+
+      <view wx:if="{{!demand.hasApplications}}" class="candidate-empty">暂无投稿</view>
+
+      <view wx:for="{{demand.applications}}" wx:key="id" class="candidate-card {{item.isSelected ? 'candidate-selected' : ''}} {{item.isRejected ? 'candidate-rejected' : ''}}">
+        <view class="candidate-summary">
+          <image class="candidate-avatar" src="{{item.resume.avatarUrlResolved}}" mode="aspectFill"></image>
+          <view class="candidate-main">
+            <view class="candidate-name-row">
+              <view class="candidate-name">{{item.resume.displayNameText}}</view>
+              <view wx:if="{{item.isSelected}}" class="candidate-badge">已选择</view>
+              <view wx:elif="{{item.isRejected}}" class="candidate-badge muted">未选中</view>
+            </view>
+            <view class="candidate-meta">{{item.summaryText}}</view>
+            <view wx:if="{{item.showMessage}}" class="candidate-message">{{item.message}}</view>
+            <view wx:if="{{item.showPhone}}" class="candidate-phone">{{item.phoneMasked}}</view>
+          </view>
+        </view>
+
+        <view class="candidate-actions">
+          <button class="ghost-button candidate-secondary" data-id="{{item.id}}" bindtap="toggleApplicationDetail">{{item.detailButtonText}}</button>
+          <button wx:if="{{item.showSelectAction}}" class="primary-button candidate-primary" data-id="{{item.id}}" loading="{{operating}}" disabled="{{operating}}" bindtap="selectApplication">选择 TA</button>
+        </view>
+
+        <view wx:if="{{item.expanded}}" class="resume-panel">
+          <view class="resume-section">
+            <view class="resume-section-title">自我介绍</view>
+            <view class="resume-text">{{item.resume.selfIntroductionText}}</view>
+          </view>
+
+          <view class="resume-section">
+            <view class="resume-section-title">认证</view>
+            <view wx:if="{{!item.resume.hasCredentials}}" class="resume-empty">暂无认证</view>
+            <view wx:for="{{item.resume.credentials}}" wx:for-item="credential" wx:key="id" class="resume-line">
+              <view class="resume-line-title">{{credential.titleText}}</view>
+              <view wx:if="{{credential.metaText}}" class="resume-line-meta">{{credential.metaText}}</view>
+            </view>
+          </view>
+
+          <view class="resume-section">
+            <view class="resume-section-title">服务履历</view>
+            <view wx:if="{{!item.resume.hasServiceEngagements}}" class="resume-empty">暂无服务履历</view>
+            <view wx:for="{{item.resume.serviceEngagements}}" wx:for-item="engagement" wx:key="id" class="resume-line">
+              <view class="resume-line-title">{{engagement.titleText}}</view>
+              <view wx:if="{{engagement.metaText}}" class="resume-line-meta">{{engagement.metaText}}</view>
+              <view wx:if="{{engagement.descriptionText}}" class="resume-text">{{engagement.descriptionText}}</view>
+            </view>
+          </view>
+
+          <view class="resume-section">
+            <view class="resume-section-title">消费履历</view>
+            <view wx:if="{{!item.resume.hasConsumptionEngagements}}" class="resume-empty">暂无消费履历</view>
+            <view wx:for="{{item.resume.consumptionEngagements}}" wx:for-item="engagement" wx:key="id" class="resume-line">
+              <view class="resume-line-title">{{engagement.titleText}}</view>
+              <view wx:if="{{engagement.metaText}}" class="resume-line-meta">{{engagement.metaText}}</view>
+              <view wx:if="{{engagement.descriptionText}}" class="resume-text">{{engagement.descriptionText}}</view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{demand.showMyApplication}}" class="surface-card application-state">
+      <view class="section-title">我的投稿</view>
+      <view class="section-subtitle">{{demand.myApplication.statusText}}</view>
+    </view>
+
+    <view class="detail-bottom-space"></view>
+
+    <view wx:if="{{demand.showBottomBar}}" class="detail-bottom-bar">
+      <button
+        wx:if="{{demand.showApplyControl}}"
+        class="{{demand.applyActionEnabled ? 'primary-button' : 'secondary-button'}} detail-primary detail-apply"
+        disabled="{{!demand.applyActionEnabled}}"
+        bindtap="openApply"
+      >{{demand.applyActionText}}</button>
+      <button
+        wx:if="{{demand.showShareAction}}"
+        class="secondary-button detail-primary detail-share {{!demand.showApplyControl ? 'detail-share-only' : ''}}"
+        open-type="share"
+      >转发</button>
+    </view>
+  </view>
+</view>
+<canvas canvas-id="demandShareCanvas" class="share-canvas" style="width: 500px; height: 400px;"></canvas>

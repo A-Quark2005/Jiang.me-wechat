@@ -1,0 +1,123 @@
+.apply-page {
+  padding-top: 16rpx;
+}
+
+.apply-empty,
+.apply-demand-card,
+.resume-card,
+.message-card {
+  box-shadow: none;
+  border: 1rpx solid #edf0f5;
+}
+
+.apply-empty {
+  min-height: 240rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b0b8c9;
+}
+
+.apply-label {
+  color: #8b95a7;
+  font-size: 24rpx;
+  line-height: 34rpx;
+}
+
+.apply-title {
+  margin-top: 10rpx;
+  color: #152033;
+  font-size: 34rpx;
+  line-height: 48rpx;
+  font-weight: 600;
+}
+
+.apply-price {
+  margin-top: 6rpx;
+  color: #0071fe;
+  font-size: 28rpx;
+  line-height: 40rpx;
+}
+
+.resume-head {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  margin-top: 18rpx;
+}
+
+.resume-avatar {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  background: #eef5ff;
+}
+
+.resume-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.resume-name {
+  color: #152033;
+  font-size: 32rpx;
+  line-height: 44rpx;
+  font-weight: 600;
+}
+
+.resume-meta,
+.resume-intro {
+  color: #8b95a7;
+  font-size: 26rpx;
+  line-height: 38rpx;
+}
+
+.resume-intro {
+  margin-top: 18rpx;
+  white-space: pre-wrap;
+}
+
+.credential-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-top: 18rpx;
+}
+
+.credential-chip {
+  height: 44rpx;
+  padding: 0 16rpx;
+  border-radius: 999rpx;
+  background: #eef5ff;
+  color: #0071fe;
+  font-size: 22rpx;
+  line-height: 44rpx;
+}
+
+.message-input {
+  width: 100%;
+  min-height: 180rpx;
+  margin-top: 16rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 8rpx;
+  background: #f7f9fc;
+  color: #152033;
+  font-size: 28rpx;
+  line-height: 40rpx;
+}
+
+.apply-bottom-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  padding: 18rpx 32rpx calc(18rpx + env(safe-area-inset-bottom));
+  background: #ffffff;
+  box-shadow: 0 -8rpx 24rpx rgba(0, 0, 0, 0.05);
+}
+
+.apply-submit {
+  height: 88rpx;
+  border-radius: 8rpx;
+}

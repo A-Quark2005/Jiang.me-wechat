@@ -1,0 +1,48 @@
+<view class="page page-with-bar apply-page">
+  <view wx:if="{{loading}}" class="surface-card apply-empty">正在读取简历</view>
+  <view wx:else>
+    <view class="surface-card apply-demand-card">
+      <view class="apply-label">投稿需求</view>
+      <view class="apply-title">{{demand.title}}</view>
+      <view class="apply-price">{{demand.feePerHourText}}，定金 {{demand.amountText}}</view>
+    </view>
+
+    <view class="surface-card resume-card">
+      <view class="apply-label">将投出的简历</view>
+      <view class="resume-head">
+        <image class="resume-avatar" src="{{resume.avatarUrlResolved}}" mode="aspectFill"></image>
+        <view class="resume-main">
+          <view class="resume-name">{{resume.displayNameText}}</view>
+          <view class="resume-meta">{{resume.credentialCount}} 个认证，{{resume.engagementCount}} 条履历</view>
+        </view>
+      </view>
+      <view class="resume-intro">{{resume.selfIntroductionText}}</view>
+      <view class="credential-row">
+        <view wx:for="{{resume.credentials}}" wx:key="id" class="credential-chip">{{item.title}}</view>
+      </view>
+    </view>
+
+    <view class="surface-card message-card">
+      <view class="apply-label">投稿留言（可选）</view>
+      <textarea class="message-input" maxlength="500" placeholder="简单说明你为什么适合这个需求" value="{{message}}" bindinput="onMessageInput"></textarea>
+    </view>
+
+    <view class="apply-bottom-bar">
+      <button
+        wx:if="{{needsPhone}}"
+        class="primary-button apply-submit"
+        open-type="getPhoneNumber"
+        bindgetphonenumber="handleGetPhoneNumber"
+        loading="{{bindingPhone}}"
+        disabled="{{bindingPhone || submitting}}"
+      >授权手机号并继续投稿</button>
+      <button
+        wx:else
+        class="primary-button apply-submit"
+        loading="{{submitting}}"
+        disabled="{{submitting}}"
+        bindtap="submit"
+      >确认投稿</button>
+    </view>
+  </view>
+</view>

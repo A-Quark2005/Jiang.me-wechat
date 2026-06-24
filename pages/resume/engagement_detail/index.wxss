@@ -67,6 +67,7 @@
   font-size: 28rpx;
   line-height: 1.7;
   color: #b0b8c9;
+  white-space: pre-wrap;
 }
 
 .detail-note {
@@ -81,6 +82,12 @@
 .row-flex-button,
 .full-button {
   width: 100%;
+}
+
+.button-row .row-flex-button,
+.button-row > button {
+  min-width: 0;
+  width: auto;
 }
 
 .detail-bottom-button {

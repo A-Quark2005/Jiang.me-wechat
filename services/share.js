@@ -2,11 +2,12 @@
 const DEFAULT_PATH = '/pages/home/index';
 const DEFAULT_IMAGE_URL = '/assets/ui/share-cover.jpg';
 const sessionStore = require('./session-store');
+const loginGuard = require('./login-guard');
 let copyUrlHandlerInstalled = false;
 
 const PAGE_SHARE_COPY = {
   '/pages/home/index': {
-    title: '讲了么，腾讯会议，会开会',
+    title: '讲了么——腾讯会议，会开会',
     timelineTitle: '讲了么',
   },
   '/pages/meeting_activation/index': {
@@ -83,6 +84,12 @@ function normalizePath(path) {
 
 function routeOnly(path) {
   return normalizePath(String(path || '').split('?')[0]);
+}
+
+function buildShareLandingPath(path) {
+  const normalizedPath = normalizePath(path);
+  if (loginGuard.isTabPage(routeOnly(normalizedPath))) return normalizedPath;
+  return `${DEFAULT_PATH}?target=${encodeURIComponent(normalizedPath)}`;
 }
 
 function currentPagePath() {
@@ -178,11 +185,11 @@ function copyForPath(path) {
 
 function defaultShareAppMessage(options) {
   const config = options || {};
-  const path = appendShareRefToPath(config.path || buildCurrentPath());
-  const copy = copyForPath(path);
+  const directPath = appendShareRefToPath(config.path || buildCurrentPath());
+  const copy = copyForPath(directPath);
   return {
     title: config.title || copy.title || DEFAULT_TITLE,
-    path,
+    path: buildShareLandingPath(directPath),
     imageUrl: config.imageUrl || copy.imageUrl || DEFAULT_IMAGE_URL,
   };
 }

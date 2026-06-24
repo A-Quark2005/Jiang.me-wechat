@@ -143,6 +143,15 @@ function parseError(response) {
   return `请求失败：HTTP ${response.statusCode || 0}`;
 }
 
+function buildApiError(response) {
+  const body = response.data || {};
+  const error = new Error(parseError(response));
+  error.statusCode = response.statusCode || 0;
+  error.code = typeof body.error === 'string' ? body.error : '';
+  error.response = body;
+  return error;
+}
+
 function handleUnauthorized(statusCode) {
   if (statusCode !== 401 && statusCode !== 403) {
     return;
@@ -212,7 +221,7 @@ function request(options) {
           return;
         }
         handleUnauthorized(statusCode);
-        reject(new Error(parseError(response)));
+        reject(buildApiError(response));
       },
       fail(error) {
         reject(new Error(error && error.errMsg ? `网络请求失败：${error.errMsg}` : '网络请求失败'));

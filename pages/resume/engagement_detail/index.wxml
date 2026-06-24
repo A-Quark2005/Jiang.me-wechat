@@ -1,9 +1,9 @@
 <view class="page page-with-bar engagement-detail-page">
-  <view wx:if="{{loading}}" class="surface-card">&#27491;&#22312;&#35835;&#21462;&#23653;&#21382;&#35814;&#24773;</view>
+  <view wx:if="{{loading}}" class="surface-card">正在读取履历详情</view>
 
   <view wx:elif="{{errorMessage && !item}}" class="surface-card">
     <view class="error-box">{{errorMessage}}</view>
-    <button class="primary-button action-button" bindtap="loadDetail">&#37325;&#26032;&#21152;&#36733;</button>
+    <button class="primary-button action-button" bindtap="loadDetail">重新加载</button>
   </view>
 
   <block wx:else>
@@ -14,56 +14,56 @@
       </view>
 
       <view class="detail-line-row">
-        <view class="detail-label">&#31867;&#22411;</view>
+        <view class="detail-label">类型</view>
         <view class="detail-value">{{typeLabelText}}</view>
       </view>
       <view class="detail-line-row">
-        <view class="detail-label">&#23545;&#26041;</view>
+        <view class="detail-label">对方</view>
         <view class="detail-value">{{counterpartNameText}}</view>
       </view>
       <view class="detail-line-row">
-        <view class="detail-label">&#24320;&#22987;&#26102;&#38388;</view>
+        <view class="detail-label">开始时间</view>
         <view class="detail-value">{{startedAtDisplayText}}</view>
       </view>
     </view>
 
     <view class="surface-card detail-content-card">
-      <view class="section-title">&#26381;&#21153;&#20869;&#23481;</view>
+      <view class="section-title">服务内容</view>
       <view class="detail-content-text">{{detailText}}</view>
     </view>
 
-    <view class="soft-note detail-note">&#23390;&#29983;&#23653;&#21382;&#38656;&#21452;&#26041;&#21516;&#24847;&#26041;&#21487;&#20462;&#25913;&#25110;&#21024;&#38500;&#65292;&#31995;&#32479;&#23558;&#33258;&#21160;&#36890;&#30693;&#23545;&#26041;</view>
+    <view class="soft-note detail-note">此条履历需双方同意方可修改或删除，系统将自动通知对方</view>
 
     <view wx:if="{{editing}}" class="surface-card">
-      <view class="section-title">&#20462;&#25913;&#23653;&#21382;</view>
+      <view class="section-title">修改履历</view>
       <view class="field">
-        <view class="field-label">&#26631;&#39064;</view>
-        <input class="input" value="{{editForm.title}}" data-field="title" bindinput="updateEditField" maxlength="64" placeholder="&#35831;&#36755;&#20837;&#26631;&#39064;" />
+        <view class="field-label">标题</view>
+        <input class="input" value="{{editForm.title}}" data-field="title" bindinput="updateEditField" maxlength="64" placeholder="请输入标题" />
       </view>
       <view class="field">
-        <view class="field-label">&#35814;&#24773;</view>
-        <textarea class="textarea" value="{{editForm.detailText}}" data-field="detailText" bindinput="updateEditField" maxlength="1200" placeholder="&#21487;&#20998;&#34892;&#22635;&#20889;&#35814;&#24773;" />
+        <view class="field-label">详情</view>
+        <textarea class="textarea" value="{{editForm.detailText}}" data-field="detailText" bindinput="updateEditField" maxlength="1200" placeholder="可分行填写详情" />
       </view>
       <view class="row action-row">
-        <button class="ghost-button row-flex-button" bindtap="cancelEdit" disabled="{{submitting}}">&#21462;&#28040;</button>
-        <button class="primary-button row-flex-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submitEdit">&#25552;&#20132;&#20462;&#25913;&#30003;&#35831;</button>
+        <button class="ghost-button row-flex-button" bindtap="cancelEdit" disabled="{{submitting}}">取消</button>
+        <button class="primary-button row-flex-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submitEdit">提交修改申请</button>
       </view>
     </view>
 
     <view wx:if="{{errorMessage}}" class="error-box">{{errorMessage}}</view>
 
     <view wx:if="{{needsMyConfirmation}}" class="bottom-bar button-row safe-bottom-pad">
-      <button wx:if="{{!inviteMode}}" class="danger-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="reject">&#25298;&#32477;</button>
-      <button class="primary-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="confirm">&#30830;&#35748;</button>
+      <button wx:if="{{!inviteMode}}" class="danger-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="reject">拒绝</button>
+      <button class="primary-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="confirm">确认</button>
     </view>
 
     <view wx:elif="{{waitingForOtherConfirmation}}" class="bottom-bar safe-bottom-pad">
-      <button class="primary-button full-button" open-type="share" bindtap="shareConfirmation">&#21457;&#32473;&#24494;&#20449;&#32852;&#31995;&#20154;&#30830;&#35748;</button>
+      <button class="primary-button full-button" open-type="share" bindtap="shareConfirmation">发给微信联系人确认</button>
     </view>
 
     <view wx:else class="bottom-bar button-row safe-bottom-pad">
-      <button class="outline-button row-flex-button detail-bottom-button" bindtap="startEdit" disabled="{{bottomActionDisabled}}">&#30003;&#35831;&#20462;&#25913;</button>
-      <button class="danger-button row-flex-button detail-bottom-button" bindtap="requestDelete" disabled="{{bottomActionDisabled}}">&#30003;&#35831;&#21024;&#38500;</button>
+      <button class="outline-button row-flex-button detail-bottom-button" bindtap="startEdit" disabled="{{bottomActionDisabled}}">申请修改</button>
+      <button class="danger-button row-flex-button detail-bottom-button" bindtap="requestDelete" disabled="{{bottomActionDisabled}}">申请删除</button>
     </view>
   </block>
 </view>
