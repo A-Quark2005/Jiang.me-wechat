@@ -21,13 +21,14 @@
       </view>
       <view class="public-share-button">
         <image class="public-share-icon" src="/assets/ui/share-outline-black.svg" mode="aspectFit"></image>
+        <view class="public-share-hint">转发页面</view>
         <button class="public-share-native" aria-label="share" bindtap="showShareOptions"></button>
       </view>
     </view>
     <view class="surface-card public-section">
       <view class="section-title">认证</view>
       <view wx:if="{{credentials.length === 0}}" class="public-empty">暂无认证</view>
-      <view wx:for="{{credentials}}" wx:key="id" class="public-credential">
+      <view wx:for="{{credentials}}" wx:key="id" class="public-credential {{item.canOpenMembers ? 'tappable' : ''}}" data-id="{{item.organizationId}}" bindtap="openOrganizationMembers">
         <image wx:if="{{item.logoUrl}}" class="public-credential-logo" src="{{item.logoUrl}}" mode="aspectFit"></image>
         <view class="row-main">
           <view class="public-credential-title">{{item.title}}</view>

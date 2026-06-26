@@ -3,16 +3,21 @@ const displayFormatters = require('../../services/display-formatters');
 const loginGuard = require('../../services/login-guard');
 const share = require('../../services/share');
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 20;
 
 function normalizeMembers(raw) {
   const items = Array.isArray(raw) ? raw : (raw && raw.items) || [];
   return items.map((item) => {
     const name = String(item.displayName || '').trim() || '未命名用户';
+    const selfIntroduction = String(item.selfIntroduction || '').trim();
     return {
       ...item,
       displayName: name,
       initial: name.slice(0, 1),
+      selfIntroduction,
+      selfIntroductionText: selfIntroduction || '暂无自我介绍',
+      resumeExpanded: false,
+      resumeButtonText: '简历',
       verifiedText: item.verifiedAt
         ? `${displayFormatters.formatDateText(item.verifiedAt, { includeTime: false, fallback: item.verifiedAt })} 完成认证`
         : '已完成认证',
@@ -122,6 +127,21 @@ Page({
     const id = String(event.currentTarget.dataset.id || '');
     if (!id) return;
     wx.navigateTo({ url: `/pages/public_resume/index?id=${encodeURIComponent(id)}` });
+  },
+
+  toggleMemberResume(event) {
+    const id = String(event.currentTarget.dataset.id || '');
+    if (!id) return;
+    const members = this.data.members.map((item) => {
+      if (item.id !== id) return item;
+      const resumeExpanded = !item.resumeExpanded;
+      return {
+        ...item,
+        resumeExpanded,
+        resumeButtonText: resumeExpanded ? '关闭简历' : '简历',
+      };
+    });
+    this.setData({ members });
   },
 
   showShareOptions() {

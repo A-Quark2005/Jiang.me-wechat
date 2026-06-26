@@ -33,12 +33,12 @@
     <view wx:if="{{demand.showCandidateList}}" class="surface-card candidates-card">
       <view class="section-head">
         <view>
-          <view class="section-title">投稿列表</view>
+          <view class="section-title">投递列表</view>
           <view class="section-subtitle">{{demand.candidateCountText}}</view>
         </view>
       </view>
 
-      <view wx:if="{{!demand.hasApplications}}" class="candidate-empty">暂无投稿</view>
+      <view wx:if="{{!demand.hasApplications}}" class="candidate-empty">暂无投递</view>
 
       <view wx:for="{{demand.applications}}" wx:key="id" class="candidate-card {{item.isSelected ? 'candidate-selected' : ''}} {{item.isRejected ? 'candidate-rejected' : ''}}">
         <view class="candidate-summary">
@@ -99,24 +99,30 @@
     </view>
 
     <view wx:if="{{demand.showMyApplication}}" class="surface-card application-state">
-      <view class="section-title">我的投稿</view>
+      <view class="section-title">我的投递</view>
       <view class="section-subtitle">{{demand.myApplication.statusText}}</view>
     </view>
 
     <view class="detail-bottom-space"></view>
 
     <view wx:if="{{demand.showBottomBar}}" class="detail-bottom-bar">
-      <button
-        wx:if="{{demand.showApplyControl}}"
-        class="{{demand.applyActionEnabled ? 'primary-button' : 'secondary-button'}} detail-primary detail-apply"
-        disabled="{{!demand.applyActionEnabled}}"
-        bindtap="openApply"
-      >{{demand.applyActionText}}</button>
-      <button
-        wx:if="{{demand.showShareAction}}"
-        class="secondary-button detail-primary detail-share {{!demand.showApplyControl ? 'detail-share-only' : ''}}"
-        open-type="share"
-      >转发</button>
+      <view wx:if="{{demand.showShareAction}}" class="detail-share-tip">
+        <text>转发给合适的人，成功匹配后可获得推荐奖励</text>
+        <text class="detail-share-rule" bindtap="showReferralRewardRule">规则</text>
+      </view>
+      <view class="detail-bottom-actions">
+        <button
+          wx:if="{{demand.showApplyControl}}"
+          class="{{demand.applyActionEnabled ? 'primary-button' : 'secondary-button'}} detail-primary detail-apply"
+          disabled="{{!demand.applyActionEnabled}}"
+          bindtap="openApply"
+        >{{demand.applyActionText}}</button>
+        <button
+          wx:if="{{demand.showShareAction}}"
+          class="secondary-button detail-primary detail-share {{!demand.showApplyControl ? 'detail-share-only' : ''}}"
+          open-type="share"
+        >转发</button>
+      </view>
     </view>
   </view>
 </view>

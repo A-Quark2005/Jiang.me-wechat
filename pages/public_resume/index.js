@@ -40,6 +40,17 @@ function numberEngagements(items) {
   });
 }
 
+function decorateCredentials(items) {
+  return listFrom(items, ['items', 'credentials']).map((item) => {
+    const organizationId = String(item.organizationId || '').trim();
+    return {
+      ...item,
+      organizationId,
+      canOpenMembers: Boolean(organizationId),
+    };
+  });
+}
+
 Page({
   data: {
     userId: '',
@@ -112,7 +123,7 @@ Page({
         avatarText: displayName.slice(0, 1),
         selfIntroductionText: resume.selfIntroduction || '暂无自我介绍',
         consultingFeeText: `价格：${moneyText(resume.consultingFeeCentsPerHour)}/小时`,
-        credentials: listFrom(resume.certifiedQualifications || resume.credentials, ['items', 'credentials']),
+        credentials: decorateCredentials(resume.certifiedQualifications || resume.credentials),
         serviceEngagements: numberEngagements(engagements.filter((item) => engagementSide(item) === 'provider')),
         consumptionEngagements: numberEngagements(engagements.filter((item) => engagementSide(item) === 'receiver')),
       });
@@ -124,6 +135,12 @@ Page({
         errorMessage: error && error.message ? error.message : '资料加载失败',
       });
     }
+  },
+
+  openOrganizationMembers(event) {
+    const id = String(event.currentTarget.dataset.id || '');
+    if (!id) return;
+    wx.navigateTo({ url: `/pages/organization_members/index?id=${encodeURIComponent(id)}` });
   },
 
   async loadContactAccess(forceRefresh) {

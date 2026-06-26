@@ -8,6 +8,7 @@
     </view>
     <view class="members-share-button">
       <image class="members-share-icon" src="/assets/ui/share-outline-black.svg" mode="aspectFit"></image>
+      <view class="members-share-hint">转发页面</view>
       <button class="members-share-native" aria-label="share" bindtap="showShareOptions"></button>
     </view>
   </view>
@@ -21,14 +22,25 @@
 
   <view wx:else class="members-list">
     <view wx:if="{{members.length === 0}}" class="surface-card members-empty">暂无公开资料</view>
-    <view wx:for="{{members}}" wx:key="id" class="surface-card member-card tappable" data-id="{{item.id}}" bindtap="openPublicResume">
-      <image wx:if="{{item.avatarUrl}}" class="member-avatar" src="{{item.avatarUrl}}" mode="aspectFill"></image>
-      <view wx:else class="member-avatar fallback">{{item.initial}}</view>
-      <view class="members-main">
-        <view class="member-name">{{item.displayName}}</view>
-        <view class="member-meta">{{item.verifiedText}}</view>
+    <view wx:for="{{members}}" wx:key="id" class="surface-card member-card">
+      <view class="member-summary">
+        <image wx:if="{{item.avatarUrl}}" class="member-avatar" src="{{item.avatarUrl}}" mode="aspectFill"></image>
+        <view wx:else class="member-avatar fallback">{{item.initial}}</view>
+        <view class="member-main">
+          <view class="member-name">{{item.displayName}}</view>
+          <view class="member-meta">{{item.verifiedText}}</view>
+        </view>
       </view>
-      <image class="members-arrow" src="/assets/ui/arrow-light.svg" mode="aspectFit"></image>
+      <view class="member-actions">
+        <button class="ghost-button member-action" data-id="{{item.id}}" bindtap="toggleMemberResume">{{item.resumeButtonText}}</button>
+        <button class="primary-button member-action" data-id="{{item.id}}" bindtap="openPublicResume">详情</button>
+      </view>
+      <view wx:if="{{item.resumeExpanded}}" class="member-resume-panel">
+        <view class="member-resume-section">
+          <view class="member-resume-title">自我介绍</view>
+          <view class="member-resume-text">{{item.selfIntroductionText}}</view>
+        </view>
+      </view>
     </view>
     <button wx:if="{{hasMore}}" class="secondary-button members-more" loading="{{loadingMore}}" bindtap="loadMore">加载更多</button>
   </view>

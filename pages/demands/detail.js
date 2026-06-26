@@ -65,9 +65,9 @@ Page({
     if (this.data.operating) return;
     const applicationId = String(event.currentTarget.dataset.id || '');
     if (!applicationId) return;
-    const result = await confirmDialog('确认选择', '选择后将展示对方手机号，其他投稿会自动标记为未选中。', {
+    const result = await confirmDialog('确认选择', '选择后将展示对方手机号，其他投递会自动标记为未选中。', {
       cancelText: '再想想',
-      confirmText: '就TA了',
+      confirmText: '知道了',
     });
     if (!result) return;
     this.setData({ operating: true });
@@ -120,6 +120,14 @@ Page({
     wx.setClipboardData({ data: phone });
   },
 
+  showReferralRewardRule() {
+    wx.showModal({
+      title: '推荐奖励',
+      content: '有人通过你的转发进入页面并投递简历，且最终被发单者选中后，你可获得推荐奖励。\n\n奖励会直接进入你的微信零钱。金额会根据实际支付的试讲定金计算，具体到账以微信支付分账结果为准。',
+      confirmText: '知道了',
+      showCancel: false,
+    });
+  },
   onShareAppMessage() {
     const demand = this.data.demand || {};
     return share.defaultShareAppMessage({
@@ -186,7 +194,7 @@ function decorateDemand(rawDemand, expandedApplicationId) {
     : [];
   const organizationText = organizationNames.join('、');
   const hasApplications = applications.length > 0;
-  const candidateCountText = hasApplications ? `${applications.length} 位投稿人` : '暂无投稿';
+  const candidateCountText = hasApplications ? `${applications.length} 位投递人` : '暂无投递';
   const isOpen = rawDemand.status === 'open';
   const isPendingPayment = rawDemand.status === 'pending_payment';
   const isPoster = Boolean(rawDemand.isPoster);
@@ -203,7 +211,7 @@ function decorateDemand(rawDemand, expandedApplicationId) {
     myApplication,
     organizationText,
     hasOrganizations: organizationNames.length > 0,
-    requirementText: organizationText || '无认证要求，所有人都可以投稿',
+    requirementText: organizationText || '无认证要求，所有人都可以投递简历',
     hasDescription: Boolean(rawDemand.description),
     hasApplications,
     candidateCountText,
@@ -234,7 +242,7 @@ function decorateApplication(application, expandedApplicationId) {
   return {
     ...application,
     expanded,
-    detailButtonText: expanded ? '关闭简历' : '查看简历',
+    detailButtonText: expanded ? '关闭详情' : '查看详情',
     isSelected: application.status === 'selected',
     isRejected: application.status === 'rejected',
     canSelect: application.status === 'submitted',
@@ -295,7 +303,7 @@ function drawShareImage(page, demand) {
     ctx.fillText(`${demand.feePerHourText}  定金 ${demand.amountText}`, 58, 218);
     ctx.setFillStyle('#4b5563');
     ctx.setFontSize(20);
-    drawWrappedText(ctx, demand.requirementText || '无认证要求，所有人都可以投稿', 58, 260, 384, 30, 2);
+    drawWrappedText(ctx, demand.requirementText || '无认证要求，所有人都可以投递简历', 58, 260, 384, 30, 2);
     ctx.setFillStyle('#9ca3af');
     ctx.setFontSize(18);
     ctx.fillText('讲了么——腾讯会议，会开会', 58, 338);

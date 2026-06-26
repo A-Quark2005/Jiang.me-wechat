@@ -62,12 +62,12 @@
 
 .public-share-button {
   position: absolute;
-  right: 56rpx;
+  right: 28rpx;
   top: 50%;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  width: 72rpx;
+  justify-content: center;
+  width: 112rpx;
   height: 72rpx;
   margin: 0;
   padding: 0;
@@ -100,6 +100,17 @@
   display: block;
   width: 44rpx;
   height: 44rpx;
+}
+
+.public-share-hint {
+  position: absolute;
+  left: 50%;
+  top: 62rpx;
+  transform: translateX(-50%);
+  color: #9ca3af;
+  font-size: 22rpx;
+  line-height: 30rpx;
+  white-space: nowrap;
 }
 
 .public-section {
@@ -182,9 +193,6 @@
 }
 
 .contact-action-bar {
-  position: sticky;
-  bottom: 0;
-  z-index: 20;
   margin: 32rpx -16px 0;
   padding: 16rpx 16px calc(20rpx + env(safe-area-inset-bottom));
   background: #f7f8fa;
