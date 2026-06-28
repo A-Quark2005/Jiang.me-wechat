@@ -21,7 +21,8 @@
         </view>
         <view wx:else class="demand-requirement">{{item.requirementText}}</view>
         <view class="demand-card-foot">
-          <text>{{item.amountText}} / 2小时定金</text>
+          <text>{{item.amountText}} / 2小时试讲定金</text>
+          <text>{{item.applicationProgressText}}</text>
           <text>{{item.applyStatusText}}</text>
         </view>
       </view>
@@ -34,7 +35,7 @@
           <view class="demand-title">{{item.title}}</view>
           <view class="demand-price">{{item.statusText}}</view>
         </view>
-        <view class="demand-desc">{{item.feePerHourText}}，定金 {{item.amountText}}</view>
+        <view class="demand-desc">{{item.feePerHourText}}，试讲定金 {{item.amountText}}，{{item.applicationProgressText}}</view>
         <view class="demand-org-row" wx:if="{{item.hasOrganizations}}">
           <view wx:for="{{item.organizations}}" wx:for-item="org" wx:key="id" class="demand-org-chip">{{org.name}}</view>
         </view>

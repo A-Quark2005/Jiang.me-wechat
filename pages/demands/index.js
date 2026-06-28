@@ -1,22 +1,6 @@
 const demands = require('../../services/demands');
 const loginGuard = require('../../services/login-guard');
 
-function listFrom(raw) {
-  return Array.isArray(raw) ? raw : (raw && raw.items) || [];
-}
-
-function decorateDemand(item) {
-  const organizations = Array.isArray(item.organizations) ? item.organizations : [];
-  return {
-    ...item,
-    organizations,
-    descriptionText: item.description || '暂无补充说明',
-    hasOrganizations: organizations.length > 0,
-    requirementText: organizations.length > 0 ? '需满足组织认证' : '无认证要求',
-    applyStatusText: item.canApply ? '可投稿' : item.statusText,
-  };
-}
-
 Page({
   data: {
     activeTab: 'feed',
@@ -49,8 +33,8 @@ Page({
       ]);
       this.setData({
         loading: false,
-        feed: listFrom(feed).map(decorateDemand),
-        mine: listFrom(mine).map(decorateDemand),
+        feed: presentDemandCards(feed),
+        mine: presentDemandCards(mine),
       });
     } catch (error) {
       this.setData({
@@ -75,3 +59,22 @@ Page({
     wx.navigateTo({ url: `/pages/demands/detail?id=${encodeURIComponent(id)}` });
   },
 });
+
+function presentDemandCards(raw) {
+  const items = Array.isArray(raw) ? raw : (raw && raw.items) || [];
+  return items.map((rawDemand) => {
+    const organizations = Array.isArray(rawDemand.organizations) ? rawDemand.organizations : [];
+    const totalApplicationCount = Number(rawDemand.totalApplicationCount || 0);
+    const applicationLimit = Number(rawDemand.applicationLimit || 1);
+    const isApplicationFull = Boolean(rawDemand.isApplicationFull);
+    return {
+      ...rawDemand,
+      organizations,
+      descriptionText: rawDemand.description || '暂无补充说明',
+      hasOrganizations: organizations.length > 0,
+      requirementText: organizations.length > 0 ? '需满足组织认证' : '无认证要求',
+      applicationProgressText: `已收到 ${totalApplicationCount}/${applicationLimit} 份简历`,
+      applyStatusText: isApplicationFull ? '简历已收满' : (rawDemand.canApply ? '可投递' : rawDemand.statusText),
+    };
+  });
+}

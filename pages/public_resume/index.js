@@ -1,6 +1,6 @@
 const profileService = require('../../services/profile');
 const loginGuard = require('../../services/login-guard');
-const paymentService = require('../../services/meeting-entitlements');
+const contactDeposit = require('../../services/contact-deposit');
 const share = require('../../services/share');
 const displayFormatters = require('../../services/display-formatters');
 
@@ -63,7 +63,7 @@ Page({
     serviceEngagements: [],
     consumptionEngagements: [],
     contactAccess: null,
-    contactButtonText: '缴纳定金，认识一下',
+    contactButtonText: '缴纳定金，添加好友',
     contactActionLoading: false,
     consultingFeeText: '',
     shareImagePath: '',
@@ -122,7 +122,7 @@ Page({
         },
         avatarText: displayName.slice(0, 1),
         selfIntroductionText: resume.selfIntroduction || '暂无自我介绍',
-        consultingFeeText: `价格：${moneyText(resume.consultingFeeCentsPerHour)}/小时`,
+        consultingFeeText: `价格：${contactDeposit.moneyText(resume.consultingFeeCentsPerHour)}/小时`,
         credentials: decorateCredentials(resume.certifiedQualifications || resume.credentials),
         serviceEngagements: numberEngagements(engagements.filter((item) => engagementSide(item) === 'provider')),
         consumptionEngagements: numberEngagements(engagements.filter((item) => engagementSide(item) === 'receiver')),
@@ -145,17 +145,17 @@ Page({
 
   async loadContactAccess(forceRefresh) {
     if (!loginGuard.isLoggedIn || !loginGuard.isLoggedIn()) {
-      this.setData({ contactAccess: null, contactButtonText: '缴纳定金，认识一下' });
+      this.setData({ contactAccess: null, contactButtonText: '缴纳定金，添加好友' });
       return;
     }
     try {
       const access = await profileService.getContactDepositAccess(this.data.userId, { forceRefresh });
       this.setData({
         contactAccess: access,
-        contactButtonText: access && access.hasPaid ? '查看手机号' : '缴纳定金，认识一下',
+        contactButtonText: access && access.hasPaid ? '查看手机号' : '缴纳定金，添加好友',
       });
     } catch {
-      this.setData({ contactAccess: null, contactButtonText: '缴纳定金，认识一下' });
+      this.setData({ contactAccess: null, contactButtonText: '缴纳定金，添加好友' });
     }
   },
 
@@ -163,65 +163,17 @@ Page({
     if (!loginGuard.guardPage('/pages/public_resume/index', { requireRegistration: true })) {
       return;
     }
-    const access = this.data.contactAccess;
-    if (access && access.hasPaid && access.phone) {
-      this.showPhone(access);
-      return;
-    }
-    const amountText = access && access.amountText ? access.amountText : moneyText(this.data.resume && this.data.resume.contactDepositAmountCents);
-    const feeText = access && access.feePerHourText
-      ? access.feePerHourText
-      : moneyText(this.data.resume && this.data.resume.consultingFeeCentsPerHour);
-    const confirmed = await confirmDialog({
-      title: '确认缴纳',
-      content: `为减少对对方的打扰，平台会先收取 2 小时试讲定金。按 ${feeText}/小时计算，本次需支付 ${amountText}。\n\n支付后将展示对方（与微信号绑定的）手机号。对方会提供 2 小时试讲服务，期间无需另行付费。\n\n若试讲满意，从第 3 小时起，双方可自行交易，平台不再收取其它费用。\n\n如有录屏、AI纪要等需求，可于小程序“权益”页自行购买会议权益。`,
-    });
-    if (!confirmed) return;
-    this.setData({ contactActionLoading: true });
-    try {
-      const order = await profileService.createContactDepositOrder(this.data.userId);
-      if (order && order.hasPaid && order.phone) {
-        this.showPhone(order);
-        this.setData({ contactAccess: order, contactButtonText: '查看手机号', contactActionLoading: false });
-        return;
-      }
-      await paymentService.payOrder(order);
-      const synced = await profileService.syncContactDepositStatus(order.depositId || order.orderNo || order.orderId);
-      this.setData({
-        contactAccess: synced,
-        contactButtonText: synced && synced.hasPaid ? '查看手机号' : '缴纳定金，认识一下',
-        contactActionLoading: false,
-      });
-      if (synced && synced.phone) {
-        this.showPhone(synced);
-      } else {
-        wx.showToast({ title: '支付确认中', icon: 'none' });
-      }
-    } catch (error) {
-      this.setData({ contactActionLoading: false });
-      wx.showModal({
-        title: '操作失败',
-        content: error && error.message ? error.message : '请稍后重试',
-        showCancel: false,
-      });
-    }
-  },
-
-  showPhone(access) {
-    const phone = access && access.phone;
-    if (!phone) {
-      wx.showToast({ title: '暂无手机号', icon: 'none' });
-      return;
-    }
-    wx.showModal({
-      title: '联系方式',
-      content: `${access.targetDisplayName || '对方'}：${phone}`,
-      confirmText: '复制',
-      cancelText: '关闭',
-      success(result) {
-        if (result.confirm) {
-          wx.setClipboardData({ data: phone });
-        }
+    await contactDeposit.payAndRevealContact({
+      targetUserId: this.data.userId,
+      access: this.data.contactAccess,
+      contactDepositAmountCents: this.data.resume && this.data.resume.contactDepositAmountCents,
+      consultingFeeCentsPerHour: this.data.resume && this.data.resume.consultingFeeCentsPerHour,
+      setLoading: (contactActionLoading) => this.setData({ contactActionLoading }),
+      onAccessChange: (contactAccess) => {
+        this.setData({
+          contactAccess,
+          contactButtonText: contactAccess && contactAccess.hasPaid ? '查看手机号' : '缴纳定金，添加好友',
+        });
       },
     });
   },
@@ -316,10 +268,6 @@ Page({
   },
 });
 
-function moneyText(cents) {
-  return `¥${(Number(cents || 0) / 100).toFixed(2)}`;
-}
-
 function decodeScene(raw) {
   const value = String(raw || '').trim();
   if (!value) return {};
@@ -344,23 +292,6 @@ function decodeScene(raw) {
       }
       return result;
     }, {});
-}
-
-function confirmDialog(options) {
-  return new Promise((resolve) => {
-    wx.showModal({
-      title: options.title,
-      content: options.content,
-      confirmText: '继续支付',
-      cancelText: '取消',
-      success(result) {
-        resolve(Boolean(result.confirm));
-      },
-      fail() {
-        resolve(false);
-      },
-    });
-  });
 }
 
 function downloadImage(url) {

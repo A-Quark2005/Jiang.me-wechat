@@ -8,19 +8,55 @@
 
   <view class="surface-card form-card">
     <view class="form-head">
-      <view class="form-title">投稿要求</view>
-      <view class="form-meta">不选组织时，所有人都可以投稿</view>
+      <view class="form-title">接收简历数量</view>
+      <view class="form-meta">收满后不再接收新投递</view>
+    </view>
+    <view class="limit-options">
+      <view
+        wx:for="{{applicationLimitOptions}}"
+        wx:key="value"
+        class="limit-option {{item.active ? 'active' : ''}}"
+        data-value="{{item.value}}"
+        bindtap="selectApplicationLimit"
+      >{{item.label}}</view>
+    </view>
+  </view>
+
+  <view class="surface-card form-card">
+    <view class="form-head">
+      <view class="form-title">谁可以投递</view>
+      <view class="form-meta">{{organizationScopeText}}</view>
     </view>
     <view wx:if="{{loading}}" class="form-loading">正在读取组织</view>
-    <view wx:else class="org-list">
-      <view wx:for="{{organizations}}" wx:key="id" class="org-option {{item.selected ? 'active' : ''}}" data-id="{{item.id}}" bindtap="toggleOrganization">
-        <view class="org-title-row">
-          <view class="org-name">{{item.name}}</view>
-          <view wx:if="{{item.typeLabelText}}" class="org-type-label">{{item.typeLabelText}}</view>
+    <view wx:elif="{{!hasOrganizations}}" class="form-loading">暂无可选认证组织</view>
+    <block wx:else>
+      <view class="scope-card tappable {{!hasSelectedOrganizations ? 'active' : ''}}" bindtap="clearOrganizationScope">
+        <view>
+          <view class="scope-title">不限制</view>
+          <view class="scope-desc">所有用户都可以投递简历</view>
         </view>
-        <view class="org-rate">{{item.minFeeText}} - {{item.maxFeeText}}</view>
+        <view class="org-select-icon {{!hasSelectedOrganizations ? 'active' : ''}}"></view>
       </view>
-    </view>
+      <view class="segmented-strip org-filter-strip">
+        <view
+          wx:for="{{groups}}"
+          wx:key="key"
+          class="segment-chip tappable {{item.className}}"
+          data-group="{{item.key}}"
+          bindtap="switchGroup"
+        >{{item.label}}</view>
+      </view>
+      <view class="org-list">
+        <view wx:for="{{visibleOrganizations}}" wx:key="id" class="org-option {{item.selected ? 'active' : ''}}" data-id="{{item.id}}" bindtap="toggleOrganization">
+          <view class="org-title-row">
+            <view class="org-name">{{item.name}}</view>
+            <view wx:if="{{item.typeLabelText}}" class="org-type-label">{{item.typeLabelText}}</view>
+            <view class="org-select-icon {{item.selected ? 'active' : ''}}"></view>
+          </view>
+          <view class="org-rate">建议时薪 {{item.minFeeText}} - {{item.maxFeeText}}</view>
+        </view>
+      </view>
+    </block>
   </view>
 
   <view class="settlement-panel">
@@ -29,34 +65,17 @@
         <view class="settlement-title">时薪</view>
         <view class="settlement-hint">{{settlementHint}}</view>
       </view>
-      <view class="settlement-rate tappable" bindtap="editFee">¥{{feeText}}/小时</view>
-    </view>
-
-    <view wx:if="{{hasSelectedOrganizations}}" class="settlement-slider-area">
-      <slider
-        class="fee-slider"
-        min="{{minRequiredCents}}"
-        max="{{maxFeeCents}}"
-        step="100"
-        value="{{feeCentsPerHour}}"
-        activeColor="#0071fe"
-        backgroundColor="#e5eaf2"
-        block-color="#0071fe"
-        block-size="24"
-        bindchange="onFeeSliderChange"
-        bindchanging="onFeeSliderChange"
-      ></slider>
-      <view class="fee-range-row">
-        <text>¥{{minRequiredText}}</text>
-        <text>¥{{maxFeeText}}</text>
+      <view class="settlement-rate-control tappable" bindtap="editFee">
+        <view class="settlement-rate">¥{{feeText}}/小时</view>
+        <view class="settlement-rate-hint">点击修改</view>
       </view>
     </view>
-    <view wx:else class="settlement-free-rate tappable" bindtap="editFee">点击设置时薪</view>
 
     <view class="settlement-bottom-row">
       <view class="bottom-total">
-        <text>合计</text>
+        <text>试讲定金</text>
         <text class="bottom-price">¥{{amountText}}</text>
+        <text class="bottom-note">发布无需付款，查看投递人的手机号时再缴纳定金</text>
       </view>
       <button
         wx:if="{{needsPhone}}"
@@ -72,7 +91,7 @@
         loading="{{submitting}}"
         disabled="{{submitting || !canSubmit}}"
         bindtap="submit"
-      >支付并发布</button>
+      >发布需求</button>
     </view>
   </view>
 </view>

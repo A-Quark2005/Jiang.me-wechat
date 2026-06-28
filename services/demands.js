@@ -55,20 +55,6 @@ function getDemand(id, options) {
   });
 }
 
-function syncPayment(id) {
-  return request({
-    path: `/api/me/demands/${encodeURIComponent(id)}/sync-payment`,
-    method: 'POST',
-  });
-}
-
-function cancelDemand(id) {
-  return request({
-    path: `/api/me/demands/${encodeURIComponent(id)}/cancel`,
-    method: 'POST',
-  });
-}
-
 function previewApplication(id) {
   return request({
     path: `/api/demands/${encodeURIComponent(id)}/application-preview`,
@@ -84,9 +70,9 @@ function applyDemand(id, payload) {
   });
 }
 
-function selectApplication(demandId, applicationId) {
+function closeDemand(id) {
   return request({
-    path: `/api/me/demands/${encodeURIComponent(demandId)}/applications/${encodeURIComponent(applicationId)}/select`,
+    path: `/api/me/demands/${encodeURIComponent(id)}/close`,
     method: 'POST',
   });
 }
@@ -97,9 +83,7 @@ module.exports = {
   listMine,
   createDemand,
   getDemand,
-  syncPayment,
-  cancelDemand,
   previewApplication,
   applyDemand,
-  selectApplication,
+  closeDemand,
 };

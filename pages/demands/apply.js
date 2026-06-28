@@ -35,7 +35,7 @@ Page({
       this.setData({ loading: false });
       wx.showModal({
         title: '读取失败',
-        content: error && error.message ? error.message : '无法读取投稿信息',
+        content: error && error.message ? error.message : '无法读取投递信息',
         showCancel: false,
         success: () => wx.navigateBack(),
       });
@@ -50,8 +50,10 @@ Page({
     if (this.data.submitting) return;
     this.setData({ submitting: true });
     try {
-      await demands.applyDemand(this.data.id, { message: this.data.message });
-      wx.showToast({ title: '已投稿', icon: 'success' });
+      await demands.applyDemand(this.data.id, {
+        message: this.data.message,
+      });
+      wx.showToast({ title: '已投递', icon: 'success' });
       setTimeout(() => {
         wx.redirectTo({ url: `/pages/demands/detail?id=${encodeURIComponent(this.data.id)}` });
       }, 500);
@@ -62,7 +64,7 @@ Page({
         return;
       }
       wx.showModal({
-        title: '投稿失败',
+        title: '投递失败',
         content: error && error.message ? error.message : '请稍后重试',
         showCancel: false,
       });
@@ -90,6 +92,7 @@ Page({
       });
     }
   },
+
 });
 
 function decorateResume(resume) {

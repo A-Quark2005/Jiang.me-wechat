@@ -78,6 +78,9 @@ Page({
       refreshState.mark(['home', 'entitlements', 'orders']);
       setTimeout(() => wx.navigateBack(), 500);
     } catch (error) {
+      if (service.isPaymentCancelled(error)) {
+        return;
+      }
       wx.showModal({
         title: '购买失败',
         content: error && error.message ? error.message : '购买失败',

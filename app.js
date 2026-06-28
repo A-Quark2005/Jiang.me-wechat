@@ -52,9 +52,11 @@ App({
   captureSessionShareRef(options) {
     const query = (options && options.query) || {};
     const direct = query.sr || query.shareRef || '';
+    const target = parseTargetQuery(query.target || '');
+    const targetRef = target.sr || target.shareRef || '';
     const scene = decodeScene(query.scene || '');
     const sceneRef = scene.sr || scene.shareRef || '';
-    const ref = normalizeShareRef(direct || sceneRef || (typeof scene === 'string' ? scene : ''));
+    const ref = normalizeShareRef(direct || targetRef || sceneRef || (typeof scene === 'string' ? scene : ''));
     if (!ref) return;
     this.globalData.sessionShareRef = ref;
   },
@@ -94,4 +96,17 @@ function parseQueryString(input) {
       }
       return result;
     }, {});
+}
+
+function parseTargetQuery(input) {
+  const value = String(input || '').trim();
+  if (!value) return {};
+  let decoded = value;
+  try {
+    decoded = decodeURIComponent(value);
+  } catch {
+    decoded = value;
+  }
+  const queryIndex = decoded.indexOf('?');
+  return queryIndex >= 0 ? parseQueryString(decoded.slice(queryIndex + 1)) : {};
 }

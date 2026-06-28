@@ -6,7 +6,7 @@ const loginGuard = require('../../services/login-guard');
 const PAGE_KEY = 'orders';
 const CACHE_MAX_AGE_MS = 5 * 60 * 1000;
 const MEETING_SOURCE_TYPES = ['hour_pass', 'single', 'duration', 'recording_pack'];
-const CONTACT_DEPOSIT_SOURCE_TYPES = ['contact_deposit', 'demand_deposit'];
+const CONTACT_DEPOSIT_SOURCE_TYPES = ['contact_deposit'];
 
 function normalizeList(raw) {
   if (Array.isArray(raw)) return raw;

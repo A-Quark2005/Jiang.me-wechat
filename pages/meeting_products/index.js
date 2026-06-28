@@ -146,6 +146,10 @@ Page({
       wx.showToast({ title: '支付成功', icon: 'success' });
       refreshState.mark(['home', 'entitlements', 'orders']);
     } catch (error) {
+      if (service.isPaymentCancelled(error)) {
+        this.setData({ paying: false });
+        return;
+      }
       this.setData({
         paying: false,
         errorMessage: error && error.message ? error.message : '购买失败',

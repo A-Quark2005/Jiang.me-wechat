@@ -62,7 +62,44 @@
   display: flex;
   flex-direction: column;
   gap: 12rpx;
+  margin-top: 14rpx;
+}
+
+.scope-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18rpx;
   margin-top: 18rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 8rpx;
+  background: #f7f9fc;
+  border: 1rpx solid transparent;
+}
+
+.scope-card.active {
+  border-color: #0071fe;
+  background: #eef5ff;
+}
+
+.scope-title {
+  color: #152033;
+  font-size: 28rpx;
+  line-height: 40rpx;
+  font-weight: 500;
+}
+
+.scope-desc {
+  margin-top: 4rpx;
+  color: #8b95a7;
+  font-size: 24rpx;
+  line-height: 34rpx;
+}
+
+.org-filter-strip {
+  margin-top: 18rpx;
+  padding: 0;
+  background: transparent;
 }
 
 .org-option {
@@ -84,6 +121,7 @@
 }
 
 .org-name {
+  flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -109,11 +147,64 @@
   color: #0071fe;
 }
 
+.org-select-icon {
+  flex-shrink: 0;
+  width: 34rpx;
+  height: 34rpx;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2rpx solid #c8d0dc;
+  box-sizing: border-box;
+}
+
+.org-select-icon.active {
+  position: relative;
+  background: #0071fe;
+  border-color: #0071fe;
+}
+
+.org-select-icon.active::after {
+  content: '';
+  position: absolute;
+  left: 9rpx;
+  top: 5rpx;
+  width: 10rpx;
+  height: 16rpx;
+  border-right: 4rpx solid #ffffff;
+  border-bottom: 4rpx solid #ffffff;
+  transform: rotate(45deg);
+}
+
 .org-rate {
   margin-top: 4rpx;
   color: #8b95a7;
   font-size: 24rpx;
   line-height: 34rpx;
+}
+
+.limit-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14rpx;
+  margin-top: 18rpx;
+}
+
+.limit-option {
+  height: 76rpx;
+  border-radius: 8rpx;
+  background: #f7f9fc;
+  border: 1rpx solid transparent;
+  color: #667085;
+  font-size: 28rpx;
+  line-height: 76rpx;
+  text-align: center;
+}
+
+.limit-option.active {
+  border-color: #0071fe;
+  background: #eef5ff;
+  color: #0071fe;
+  font-weight: 600;
 }
 
 .settlement-panel {
@@ -149,42 +240,27 @@
   line-height: 34rpx;
 }
 
-.settlement-rate {
+.settlement-rate-control {
   flex-shrink: 0;
+  min-width: 210rpx;
+  padding: 12rpx 18rpx;
+  border-radius: 8rpx;
+  background: #eef5ff;
+  text-align: right;
+}
+
+.settlement-rate {
   color: #0071fe;
   font-size: 32rpx;
   line-height: 44rpx;
   font-weight: 600;
 }
 
-.settlement-slider-area {
-  margin-top: 12rpx;
-}
-
-.settlement-free-rate {
-  height: 94rpx;
-  margin-top: 12rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8rpx;
-  background: #f7f9fc;
-  color: #0071fe;
-  font-size: 26rpx;
-  font-weight: 500;
-}
-
-.fee-slider {
-  margin: 0 -8rpx;
-}
-
-.fee-range-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: #9ca3af;
-  font-size: 24rpx;
-  line-height: 34rpx;
+.settlement-rate-hint {
+  margin-top: 2rpx;
+  color: #6b9ef6;
+  font-size: 22rpx;
+  line-height: 30rpx;
 }
 
 .settlement-bottom-row {
@@ -194,7 +270,7 @@
 }
 
 .bottom-total {
-  width: 200rpx;
+  width: 300rpx;
   display: flex;
   flex-direction: column;
   color: #8b95a7;
@@ -206,6 +282,12 @@
   font-size: 36rpx;
   line-height: 48rpx;
   font-weight: 600;
+}
+
+.bottom-note {
+  color: #9ca3af;
+  font-size: 22rpx;
+  line-height: 30rpx;
 }
 
 .bottom-submit {

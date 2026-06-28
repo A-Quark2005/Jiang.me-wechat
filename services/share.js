@@ -50,6 +50,14 @@ const PAGE_SHARE_COPY = {
     title: '远方的人',
     timelineTitle: '远方的人',
   },
+  '/pages/demands/index': {
+    title: '讲了么——需求广场',
+    timelineTitle: '讲了么需求广场',
+  },
+  '/pages/demands/create': {
+    title: '来发布你的需求',
+    timelineTitle: '发布你的需求',
+  },
   '/pages/organization_members/index': {
     title: '远方的人',
     timelineTitle: '远方的人',

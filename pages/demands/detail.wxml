@@ -15,19 +15,13 @@
         <view wx:for="{{demand.organizations}}" wx:for-item="org" wx:key="id" class="detail-org-chip">{{org.name}}</view>
       </view>
       <view wx:else class="detail-requirement">{{demand.requirementText}}</view>
-      <button wx:if="{{demand.showCancelAction}}" class="plain-danger-button overview-cancel" loading="{{operating}}" disabled="{{operating}}" bindtap="cancelDemand">取消并退款</button>
-    </view>
-
-    <view wx:if="{{demand.showSelectedContact}}" class="surface-card selected-card">
-      <view class="section-title">已选择</view>
-      <view class="selected-row">
-        <image class="selected-avatar" src="{{demand.selectedApplication.resume.avatarUrlResolved}}" mode="aspectFill"></image>
-        <view class="selected-main">
-          <view class="selected-name">{{demand.selectedApplication.resume.displayNameText}}</view>
-          <view class="selected-phone">{{demand.selectedApplication.phoneMasked}}</view>
-        </view>
-        <button class="ghost-button selected-copy" data-phone="{{demand.selectedApplication.phone}}" bindtap="copyPhone">复制手机号</button>
-      </view>
+      <button
+        wx:if="{{demand.showCloseAction}}"
+        class="plain-danger-button overview-close-button"
+        loading="{{closing}}"
+        disabled="{{closing}}"
+        bindtap="closeDemand"
+      >撤下需求</button>
     </view>
 
     <view wx:if="{{demand.showCandidateList}}" class="surface-card candidates-card">
@@ -40,26 +34,15 @@
 
       <view wx:if="{{!demand.hasApplications}}" class="candidate-empty">暂无投递</view>
 
-      <view wx:for="{{demand.applications}}" wx:key="id" class="candidate-card {{item.isSelected ? 'candidate-selected' : ''}} {{item.isRejected ? 'candidate-rejected' : ''}}">
+      <view wx:for="{{demand.applications}}" wx:key="id" class="candidate-card">
         <view class="candidate-summary">
           <image class="candidate-avatar" src="{{item.resume.avatarUrlResolved}}" mode="aspectFill"></image>
           <view class="candidate-main">
-            <view class="candidate-name-row">
-              <view class="candidate-name">{{item.resume.displayNameText}}</view>
-              <view wx:if="{{item.isSelected}}" class="candidate-badge">已选择</view>
-              <view wx:elif="{{item.isRejected}}" class="candidate-badge muted">未选中</view>
-            </view>
+            <view class="candidate-name">{{item.resume.displayNameText}}</view>
             <view class="candidate-meta">{{item.summaryText}}</view>
             <view wx:if="{{item.showMessage}}" class="candidate-message">{{item.message}}</view>
-            <view wx:if="{{item.showPhone}}" class="candidate-phone">{{item.phoneMasked}}</view>
           </view>
         </view>
-
-        <view class="candidate-actions">
-          <button class="ghost-button candidate-secondary" data-id="{{item.id}}" bindtap="toggleApplicationDetail">{{item.detailButtonText}}</button>
-          <button wx:if="{{item.showSelectAction}}" class="primary-button candidate-primary" data-id="{{item.id}}" loading="{{operating}}" disabled="{{operating}}" bindtap="selectApplication">选择 TA</button>
-        </view>
-
         <view wx:if="{{item.expanded}}" class="resume-panel">
           <view class="resume-section">
             <view class="resume-section-title">自我介绍</view>
@@ -77,23 +60,24 @@
 
           <view class="resume-section">
             <view class="resume-section-title">服务履历</view>
-            <view wx:if="{{!item.resume.hasServiceEngagements}}" class="resume-empty">暂无服务履历</view>
-            <view wx:for="{{item.resume.serviceEngagements}}" wx:for-item="engagement" wx:key="id" class="resume-line">
+            <view wx:if="{{!item.resume.hasEngagements}}" class="resume-empty">暂无公开履历</view>
+            <view wx:for="{{item.resume.engagements}}" wx:for-item="engagement" wx:key="id" class="resume-line">
               <view class="resume-line-title">{{engagement.titleText}}</view>
               <view wx:if="{{engagement.metaText}}" class="resume-line-meta">{{engagement.metaText}}</view>
               <view wx:if="{{engagement.descriptionText}}" class="resume-text">{{engagement.descriptionText}}</view>
             </view>
           </view>
+        </view>
 
-          <view class="resume-section">
-            <view class="resume-section-title">消费履历</view>
-            <view wx:if="{{!item.resume.hasConsumptionEngagements}}" class="resume-empty">暂无消费履历</view>
-            <view wx:for="{{item.resume.consumptionEngagements}}" wx:for-item="engagement" wx:key="id" class="resume-line">
-              <view class="resume-line-title">{{engagement.titleText}}</view>
-              <view wx:if="{{engagement.metaText}}" class="resume-line-meta">{{engagement.metaText}}</view>
-              <view wx:if="{{engagement.descriptionText}}" class="resume-text">{{engagement.descriptionText}}</view>
-            </view>
-          </view>
+        <view class="candidate-actions">
+          <button class="ghost-button candidate-action-button" data-id="{{item.id}}" bindtap="toggleApplicationDetail">{{item.detailButtonText}}</button>
+          <button
+            class="primary-button candidate-action-button"
+            data-user-id="{{item.publicUserId}}"
+            loading="{{contactTargetUserId == item.publicUserId}}"
+            disabled="{{contactTargetUserId == item.publicUserId}}"
+            bindtap="addCandidateFriend"
+          >{{item.contactButtonText}}</button>
         </view>
       </view>
     </view>
@@ -107,9 +91,10 @@
 
     <view wx:if="{{demand.showBottomBar}}" class="detail-bottom-bar">
       <view wx:if="{{demand.showShareAction}}" class="detail-share-tip">
-        <text>转发给合适的人，成功匹配后可获得推荐奖励</text>
-        <text class="detail-share-rule" bindtap="showReferralRewardRule">规则</text>
+        <text>{{demand.shareTipText}}</text>
+        <text class="detail-share-rule" bindtap="showReferralRewardRule">说明</text>
       </view>
+      <view wx:if="{{demand.showApplyDisabledHint}}" class="detail-apply-hint">{{demand.applyDisabledHint}}</view>
       <view class="detail-bottom-actions">
         <button
           wx:if="{{demand.showApplyControl}}"

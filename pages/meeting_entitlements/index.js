@@ -46,7 +46,7 @@ function organizationTextOf(demand) {
 
 function buildUnfinishedDemandCards(items) {
   return items
-    .filter((item) => String(item.status || '').toLowerCase() === 'open')
+    .filter((item) => ['open', 'filled'].indexOf(String(item.status || '').toLowerCase()) >= 0)
     .map((item) => {
       const createdText = displayFormatters.formatDateText(item.createdAt, {
         includeTime: true,
@@ -55,7 +55,7 @@ function buildUnfinishedDemandCards(items) {
       return {
         id: String(item.id || ''),
         title: item.title || '我发出的需求',
-        summary: [item.feePerHourText, item.amountText ? `定金 ${item.amountText}` : '']
+        summary: [item.feePerHourText, item.amountText ? `试讲定金 ${item.amountText}` : '', applicationTextOf(item)]
           .filter(Boolean)
           .join('，'),
         meta: [organizationTextOf(item), createdText].filter(Boolean).join(' · '),
@@ -63,6 +63,12 @@ function buildUnfinishedDemandCards(items) {
         statusText: item.statusText || '征集中',
       };
     });
+}
+
+function applicationTextOf(demand) {
+  const limit = Number(demand.applicationLimit || 1);
+  const count = Number(demand.totalApplicationCount || 0);
+  return `已收到 ${count}/${limit}`;
 }
 
 Page({

@@ -185,6 +185,11 @@ async function confirmPaidOrder(orderId) {
   throw new Error('支付已提交，系统正在确认权益，请稍后刷新');
 }
 
+function isPaymentCancelled(error) {
+  const message = String(error && (error.errMsg || error.message) || error || '').toLowerCase();
+  return message.includes('cancel') || message.includes('取消');
+}
+
 function requestPayment(paymentParams) {
   return new Promise((resolve, reject) => {
     wx.requestPayment({
@@ -247,6 +252,7 @@ module.exports = {
   confirmPaidOrder,
   getTencentMeetingActivation,
   getProducts,
+  isPaymentCancelled,
   payOrder,
   requestPayment,
   requestVirtualPayment,

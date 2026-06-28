@@ -1,11 +1,11 @@
 <view class="page page-plain distant-page">
   <view class="segmented-strip distant-filter-strip">
     <view
-      wx:for="{{filters}}"
+      wx:for="{{groups}}"
       wx:key="key"
       class="segment-chip tappable {{item.className}}"
-      data-filter="{{item.key}}"
-      bindtap="switchFilter"
+      data-group="{{item.key}}"
+      bindtap="switchGroup"
     >
       {{item.label}}
     </view>
