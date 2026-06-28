@@ -24,8 +24,7 @@
     <view wx:if="{{members.length === 0}}" class="surface-card members-empty">暂无公开资料</view>
     <view wx:for="{{members}}" wx:key="id" class="surface-card member-card">
       <view class="member-summary">
-        <image wx:if="{{item.avatarUrl}}" class="member-avatar" src="{{item.avatarUrl}}" mode="aspectFill"></image>
-        <view wx:else class="member-avatar fallback">{{item.initial}}</view>
+        <image class="member-avatar" src="{{item.avatarUrlResolved}}" mode="aspectFill"></image>
         <view class="member-main">
           <view class="member-name">{{item.displayName}}</view>
           <view class="member-meta">{{item.verifiedText}}</view>

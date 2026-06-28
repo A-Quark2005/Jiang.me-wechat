@@ -12,8 +12,7 @@
   <block wx:else>
     <view class="surface-card public-profile-card">
       <view class="public-profile-main">
-        <image wx:if="{{resume.avatarUrl}}" class="public-avatar" src="{{resume.avatarUrl}}" mode="aspectFill"></image>
-        <view wx:else class="public-avatar fallback">{{avatarText}}</view>
+        <image class="public-avatar" src="{{resume.avatarUrlResolved}}" mode="aspectFill"></image>
         <view class="public-profile-copy">
           <view class="public-name">{{resume.displayName}}</view>
           <view class="public-tier">{{resume.accountTierText}}</view>

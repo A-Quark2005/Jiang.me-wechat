@@ -3,6 +3,7 @@ const loginGuard = require('../../services/login-guard');
 const contactDeposit = require('../../services/contact-deposit');
 const share = require('../../services/share');
 const displayFormatters = require('../../services/display-formatters');
+const avatar = require('../../services/avatar');
 
 const SHARE_CANVAS_ID = 'publicResumeShareCanvas';
 const SHARE_IMAGE_WIDTH = 500;
@@ -57,7 +58,6 @@ Page({
     loading: true,
     errorMessage: '',
     resume: null,
-    avatarText: '人',
     selfIntroductionText: '暂无自我介绍',
     credentials: [],
     serviceEngagements: [],
@@ -119,8 +119,8 @@ Page({
         resume: {
           ...resume,
           displayName,
+          avatarUrlResolved: avatar.resolveAvatarUrl(resume.avatarUrl),
         },
-        avatarText: displayName.slice(0, 1),
         selfIntroductionText: resume.selfIntroduction || '暂无自我介绍',
         consultingFeeText: `价格：${contactDeposit.moneyText(resume.consultingFeeCentsPerHour)}/小时`,
         credentials: decorateCredentials(resume.certifiedQualifications || resume.credentials),
@@ -251,10 +251,9 @@ Page({
     const resume = this.data.resume;
     if (!resume) return;
     try {
-      const avatarPath = await downloadImage(resume.avatarUrl);
+      const avatarPath = await resolveShareAvatarPath(resume.avatarUrl);
       const imagePath = await drawShareImage(this, {
         avatarPath,
-        avatarText: this.data.avatarText,
         displayName: resume.displayName,
         accountTierText: resume.accountTierText,
         consultingFeeText: this.data.consultingFeeText,
@@ -310,6 +309,12 @@ function downloadImage(url) {
   });
 }
 
+function resolveShareAvatarPath(url) {
+  const value = String(url || '').trim();
+  if (!value) return Promise.resolve(avatar.DEFAULT_AVATAR_URL);
+  return downloadImage(value).then((path) => path || avatar.DEFAULT_AVATAR_URL);
+}
+
 function drawShareImage(page, input) {
   return new Promise((resolve, reject) => {
     const ctx = wx.createCanvasContext(SHARE_CANVAS_ID, page);
@@ -318,7 +323,7 @@ function drawShareImage(page, input) {
     drawRoundRect(ctx, 30, 30, 440, 340, 24, '#ffffff');
     ctx.setFillStyle('#0071fe');
     ctx.fillRect(30, 30, 440, 10);
-    drawAvatar(ctx, input.avatarPath, input.avatarText);
+    drawAvatar(ctx, input.avatarPath);
     ctx.setFillStyle('#111827');
     ctx.setFontSize(30);
     ctx.fillText(ellipsis(input.displayName || '未命名用户', 10), 150, 108);
@@ -358,20 +363,12 @@ function drawShareImage(page, input) {
   });
 }
 
-function drawAvatar(ctx, avatarPath, avatarText) {
+function drawAvatar(ctx, avatarPath) {
   ctx.save();
   ctx.beginPath();
   ctx.arc(90, 116, 44, 0, Math.PI * 2);
   ctx.clip();
-  if (avatarPath) {
-    ctx.drawImage(avatarPath, 46, 72, 88, 88);
-  } else {
-    ctx.setFillStyle('#eef5ff');
-    ctx.fillRect(46, 72, 88, 88);
-    ctx.setFillStyle('#0071fe');
-    ctx.setFontSize(34);
-    ctx.fillText(String(avatarText || '讲').slice(0, 1), 74, 128);
-  }
+  ctx.drawImage(avatarPath || avatar.DEFAULT_AVATAR_URL, 46, 72, 88, 88);
   ctx.restore();
 }
 

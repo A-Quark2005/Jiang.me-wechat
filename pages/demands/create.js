@@ -15,8 +15,24 @@ function yuanToCents(value) {
   return Math.round(Number(text) * 100);
 }
 
+function pageTitleForMode(mode) {
+  if (mode === 'recollect') return '重新收集';
+  if (mode === 'edit') return '修改需求';
+  return '发布需求';
+}
+
+function submitTextForMode(mode) {
+  if (mode === 'recollect') return '重新收集';
+  if (mode === 'edit') return '保存修改';
+  return '发布需求';
+}
+
 Page({
   data: {
+    demandId: '',
+    mode: 'create',
+    resetApplications: false,
+    submitText: '发布需求',
     title: '',
     description: '',
     feeCentsPerHour: 0,
@@ -29,6 +45,8 @@ Page({
     selectedIds: [],
     minRequiredCents: 0,
     minRequiredText: '0.00',
+    feeFloorCents: 0,
+    feeFloorText: '0.00',
     amountText: '0.00',
     applicationLimit: 1,
     applicationLimitOptions: [
@@ -46,8 +64,20 @@ Page({
     loading: true,
   },
 
-  onLoad() {
-    if (!loginGuard.guardPage('/pages/demands/create', { requireRegistration: true })) return;
+  onLoad(options) {
+    const id = decodeURIComponent((options && options.id) || '');
+    const mode = id ? (options && options.mode === 'recollect' ? 'recollect' : 'edit') : 'create';
+    const guardPath = id
+      ? `/pages/demands/create?id=${encodeURIComponent(id)}&mode=${mode}`
+      : '/pages/demands/create';
+    if (!loginGuard.guardPage(guardPath, { requireRegistration: true })) return;
+    this.setData({
+      demandId: id,
+      mode,
+      resetApplications: mode === 'recollect',
+      submitText: submitTextForMode(mode),
+    });
+    wx.setNavigationBarTitle({ title: pageTitleForMode(mode) });
     this.loadOrganizations();
   },
 
@@ -62,11 +92,69 @@ Page({
         hasOrganizations: organizations.length > 0,
         loading: false,
       });
+      if (this.data.demandId) await this.loadDemandForEdit();
     } catch (error) {
       this.setData({ loading: false });
       wx.showModal({
         title: '读取失败',
         content: error && error.message ? error.message : '组织信息读取失败',
+        showCancel: false,
+      });
+    }
+  },
+
+  async loadDemandForEdit() {
+    this.setData({ loading: true });
+    try {
+      const demand = await demands.getDemand(this.data.demandId, { forceRefresh: true });
+      if (!demand || !demand.isPoster) {
+        wx.showModal({ title: '无法修改', content: '只能修改自己发布的需求', showCancel: false });
+        this.setData({ loading: false });
+        return;
+      }
+
+      const selectedIds = Array.isArray(demand.organizations)
+        ? demand.organizations.map((item) => String(item.id || '')).filter(Boolean)
+        : [];
+      const selectedOrgs = this.data.organizations.filter((item) => selectedIds.indexOf(item.id) >= 0);
+      const minRequired = selectedOrgs.reduce((max, item) => Math.max(max, Number(item.minFeeCentsPerHour || 0)), 0);
+      const hasApplications = Number(demand.totalApplicationCount || 0) > 0;
+      const feeFloor = this.data.mode === 'edit' && hasApplications ? Number(demand.feeCentsPerHour || 0) : 0;
+      const fee = Math.max(Number(demand.feeCentsPerHour || 0), minRequired, feeFloor);
+      const organizations = this.data.organizations.map((item) => ({
+        ...item,
+        selected: selectedIds.indexOf(item.id) >= 0,
+      }));
+
+      this.setData({
+        title: demand.title || '',
+        description: demand.description || '',
+        organizations,
+        visibleOrganizations: organizationGroups.filterOrganizations(organizations, this.data.activeGroup),
+        selectedIds,
+        minRequiredCents: minRequired,
+        minRequiredText: centsToYuan(minRequired),
+        feeFloorCents: feeFloor,
+        feeFloorText: centsToYuan(feeFloor),
+        feeCentsPerHour: fee,
+        feeText: centsToYuan(fee),
+        amountText: centsToYuan(fee * 2),
+        applicationLimit: Number(demand.applicationLimit || 1),
+        applicationLimitOptions: this.data.applicationLimitOptions.map((item) => ({
+          ...item,
+          active: Number(item.value) === Number(demand.applicationLimit || 1),
+        })),
+        hasSelectedOrganizations: selectedIds.length > 0,
+        organizationScopeText: selectedIds.length > 0 ? `仅所选组织认证用户可投递（已选 ${selectedIds.length} 个）` : '所有用户都可以投递简历',
+        canSubmit: this.canSubmitWithFee(fee, minRequired, feeFloor),
+        settlementHint: this.settlementHintText(minRequired, feeFloor),
+        loading: false,
+      });
+    } catch (error) {
+      this.setData({ loading: false });
+      wx.showModal({
+        title: '读取失败',
+        content: error && error.message ? error.message : '需求信息读取失败',
         showCancel: false,
       });
     }
@@ -93,7 +181,7 @@ Page({
       hasSelectedOrganizations: false,
       organizationScopeText: '所有用户都可以投递简历',
       canSubmit: this.canSubmitWithFee(fee, 0),
-      settlementHint: this.data.needsPhone ? '请先授权手机号后继续发布' : '发布后先收集简历，添加好友时再缴纳定金',
+      settlementHint: this.settlementHintText(0),
     });
   },
 
@@ -117,10 +205,10 @@ Page({
   },
 
   updateFee(value) {
-    const min = Number(this.data.minRequiredCents || 0);
+    const floor = this.feeFloor();
     let fee = Math.round(Number(value || 0));
     if (!Number.isFinite(fee)) fee = 0;
-    if (min > 0) fee = Math.max(min, fee);
+    if (floor > 0) fee = Math.max(floor, fee);
     this.setData({
       feeCentsPerHour: fee,
       feeText: centsToYuan(fee),
@@ -130,11 +218,11 @@ Page({
   },
 
   editFee() {
-    const hasLimit = this.data.hasSelectedOrganizations;
+    const floor = this.feeFloor();
     wx.showModal({
       title: '手动输入时薪',
       editable: true,
-      placeholderText: hasLimit ? `不低于 ¥${this.data.minRequiredText}/小时` : '请输入时薪',
+      placeholderText: floor > 0 ? `不低于 ¥${centsToYuan(floor)}/小时` : '请输入时薪',
       content: this.data.feeText,
       success: (result) => {
         if (!result.confirm) return;
@@ -143,9 +231,9 @@ Page({
           wx.showToast({ title: '请输入正确的报价', icon: 'none' });
           return;
         }
-        if (hasLimit && value < Number(this.data.minRequiredCents || 0)) {
-          wx.showToast({ title: `不能低于 ¥${this.data.minRequiredText}/小时`, icon: 'none' });
-          this.updateFee(this.data.minRequiredCents);
+        if (floor > 0 && value < floor) {
+          wx.showToast({ title: `不能低于 ¥${centsToYuan(floor)}/小时`, icon: 'none' });
+          this.updateFee(floor);
           return;
         }
         this.updateFee(value);
@@ -162,9 +250,7 @@ Page({
     const selectedOrgs = this.data.organizations.filter((item) => selected.indexOf(item.id) >= 0);
     const minRequired = selectedOrgs.reduce((max, item) => Math.max(max, Number(item.minFeeCentsPerHour || 0)), 0);
     const currentFee = Number(this.data.feeCentsPerHour || 0);
-    const nextFee = minRequired > 0
-      ? Math.max(currentFee || minRequired, minRequired)
-      : currentFee;
+    const nextFee = Math.max(currentFee, minRequired, Number(this.data.feeFloorCents || 0));
     const organizations = this.data.organizations.map((item) => ({
       ...item,
       selected: selected.indexOf(item.id) >= 0,
@@ -181,21 +267,36 @@ Page({
       hasSelectedOrganizations: selected.length > 0,
       organizationScopeText: selected.length > 0 ? `仅所选组织认证用户可投递（已选 ${selected.length} 个）` : '所有用户都可以投递简历',
       canSubmit: this.canSubmitWithFee(nextFee, minRequired),
-      settlementHint: this.data.needsPhone
-        ? '请先授权手机号后继续发布'
-        : (minRequired > 0 ? `所选组织建议报价不低于 ¥${centsToYuan(minRequired)}/小时` : '发布后先收集简历，添加好友时再缴纳定金'),
+      settlementHint: this.settlementHintText(minRequired),
     });
   },
 
-  canSubmitWithFee(fee, minRequiredCents) {
+  feeFloor(minRequiredCents, feeFloorCents) {
     const minRequired = minRequiredCents === undefined ? this.data.minRequiredCents : minRequiredCents;
-    return Number(fee || 0) >= 100 && Number(fee || 0) >= Number(minRequired || 0);
+    const feeFloor = feeFloorCents === undefined ? this.data.feeFloorCents : feeFloorCents;
+    return Math.max(Number(minRequired || 0), Number(feeFloor || 0));
+  },
+
+  canSubmitWithFee(fee, minRequiredCents, feeFloorCents) {
+    return Number(fee || 0) >= 100 && Number(fee || 0) >= this.feeFloor(minRequiredCents, feeFloorCents);
+  },
+
+  settlementHintText(minRequiredCents, feeFloorCents) {
+    if (this.data.needsPhone) return '请先授权手机号后继续发布';
+    const minRequired = minRequiredCents === undefined ? Number(this.data.minRequiredCents || 0) : Number(minRequiredCents || 0);
+    const feeFloor = feeFloorCents === undefined ? Number(this.data.feeFloorCents || 0) : Number(feeFloorCents || 0);
+    if (feeFloor > 0) return `已收到简历，保留简历时报价不能低于 ¥${centsToYuan(feeFloor)}/小时`;
+    if (minRequired > 0) return `所选组织建议报价不低于 ¥${centsToYuan(minRequired)}/小时`;
+    if (this.data.mode === 'recollect') return '重新收集后，旧简历不再显示在当前需求中';
+    if (this.data.mode === 'edit') return '保存后，需求内容会立即更新';
+    return '发布后先收集简历，添加好友时再缴纳定金';
   },
 
   async submit() {
     if (this.data.submitting) return;
     const title = String(this.data.title || '').trim();
     const feeCentsPerHour = Number(this.data.feeCentsPerHour || 0);
+    const floor = this.feeFloor();
     if (!title) {
       wx.showToast({ title: '请填写标题', icon: 'none' });
       return;
@@ -204,23 +305,16 @@ Page({
       wx.showToast({ title: '请填写时薪', icon: 'none' });
       return;
     }
-    if (feeCentsPerHour < Number(this.data.minRequiredCents || 0)) {
-      wx.showToast({ title: `报价不能低于 ¥${centsToYuan(this.data.minRequiredCents)}/小时`, icon: 'none' });
+    if (feeCentsPerHour < floor) {
+      wx.showToast({ title: `报价不能低于 ¥${centsToYuan(floor)}/小时`, icon: 'none' });
       return;
     }
     this.setData({ submitting: true });
     try {
-      const applicationNoticeQuota = await this.requestApplicationNotices();
-      const demand = await demands.createDemand({
-        title,
-        description: this.data.description,
-        organizationIds: this.data.selectedIds,
-        feeCentsPerHour,
-        applicationLimit: this.data.applicationLimit,
-        applicationNoticeQuota,
-      });
+      const applicationNoticeQuota = this.shouldRequestNotices() ? await this.requestApplicationNotices() : 0;
+      const demand = await this.saveDemand(applicationNoticeQuota);
       refreshState.mark(['entitlements']);
-      wx.showToast({ title: '发布成功', icon: 'success' });
+      wx.showToast({ title: this.successToastText(), icon: 'success' });
       setTimeout(() => {
         wx.redirectTo({ url: `/pages/demands/detail?id=${encodeURIComponent(demand.id)}` });
       }, 500);
@@ -234,13 +328,43 @@ Page({
         return;
       }
       wx.showModal({
-        title: '发布失败',
+        title: this.errorTitleText(),
         content: error && error.message ? error.message : '请稍后重试',
         showCancel: false,
       });
     } finally {
       this.setData({ submitting: false });
     }
+  },
+
+  async saveDemand(applicationNoticeQuota) {
+    const payload = {
+      title: String(this.data.title || '').trim(),
+      description: this.data.description,
+      organizationIds: this.data.selectedIds,
+      feeCentsPerHour: Number(this.data.feeCentsPerHour || 0),
+      applicationLimit: this.data.applicationLimit,
+      applicationNoticeQuota,
+      resetApplications: this.data.resetApplications,
+    };
+    if (this.data.mode === 'create') return demands.createDemand(payload);
+    return demands.updateDemand(this.data.demandId, payload);
+  },
+
+  shouldRequestNotices() {
+    return this.data.mode === 'create' || this.data.resetApplications;
+  },
+
+  successToastText() {
+    if (this.data.mode === 'recollect') return '已重新收集';
+    if (this.data.mode === 'edit') return '已保存';
+    return '发布成功';
+  },
+
+  errorTitleText() {
+    if (this.data.mode === 'recollect') return '重新收集失败';
+    if (this.data.mode === 'edit') return '保存失败';
+    return '发布失败';
   },
 
   async handleGetPhoneNumber(event) {
@@ -251,9 +375,7 @@ Page({
       this.setData({
         bindingPhone: false,
         needsPhone: false,
-        settlementHint: this.data.minRequiredCents > 0
-          ? `所选组织建议报价不低于 ¥${this.data.minRequiredText}/小时`
-          : '发布后先收集简历，添加好友时再缴纳定金',
+        settlementHint: this.settlementHintText(),
       });
       wx.showToast({ title: '手机号已授权', icon: 'success' });
       await this.submit();

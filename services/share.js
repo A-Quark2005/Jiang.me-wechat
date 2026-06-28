@@ -14,10 +14,6 @@ const PAGE_SHARE_COPY = {
     title: '激活讲了么账号',
     timelineTitle: '讲了么账号服务',
   },
-  '/pages/meeting_create/index': {
-    title: '用讲了么预定腾讯会议',
-    timelineTitle: '讲了么会议预定',
-  },
   '/pages/meeting_entitlements/index': {
     title: '讲了么会议权益',
     timelineTitle: '讲了么会议权益',

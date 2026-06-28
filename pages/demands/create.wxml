@@ -84,14 +84,14 @@
         bindgetphonenumber="handleGetPhoneNumber"
         loading="{{bindingPhone}}"
         disabled="{{bindingPhone || submitting}}"
-      >授权手机号并继续发布</button>
+      >授权手机号并继续{{submitText}}</button>
       <button
         wx:else
         class="primary-button bottom-submit"
         loading="{{submitting}}"
         disabled="{{submitting || !canSubmit}}"
         bindtap="submit"
-      >发布需求</button>
+      >{{submitText}}</button>
     </view>
   </view>
 </view>

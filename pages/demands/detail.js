@@ -52,6 +52,25 @@ Page({
     wx.navigateTo({ url: `/pages/demands/apply?id=${encodeURIComponent(this.data.id)}` });
   },
 
+  editDemand() {
+    const hasApplications = Number(this.data.demand && this.data.demand.totalApplicationCount || 0) > 0;
+    if (!hasApplications) {
+      this.navigateToDemandEditor('edit');
+      return;
+    }
+    wx.showActionSheet({
+      itemList: ['保留简历修改', '清空简历重新收集'],
+      success: (result) => {
+        const mode = result.tapIndex === 1 ? 'recollect' : 'edit';
+        this.navigateToDemandEditor(mode);
+      },
+    });
+  },
+
+  navigateToDemandEditor(mode) {
+    wx.navigateTo({ url: `/pages/demands/create?id=${encodeURIComponent(this.data.id)}&mode=${mode}` });
+  },
+
   toggleApplicationDetail(event) {
     const id = String(event.currentTarget.dataset.id || '');
     const expandedApplicationId = this.data.expandedApplicationId === id ? '' : id;
@@ -86,26 +105,27 @@ Page({
 
   closeDemand() {
     if (this.data.closing) return;
+    const currentDemand = this.data.demand || {};
     wx.showModal({
-      title: '撤下需求',
-      content: '撤下后将不再出现在公域需求列表中，也不能继续接收新的简历。已投递的简历仍可在详情页查看。',
-      confirmText: '撤下',
+      title: currentDemand.closeModalTitle || '撤下需求',
+      content: currentDemand.closeModalContent || '撤下后将不再出现在公域需求列表中，也不能继续接收新的简历。已投递的简历仍可在详情页查看。',
+      confirmText: currentDemand.closeModalConfirmText || '撤下',
       confirmColor: '#d92d20',
       success: async (result) => {
         if (!result.confirm) return;
         this.setData({ closing: true });
         try {
-          const demand = await demands.closeDemand(this.data.id);
+          const latestDemand = await demands.closeDemand(this.data.id);
           refreshState.mark(['entitlements']);
           this.setData({
-            demand: presenter.presentDemand(demand, this.data.expandedApplicationId),
+            demand: presenter.presentDemand(latestDemand, this.data.expandedApplicationId),
             closing: false,
           });
-          wx.showToast({ title: '已撤下', icon: 'success' });
+          wx.showToast({ title: currentDemand.closeSuccessText || '已撤下', icon: 'success' });
         } catch (error) {
           this.setData({ closing: false });
           wx.showModal({
-            title: '撤下失败',
+            title: currentDemand.closeFailureTitle || '撤下失败',
             content: error && error.message ? error.message : '请稍后重试',
             showCancel: false,
           });

@@ -27,8 +27,7 @@
   flex-shrink: 0;
 }
 
-.members-org-logo.fallback,
-.member-avatar.fallback {
+.members-org-logo.fallback {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -149,10 +148,6 @@
   border-radius: 50%;
   background: #eef5ff;
   flex-shrink: 0;
-}
-
-.member-avatar.fallback {
-  font-size: 30rpx;
 }
 
 .member-main {

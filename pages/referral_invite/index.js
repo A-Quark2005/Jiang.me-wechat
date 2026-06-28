@@ -2,6 +2,7 @@ const service = require('../../services/meeting-entitlements');
 const refreshState = require('../../services/refresh-state');
 const loginGuard = require('../../services/login-guard');
 const share = require('../../services/share');
+const avatar = require('../../services/avatar');
 
 function normalizeItems(items) {
   return (Array.isArray(items) ? items : []).map((item) => {
@@ -9,7 +10,7 @@ function normalizeItems(items) {
     return {
       ...item,
       inviteeDisplayName: name,
-      initial: name.slice(0, 1),
+      inviteeAvatarUrlResolved: avatar.resolveAvatarUrl(item.inviteeAvatarUrl),
     };
   });
 }

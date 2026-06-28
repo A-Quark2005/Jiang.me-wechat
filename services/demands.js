@@ -45,6 +45,14 @@ function createDemand(payload) {
   });
 }
 
+function updateDemand(id, payload) {
+  return request({
+    path: `/api/me/demands/${encodeURIComponent(id)}`,
+    method: 'PUT',
+    data: payload || {},
+  });
+}
+
 function getDemand(id, options) {
   const requestOptions = options || {};
   return request({
@@ -82,6 +90,7 @@ module.exports = {
   listFeed,
   listMine,
   createDemand,
+  updateDemand,
   getDemand,
   previewApplication,
   applyDemand,

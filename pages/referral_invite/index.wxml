@@ -13,8 +13,7 @@
     <view wx:elif="{{items.length === 0}}" class="referral-empty">还没有邀请记录</view>
     <view wx:else class="referral-list">
       <view wx:for="{{items}}" wx:key="inviteeUserId" class="referral-row">
-        <image wx:if="{{item.inviteeAvatarUrl}}" class="referral-avatar" src="{{item.inviteeAvatarUrl}}" mode="aspectFill"></image>
-        <view wx:else class="referral-avatar fallback">{{item.initial}}</view>
+        <image class="referral-avatar" src="{{item.inviteeAvatarUrlResolved}}" mode="aspectFill"></image>
         <view class="referral-row-main">
           <view class="referral-name">{{item.inviteeDisplayName}}</view>
           <view class="referral-status {{item.status}}">{{item.statusText}}</view>

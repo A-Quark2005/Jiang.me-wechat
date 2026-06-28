@@ -1,3 +1,5 @@
+const avatar = require('../../services/avatar');
+
 function presentDemand(rawDemand, expandedApplicationId) {
   if (!rawDemand) return null;
   const rawApplications = Array.isArray(rawDemand.applications) ? rawDemand.applications : [];
@@ -14,11 +16,14 @@ function presentDemand(rawDemand, expandedApplicationId) {
   const applicationLimit = Number(rawDemand.applicationLimit || 1);
   const totalApplicationCount = Number(rawDemand.totalApplicationCount || 0);
   const isOpen = rawDemand.status === 'open';
+  const isClosed = rawDemand.status === 'closed';
   const isPoster = Boolean(rawDemand.isPoster);
   const showMyApplication = Boolean(myApplication && !isPoster);
   const showApplyControl = Boolean(!isPoster && (isOpen || showMyApplication));
   const showShareAction = Boolean(isOpen);
-  const showCloseAction = Boolean(isPoster && isOpen);
+  const showCloseAction = Boolean(isPoster && !isClosed);
+  const showEditAction = Boolean(isPoster && !isClosed);
+  const isFilled = rawDemand.status === 'filled';
   const applyActionEnabled = Boolean(rawDemand.canApply);
   const applyDisabledHint = !isPoster && !myApplication && !applyActionEnabled
     ? rawDemand.applyDisabledReason || ''
@@ -44,6 +49,15 @@ function presentDemand(rawDemand, expandedApplicationId) {
     showApplyControl,
     showShareAction,
     showCloseAction,
+    showEditAction,
+    closeActionText: isFilled ? '完成征集' : '撤下需求',
+    closeModalTitle: isFilled ? '完成征集' : '撤下需求',
+    closeModalContent: isFilled
+      ? '完成征集后将结束这条已收满的需求，不能继续通过分享链接接收新的简历。已投递的简历仍可在详情页查看。'
+      : '撤下后将不再出现在公域需求列表中，也不能继续接收新的简历。已投递的简历仍可在详情页查看。',
+    closeModalConfirmText: isFilled ? '完成' : '撤下',
+    closeSuccessText: isFilled ? '已完成征集' : '已撤下',
+    closeFailureTitle: isFilled ? '完成失败' : '撤下失败',
     applyActionEnabled,
     applyActionText: applyActionEnabled ? '我想试试' : (myApplication ? myApplication.statusText : '暂不符合要求'),
     applyDisabledHint,
@@ -72,7 +86,7 @@ function presentApplication(application, expandedApplicationId, isMine) {
     summaryText: `${credentialCount} 个认证，${engagementCount} 条履历`,
     resume: {
       ...resume,
-      avatarUrlResolved: resume.avatarUrl || '/assets/ui/avatar-home.svg',
+      avatarUrlResolved: avatar.resolveAvatarUrl(resume.avatarUrl),
       displayNameText: resume.displayName || '未命名用户',
       selfIntroductionText: resume.selfIntroduction || '暂无自我介绍',
       credentials,

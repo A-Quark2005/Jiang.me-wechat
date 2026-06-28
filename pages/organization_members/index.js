@@ -2,6 +2,7 @@ const profileService = require('../../services/profile');
 const displayFormatters = require('../../services/display-formatters');
 const loginGuard = require('../../services/login-guard');
 const share = require('../../services/share');
+const avatar = require('../../services/avatar');
 
 const PAGE_SIZE = 20;
 
@@ -13,7 +14,7 @@ function normalizeMembers(raw) {
     return {
       ...item,
       displayName: name,
-      initial: name.slice(0, 1),
+      avatarUrlResolved: avatar.resolveAvatarUrl(item.avatarUrl),
       selfIntroduction,
       selfIntroductionText: selfIntroduction || '暂无自我介绍',
       resumeExpanded: false,

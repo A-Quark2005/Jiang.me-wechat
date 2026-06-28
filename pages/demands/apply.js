@@ -1,5 +1,6 @@
 const demands = require('../../services/demands');
 const loginGuard = require('../../services/login-guard');
+const avatar = require('../../services/avatar');
 const phoneBinding = require('../../services/phone-binding');
 
 Page({
@@ -102,7 +103,7 @@ function decorateResume(resume) {
     ...resume,
     credentials,
     engagements,
-    avatarUrlResolved: resume.avatarUrl || '/assets/ui/avatar-home.svg',
+    avatarUrlResolved: avatar.resolveAvatarUrl(resume.avatarUrl),
     displayNameText: resume.displayName || '未命名用户',
     selfIntroductionText: resume.selfIntroduction || '暂无自我介绍',
     credentialCount: credentials.length,

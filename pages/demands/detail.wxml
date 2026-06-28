@@ -15,13 +15,20 @@
         <view wx:for="{{demand.organizations}}" wx:for-item="org" wx:key="id" class="detail-org-chip">{{org.name}}</view>
       </view>
       <view wx:else class="detail-requirement">{{demand.requirementText}}</view>
-      <button
-        wx:if="{{demand.showCloseAction}}"
-        class="plain-danger-button overview-close-button"
-        loading="{{closing}}"
-        disabled="{{closing}}"
-        bindtap="closeDemand"
-      >撤下需求</button>
+      <view wx:if="{{demand.showEditAction || demand.showCloseAction}}" class="overview-action-row">
+        <button
+          wx:if="{{demand.showEditAction}}"
+          class="secondary-button overview-action-button"
+          bindtap="editDemand"
+        >修改需求</button>
+        <button
+          wx:if="{{demand.showCloseAction}}"
+          class="plain-danger-button overview-action-button"
+          loading="{{closing}}"
+          disabled="{{closing}}"
+          bindtap="closeDemand"
+        >{{demand.closeActionText}}</button>
+      </view>
     </view>
 
     <view wx:if="{{demand.showCandidateList}}" class="surface-card candidates-card">

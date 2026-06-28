@@ -96,8 +96,17 @@
   line-height: 36rpx;
 }
 
-.overview-close-button {
+.overview-action-row {
   margin-top: 24rpx;
+  display: flex;
+  gap: 16rpx;
+}
+
+.overview-action-button {
+  flex: 1;
+  height: 72rpx;
+  border-radius: 8rpx;
+  font-size: 24rpx;
 }
 
 .plain-danger-button {
