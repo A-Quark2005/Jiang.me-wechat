@@ -1,4 +1,21 @@
 <view class="page page-plain distant-page">
+  <view class="social-entry-card">
+    <view class="social-entry-copy">
+      <view class="social-entry-title">找人，也可以发需求</view>
+      <view class="social-entry-desc">按认证组织发现公开资料，或发布需求收集简历</view>
+    </view>
+    <view class="social-entry-actions">
+      <view class="social-entry-action active">
+        <view class="social-entry-action-title">找人</view>
+        <view class="social-entry-action-desc">查看公开资料</view>
+      </view>
+      <view class="social-entry-action tappable" bindtap="openDemandEntry">
+        <view class="social-entry-action-title">需求广场</view>
+        <view class="social-entry-action-desc">寻找/发布需求</view>
+      </view>
+    </view>
+  </view>
+
   <view class="segmented-strip distant-filter-strip">
     <view
       wx:for="{{groups}}"
@@ -33,9 +50,5 @@
       </view>
       <image class="distant-arrow" src="/assets/ui/arrow-light.svg" mode="aspectFit"></image>
     </view>
-  </view>
-
-  <view class="demand-entry-button" hover-class="demand-entry-button-hover" hover-stay-time="80" bindtap="openDemandEntry" aria-label="主动发单">
-    <image class="demand-entry-icon" src="/assets/ui/search.svg" mode="aspectFit"></image>
   </view>
 </view>

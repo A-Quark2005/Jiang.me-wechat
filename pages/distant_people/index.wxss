@@ -1,14 +1,76 @@
 .distant-page {
   min-height: 100vh;
-  padding: 18rpx 16px 152rpx;
+  padding: 18rpx 16px 40rpx;
   box-sizing: border-box;
+}
+
+.social-entry-card {
+  margin-bottom: 18rpx;
+  padding: 28rpx;
+  border-radius: 16rpx;
+  background: #ffffff;
+  box-shadow: 0 12rpx 30rpx rgba(15, 23, 42, 0.06);
+}
+
+.social-entry-title {
+  font-size: 34rpx;
+  line-height: 48rpx;
+  color: #152033;
+  font-weight: 700;
+}
+
+.social-entry-desc {
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  line-height: 34rpx;
+  color: #9ca3af;
+}
+
+.social-entry-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16rpx;
+  margin-top: 24rpx;
+}
+
+.social-entry-action {
+  min-width: 0;
+  padding: 20rpx 22rpx;
+  border-radius: 12rpx;
+  background: #f5f7fb;
+  box-sizing: border-box;
+}
+
+.social-entry-action.active {
+  background: #eaf3ff;
+}
+
+.social-entry-action-title {
+  font-size: 28rpx;
+  line-height: 40rpx;
+  color: #152033;
+  font-weight: 600;
+}
+
+.social-entry-action.active .social-entry-action-title {
+  color: #0071fe;
+}
+
+.social-entry-action-desc {
+  margin-top: 4rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 22rpx;
+  line-height: 32rpx;
+  color: #9ca3af;
 }
 
 .distant-filter-strip {
   position: sticky;
   top: 0;
   z-index: 10;
-  margin: -18rpx -32rpx 16rpx;
+  margin: 0 -32rpx 20rpx;
   padding: 16rpx 32rpx 18rpx;
   background: #ffffff;
   border-bottom: 1rpx solid #eef2f7;
@@ -91,33 +153,4 @@
   width: 32rpx;
   height: 32rpx;
   flex: 0 0 32rpx;
-}
-
-.demand-entry-button {
-  position: fixed;
-  right: 86rpx;
-  bottom: calc(250rpx + env(safe-area-inset-bottom));
-  z-index: 20;
-  width: 132rpx;
-  height: 132rpx;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: #0071fe;
-  box-shadow: 0 16rpx 36rpx rgba(0, 113, 254, 0.28);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  overflow: hidden;
-}
-
-.demand-entry-button-hover {
-  background: #0065e5;
-  transform: translateY(2rpx);
-}
-
-.demand-entry-icon {
-  width: 58rpx;
-  height: 58rpx;
 }
