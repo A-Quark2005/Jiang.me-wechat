@@ -27,6 +27,13 @@
   background: #0071fe;
 }
 
+.demand-feed-hint {
+  margin: 4rpx 8rpx 16rpx;
+  color: #8b95a7;
+  font-size: 24rpx;
+  line-height: 36rpx;
+}
+
 .demand-card {
   box-shadow: none;
   border: 1rpx solid #edf0f5;

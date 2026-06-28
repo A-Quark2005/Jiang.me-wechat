@@ -1,6 +1,6 @@
 <view class="page demands-page">
   <view class="demand-tabs">
-    <view class="demand-tab {{activeTab === 'feed' ? 'active' : ''}}" data-tab="feed" bindtap="switchTab">需求广场</view>
+    <view class="demand-tab {{activeTab === 'feed' ? 'active' : ''}}" data-tab="feed" bindtap="switchTab">待投递</view>
     <view class="demand-tab {{activeTab === 'mine' ? 'active' : ''}}" data-tab="mine" bindtap="switchTab">我发布的</view>
   </view>
 
@@ -9,7 +9,8 @@
 
   <view wx:else>
     <view wx:if="{{activeTab === 'feed'}}">
-      <view wx:if="{{feed.length === 0}}" class="surface-card demand-empty">暂时没有可投递的需求</view>
+      <view class="demand-feed-hint">这里只展示未收到简历的需求，收满后会自动撤下</view>
+      <view wx:if="{{feed.length === 0}}" class="surface-card demand-empty">暂无未收到简历的需求</view>
       <view wx:for="{{feed}}" wx:key="id" class="surface-card demand-card tappable" data-id="{{item.id}}" bindtap="openDemand">
         <view class="demand-card-head">
           <view class="demand-title">{{item.title}}</view>

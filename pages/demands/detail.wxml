@@ -32,13 +32,16 @@
         </view>
       </view>
 
-      <view wx:if="{{!demand.hasApplications}}" class="candidate-empty">暂无投递</view>
+      <view wx:if="{{!demand.hasApplications}}" class="candidate-empty">{{demand.emptyCandidateText}}</view>
 
       <view wx:for="{{demand.applications}}" wx:key="id" class="candidate-card">
         <view class="candidate-summary">
           <image class="candidate-avatar" src="{{item.resume.avatarUrlResolved}}" mode="aspectFill"></image>
           <view class="candidate-main">
-            <view class="candidate-name">{{item.resume.displayNameText}}</view>
+            <view class="candidate-name-row">
+              <view class="candidate-name">{{item.resume.displayNameText}}</view>
+              <view wx:if="{{item.isMine}}" class="candidate-self-badge">我的投递</view>
+            </view>
             <view class="candidate-meta">{{item.summaryText}}</view>
             <view wx:if="{{item.showMessage}}" class="candidate-message">{{item.message}}</view>
           </view>
@@ -80,11 +83,6 @@
           >{{item.contactButtonText}}</button>
         </view>
       </view>
-    </view>
-
-    <view wx:if="{{demand.showMyApplication}}" class="surface-card application-state">
-      <view class="section-title">我的投递</view>
-      <view class="section-subtitle">{{demand.myApplication.statusText}}</view>
     </view>
 
     <view class="detail-bottom-space"></view>

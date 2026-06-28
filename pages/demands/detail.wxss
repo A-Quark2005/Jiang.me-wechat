@@ -142,11 +142,33 @@
   min-width: 0;
 }
 
+.candidate-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  min-width: 0;
+}
+
 .candidate-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: #152033;
   font-size: 30rpx;
   line-height: 42rpx;
   font-weight: 600;
+}
+
+.candidate-self-badge {
+  flex-shrink: 0;
+  height: 36rpx;
+  padding: 0 12rpx;
+  border-radius: 999rpx;
+  background: #eef5ff;
+  color: #0071fe;
+  font-size: 20rpx;
+  line-height: 36rpx;
 }
 
 .candidate-empty {

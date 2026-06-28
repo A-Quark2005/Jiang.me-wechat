@@ -16,13 +16,13 @@ function drawImage(page, demand) {
     ctx.fillRect(30, 30, 440, 10);
     ctx.setFillStyle('#0071fe');
     ctx.setFontSize(22);
-    ctx.fillText('主动发需求', 58, 82);
+    ctx.fillText('需求广场', 58, 82);
     ctx.setFillStyle('#111827');
     ctx.setFontSize(32);
     drawWrappedText(ctx, demand.title, 58, 128, 384, 40, 2);
     ctx.setFillStyle('#0071fe');
     ctx.setFontSize(24);
-    ctx.fillText(`${demand.feePerHourText}  试讲定金 ${demand.amountText}`, 58, 218);
+    ctx.fillText(`${demand.feePerHourText}  ${demand.candidateCountText || ''}`, 58, 218);
     ctx.setFillStyle('#4b5563');
     ctx.setFontSize(20);
     drawWrappedText(ctx, demand.requirementText || '无认证要求，所有人都可以投递简历', 58, 260, 384, 30, 2);

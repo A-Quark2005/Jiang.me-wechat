@@ -1,9 +1,12 @@
 function presentDemand(rawDemand, expandedApplicationId) {
   if (!rawDemand) return null;
-  const applications = Array.isArray(rawDemand.applications)
-    ? rawDemand.applications.map((item) => presentApplication(item, expandedApplicationId))
-    : [];
-  const myApplication = rawDemand.myApplication ? presentApplication(rawDemand.myApplication, '') : null;
+  const rawApplications = Array.isArray(rawDemand.applications) ? rawDemand.applications : [];
+  const rawMyApplication = rawDemand.myApplication || null;
+  const myApplicationId = rawMyApplication ? String(rawMyApplication.id || '') : '';
+  const applications = rawApplications.map((item) => (
+    presentApplication(item, expandedApplicationId, Boolean(myApplicationId && String(item.id || '') === myApplicationId))
+  ));
+  const myApplication = rawMyApplication ? presentApplication(rawMyApplication, '', true) : null;
   const organizationNames = Array.isArray(rawDemand.organizations)
     ? rawDemand.organizations.map((item) => String(item.name || '').trim()).filter(Boolean)
     : [];
@@ -33,22 +36,25 @@ function presentDemand(rawDemand, expandedApplicationId) {
     totalApplicationCount,
     applicationLimit,
     candidateCountText: `已收到 ${totalApplicationCount}/${applicationLimit} 份简历`,
-    overviewMetaText: `${rawDemand.amountText} / 2 小时试讲定金，收到简历后可按需查看联系方式`,
+    overviewMetaText: isPoster
+      ? `已收到 ${totalApplicationCount}/${applicationLimit} 份简历，收满后会自动撤下`
+      : `已收到 ${totalApplicationCount}/${applicationLimit} 份简历，符合条件即可投递`,
     showCandidateList: true,
     showBottomBar: Boolean(showApplyControl || showShareAction),
     showApplyControl,
     showShareAction,
     showCloseAction,
     applyActionEnabled,
-    applyActionText: applyActionEnabled ? '我想试试' : (myApplication ? myApplication.statusText : (applyDisabledHint || '暂不符合要求')),
+    applyActionText: applyActionEnabled ? '我想试试' : (myApplication ? myApplication.statusText : '暂不符合要求'),
     applyDisabledHint,
     showApplyDisabledHint: Boolean(applyDisabledHint),
-    shareTipText: '转发给合适的人，帮我收集更多简历',
-    showMyApplication,
+    shareTipText: isPoster ? '转发给合适的人，帮我收集更多简历' : '转发给合适的人，一起看看这个需求',
+    emptyCandidateText: isPoster ? '还没有人投递，转发后更容易收到简历' : '还没有人投递，可以先投递简历',
+    showMyApplication: false,
   };
 }
 
-function presentApplication(application, expandedApplicationId) {
+function presentApplication(application, expandedApplicationId, isMine) {
   const resume = application.resume || {};
   const credentials = Array.isArray(resume.credentials) ? resume.credentials.map(presentCredential) : [];
   const engagements = Array.isArray(resume.engagements) ? resume.engagements.map(presentEngagement) : [];
@@ -59,6 +65,7 @@ function presentApplication(application, expandedApplicationId) {
     ...application,
     publicUserId: application.applicantUserId || resume.publicId || '',
     expanded,
+    isMine: Boolean(isMine),
     detailButtonText: expanded ? '收起' : '查看简历',
     contactButtonText: '添加好友',
     showMessage: Boolean(application.message),
