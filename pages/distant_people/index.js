@@ -55,4 +55,8 @@ Page({
   openDemandEntry() {
     wx.navigateTo({ url: '/pages/demands/index' });
   },
+
+  openSearch() {
+    wx.navigateTo({ url: '/pages/search/index' });
+  },
 });

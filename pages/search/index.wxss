@@ -1,0 +1,190 @@
+.search-page {
+  min-height: 100vh;
+  padding: 0 16px 40rpx;
+  box-sizing: border-box;
+}
+
+.search-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  margin: 0 -32rpx 18rpx;
+  padding: 18rpx 32rpx 16rpx;
+  background: #ffffff;
+  border-bottom: 1rpx solid #eef2f7;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  height: 76rpx;
+  padding: 0 20rpx;
+  border-radius: 12rpx;
+  background: #f5f7fb;
+  box-sizing: border-box;
+}
+
+.search-icon {
+  width: 34rpx;
+  height: 34rpx;
+  flex: 0 0 34rpx;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 0;
+  height: 76rpx;
+  color: #152033;
+  font-size: 28rpx;
+}
+
+.search-clear {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  background: #d9dee8;
+  color: #ffffff;
+  font-size: 34rpx;
+  line-height: 40rpx;
+  text-align: center;
+  flex: 0 0 44rpx;
+}
+
+.search-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12rpx;
+  margin-top: 16rpx;
+}
+
+.search-tab {
+  height: 64rpx;
+  border-radius: 8rpx;
+  background: #f5f7fb;
+  color: #667085;
+  font-size: 26rpx;
+  line-height: 64rpx;
+  text-align: center;
+}
+
+.search-tab.active {
+  background: #0071fe;
+  color: #ffffff;
+}
+
+.search-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.search-person-card,
+.search-organization-card {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  min-height: 132rpx;
+  padding: 24rpx 28rpx;
+}
+
+.search-avatar {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  background: #eef5ff;
+  flex-shrink: 0;
+}
+
+.search-logo {
+  width: 92rpx;
+  height: 92rpx;
+  flex-shrink: 0;
+}
+
+.search-logo.fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16rpx;
+  background: #eef5ff;
+  color: #0071fe;
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+.search-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.search-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #152033;
+  font-size: 30rpx;
+  font-weight: 600;
+  line-height: 42rpx;
+}
+
+.search-meta,
+.search-desc,
+.search-domain {
+  margin-top: 4rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #9ca3af;
+  font-size: 24rpx;
+  line-height: 34rpx;
+}
+
+.search-domain {
+  color: #0071fe;
+}
+
+.search-arrow {
+  width: 32rpx;
+  height: 32rpx;
+  flex: 0 0 32rpx;
+}
+
+.search-demand-card {
+  padding: 24rpx 28rpx;
+  box-shadow: none;
+  border: 1rpx solid #edf0f5;
+}
+
+.search-demand-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.search-price {
+  flex-shrink: 0;
+  color: #0071fe;
+  font-size: 28rpx;
+  font-weight: 600;
+  line-height: 42rpx;
+}
+
+.search-state {
+  min-height: 420rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b0b8c9;
+  font-size: 26rpx;
+  text-align: center;
+}
+
+.search-more {
+  padding: 16rpx 0 0;
+  color: #b0b8c9;
+  font-size: 24rpx;
+  line-height: 34rpx;
+  text-align: center;
+}

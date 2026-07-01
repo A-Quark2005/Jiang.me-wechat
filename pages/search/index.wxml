@@ -1,0 +1,73 @@
+<view class="page page-plain search-page">
+  <view class="search-sticky">
+    <view class="search-box">
+      <image class="search-icon" src="/assets/ui/search.svg" mode="aspectFit"></image>
+      <input
+        class="search-input"
+        value="{{keyword}}"
+        placeholder="搜索人、组织、需求"
+        confirm-type="search"
+        bindinput="onKeywordInput"
+        bindconfirm="submitSearch"
+        focus
+      />
+      <view wx:if="{{keyword}}" class="search-clear tappable" bindtap="clearKeyword">×</view>
+    </view>
+    <view class="search-tabs">
+      <view
+        wx:for="{{tabs}}"
+        wx:key="key"
+        class="search-tab {{item.className}}"
+        data-type="{{item.key}}"
+        bindtap="switchTab"
+      >
+        {{item.label}}
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{!searched}}" class="search-state">输入关键词开始搜索</view>
+  <view wx:elif="{{loading}}" class="search-state">正在搜索</view>
+  <view wx:elif="{{errorMessage}}" class="search-state">{{errorMessage}}</view>
+  <view wx:elif="{{items.length === 0}}" class="search-state">暂无搜索结果</view>
+
+  <view wx:else class="search-list">
+    <block wx:if="{{activeType === 'people'}}">
+      <view wx:for="{{items}}" wx:key="id" class="surface-card search-person-card tappable" data-id="{{item.id}}" bindtap="openItem">
+        <image class="search-avatar" src="{{item.avatarUrlResolved}}" mode="aspectFill"></image>
+        <view class="search-main">
+          <view class="search-title">{{item.displayName}}</view>
+          <view class="search-meta">{{item.metaText}}</view>
+          <view class="search-desc">{{item.selfIntroductionText}}</view>
+        </view>
+        <image class="search-arrow" src="/assets/ui/arrow-light.svg" mode="aspectFit"></image>
+      </view>
+    </block>
+
+    <block wx:elif="{{activeType === 'organizations'}}">
+      <view wx:for="{{items}}" wx:key="id" class="surface-card search-organization-card tappable" data-id="{{item.id}}" bindtap="openItem">
+        <image wx:if="{{item.logoUrl}}" class="search-logo" src="{{item.logoUrl}}" mode="aspectFit"></image>
+        <view wx:else class="search-logo fallback">{{item.initial}}</view>
+        <view class="search-main">
+          <view class="search-title">{{item.name}}</view>
+          <view class="search-meta">{{item.description}}</view>
+          <view class="search-domain">{{item.domainText}}</view>
+        </view>
+        <image class="search-arrow" src="/assets/ui/arrow-light.svg" mode="aspectFit"></image>
+      </view>
+    </block>
+
+    <block wx:else>
+      <view wx:for="{{items}}" wx:key="id" class="surface-card search-demand-card tappable" data-id="{{item.id}}" bindtap="openItem">
+        <view class="search-demand-head">
+          <view class="search-title">{{item.title}}</view>
+          <view class="search-price">{{item.feePerHourText}}</view>
+        </view>
+        <view class="search-desc">{{item.descriptionText}}</view>
+        <view class="search-meta">{{item.metaText}}</view>
+      </view>
+    </block>
+    <view wx:if="{{loadingMore}}" class="search-more">正在加载</view>
+    <view wx:elif="{{!hasMore}}" class="search-more">已显示全部</view>
+  </view>
+</view>

@@ -8,6 +8,7 @@ Page({
     mine: [],
     loading: true,
     errorMessage: '',
+    createEntryHidden: 0,
   },
 
   onLoad() {
@@ -27,14 +28,16 @@ Page({
   async loadData(forceRefresh) {
     this.setData({ loading: true, errorMessage: '' });
     try {
-      const [feed, mine] = await Promise.all([
+      const [feed, mine, createEntry] = await Promise.all([
         demands.listFeed({ forceRefresh }),
         demands.listMine({ forceRefresh }),
+        demands.getCreateEntry({ forceRefresh }),
       ]);
       this.setData({
         loading: false,
         feed: presentDemandCards(feed),
         mine: presentDemandCards(mine),
+        createEntryHidden: Number(createEntry && createEntry.hidden) === 1 ? 1 : 0,
       });
     } catch (error) {
       this.setData({

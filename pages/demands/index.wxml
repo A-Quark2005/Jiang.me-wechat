@@ -44,5 +44,5 @@
     </view>
   </view>
 
-  <button class="primary-button demand-create-button" bindtap="openCreate">发布需求</button>
+  <button wx:if="{{createEntryHidden === 0}}" class="primary-button demand-create-button" bindtap="openCreate">发布需求</button>
 </view>

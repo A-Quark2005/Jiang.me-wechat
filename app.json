@@ -10,6 +10,7 @@
     "pages/resume/edit_self/index",
     "pages/resume/credentials/index",
     "pages/distant_people/index",
+    "pages/search/index",
     "pages/demands/index",
     "pages/demands/create",
     "pages/demands/detail",

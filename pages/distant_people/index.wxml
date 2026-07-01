@@ -17,14 +17,19 @@
   </view>
 
   <view class="segmented-strip distant-filter-strip">
-    <view
-      wx:for="{{groups}}"
-      wx:key="key"
-      class="segment-chip tappable {{item.className}}"
-      data-group="{{item.key}}"
-      bindtap="switchGroup"
-    >
-      {{item.label}}
+    <view class="distant-filter-groups">
+      <view
+        wx:for="{{groups}}"
+        wx:key="key"
+        class="segment-chip tappable {{item.className}}"
+        data-group="{{item.key}}"
+        bindtap="switchGroup"
+      >
+        {{item.label}}
+      </view>
+    </view>
+    <view class="distant-search-button tappable" bindtap="openSearch" aria-label="搜索">
+      <image class="distant-search-icon" src="/assets/ui/search.svg" mode="aspectFit"></image>
     </view>
   </view>
 

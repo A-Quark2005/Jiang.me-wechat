@@ -70,10 +70,38 @@
   position: sticky;
   top: 0;
   z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
   margin: 0 -32rpx 20rpx;
   padding: 16rpx 32rpx 18rpx;
   background: #ffffff;
   border-bottom: 1rpx solid #eef2f7;
+}
+
+.distant-filter-groups {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  gap: 16rpx;
+}
+
+.distant-search-button {
+  width: 72rpx;
+  height: 72rpx;
+  flex: 0 0 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8rpx;
+  background: #f5f7fb;
+}
+
+.distant-search-icon {
+  width: 34rpx;
+  height: 34rpx;
+  filter: brightness(0);
+  opacity: 0.56;
 }
 
 .distant-list {

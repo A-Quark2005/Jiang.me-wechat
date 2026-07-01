@@ -26,6 +26,16 @@ function listFeed(options) {
   });
 }
 
+function getCreateEntry(options) {
+  const requestOptions = options || {};
+  return request({
+    path: '/api/demands/create-entry',
+    cacheKey: 'demand_create_entry',
+    maxAgeMs: 15 * 1000,
+    forceRefresh: Boolean(requestOptions.forceRefresh),
+  });
+}
+
 function listMine(options) {
   const requestOptions = options || {};
   return request({
@@ -88,6 +98,7 @@ function closeDemand(id) {
 module.exports = {
   listOrganizationRateRanges,
   listFeed,
+  getCreateEntry,
   listMine,
   createDemand,
   updateDemand,
