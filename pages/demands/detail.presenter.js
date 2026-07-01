@@ -1,14 +1,19 @@
 const avatar = require('../../services/avatar');
 
-function presentDemand(rawDemand, expandedApplicationId) {
+function presentDemand(rawDemand, expandedApplicationId, contactAccessByUserId) {
   if (!rawDemand) return null;
   const rawApplications = Array.isArray(rawDemand.applications) ? rawDemand.applications : [];
   const rawMyApplication = rawDemand.myApplication || null;
   const myApplicationId = rawMyApplication ? String(rawMyApplication.id || '') : '';
   const applications = rawApplications.map((item) => (
-    presentApplication(item, expandedApplicationId, Boolean(myApplicationId && String(item.id || '') === myApplicationId))
+    presentApplication(
+      item,
+      expandedApplicationId,
+      Boolean(myApplicationId && String(item.id || '') === myApplicationId),
+      contactAccessByUserId
+    )
   ));
-  const myApplication = rawMyApplication ? presentApplication(rawMyApplication, '', true) : null;
+  const myApplication = rawMyApplication ? presentApplication(rawMyApplication, '', true, contactAccessByUserId) : null;
   const organizationNames = Array.isArray(rawDemand.organizations)
     ? rawDemand.organizations.map((item) => String(item.name || '').trim()).filter(Boolean)
     : [];
@@ -68,20 +73,23 @@ function presentDemand(rawDemand, expandedApplicationId) {
   };
 }
 
-function presentApplication(application, expandedApplicationId, isMine) {
+function presentApplication(application, expandedApplicationId, isMine, contactAccessByUserId) {
   const resume = application.resume || {};
   const credentials = Array.isArray(resume.credentials) ? resume.credentials.map(presentCredential) : [];
   const engagements = Array.isArray(resume.engagements) ? resume.engagements.map(presentEngagement) : [];
   const credentialCount = credentials.length;
   const engagementCount = engagements.length;
   const expanded = application.id === expandedApplicationId;
+  const publicUserId = application.applicantUserId || resume.publicId || '';
+  const contactAccess = contactAccessByUserId && publicUserId ? contactAccessByUserId[String(publicUserId)] : null;
+  const hasContactAccess = Boolean((application.contactAccess && application.contactAccess.hasPaid) || (contactAccess && contactAccess.hasPaid));
   return {
     ...application,
-    publicUserId: application.applicantUserId || resume.publicId || '',
+    publicUserId,
     expanded,
     isMine: Boolean(isMine),
     detailButtonText: expanded ? '收起' : '查看简历',
-    contactButtonText: '添加好友',
+    contactButtonText: hasContactAccess ? '查看手机号' : (expanded ? '缴纳定金，添加好友' : '添加好友'),
     showMessage: Boolean(application.message),
     summaryText: `${credentialCount} 个认证，${engagementCount} 条履历`,
     resume: {

@@ -80,7 +80,7 @@
         </view>
 
         <view class="candidate-actions">
-          <button class="ghost-button candidate-action-button" data-id="{{item.id}}" bindtap="toggleApplicationDetail">{{item.detailButtonText}}</button>
+          <button wx:if="{{!item.expanded}}" class="ghost-button candidate-action-button" data-id="{{item.id}}" bindtap="toggleApplicationDetail">{{item.detailButtonText}}</button>
           <button
             class="primary-button candidate-action-button"
             data-user-id="{{item.publicUserId}}"

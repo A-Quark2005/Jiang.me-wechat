@@ -2,6 +2,7 @@ const demands = require('../../services/demands');
 const loginGuard = require('../../services/login-guard');
 const avatar = require('../../services/avatar');
 const phoneBinding = require('../../services/phone-binding');
+const subscribeMessage = require('../../services/subscribe-message');
 
 Page({
   data: {
@@ -51,6 +52,7 @@ Page({
     if (this.data.submitting) return;
     this.setData({ submitting: true });
     try {
+      await subscribeMessage.requestDemandSelectionNotice().catch(() => false);
       await demands.applyDemand(this.data.id, {
         message: this.data.message,
       });

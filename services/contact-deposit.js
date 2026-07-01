@@ -29,9 +29,9 @@ function showPhone(access) {
     return;
   }
   wx.showModal({
-    title: '联系方式',
-    content: `${access.targetDisplayName || '对方'}：${phone}`,
-    confirmText: '复制',
+    title: '添加微信好友',
+    content: `${access.targetDisplayName || '对方'}：${phone}\n\n微信搜索手机号即可添加好友`,
+    confirmText: '复制号码',
     cancelText: '关闭',
     success(result) {
       if (result.confirm) {
@@ -58,24 +58,30 @@ async function payAndRevealContact(options) {
     }
 
     if (currentAccess && currentAccess.hasPaid && currentAccess.phone) {
-      showPhone(currentAccess);
-      return currentAccess;
+      const access = settings.demandId && settings.applicationId
+        ? await profileService.createContactDepositOrder(targetUserId, {
+          demandId: settings.demandId,
+          applicationId: settings.applicationId,
+        })
+        : currentAccess;
+      showPhone(access && access.phone ? access : currentAccess);
+      if (typeof settings.onAccessChange === 'function') settings.onAccessChange(access || currentAccess);
+      return access || currentAccess;
     }
 
     const amountText = currentAccess && currentAccess.amountText
       ? currentAccess.amountText
       : moneyText(settings.contactDepositAmountCents);
-    const feeText = currentAccess && currentAccess.feePerHourText
-      ? currentAccess.feePerHourText
-      : moneyText(settings.consultingFeeCentsPerHour);
-
     const confirmed = await confirmDialog({
       title: '确认缴纳',
-      content: `为减少无效打扰，平台会先收取 2 小时试讲定金。按 ${feeText}/小时计算，本次需支付 ${amountText}。\n\n支付后将展示对方微信绑定的手机号，可通过微信搜索手机号与对方建立联系。\n\n该定金可抵扣 2 小时试讲服务，期间无需另行付费。\n\n若试讲满意，从第 3 小时起，双方可自行协商后续服务，平台不再收取其它费用。`,
+      content: `为减少无效打扰，平台会先收取 2 小时试讲定金。本次需支付 ${amountText}。\n\n支付后将展示对方微信绑定的手机号，可通过微信搜索手机号与对方建立联系。\n\n该定金可抵扣 2 小时试讲服务，期间无需另行付费。\n\n若试讲满意，从第 3 小时起，双方可自行协商后续服务，平台不再收取其它费用。\n\n如试讲不满意，可向平台提交退款申请。`,
     });
     if (!confirmed) return null;
 
-    const order = await profileService.createContactDepositOrder(targetUserId);
+    const order = await profileService.createContactDepositOrder(targetUserId, {
+      demandId: settings.demandId,
+      applicationId: settings.applicationId,
+    });
     if (order && order.hasPaid && order.phone) {
       showPhone(order);
       if (typeof settings.onAccessChange === 'function') settings.onAccessChange(order);

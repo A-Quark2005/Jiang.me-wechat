@@ -15,6 +15,7 @@ Page({
     loading: true,
     closing: false,
     contactTargetUserId: '',
+    contactAccessByUserId: {},
     errorMessage: '',
   },
 
@@ -35,7 +36,7 @@ Page({
     try {
       const demand = await demands.getDemand(this.data.id, { forceRefresh });
       this.setData({
-        demand: presenter.presentDemand(demand, this.data.expandedApplicationId),
+        demand: this.presentDemand(demand),
         loading: false,
       }, () => {
         this.prepareShareImage();
@@ -76,7 +77,7 @@ Page({
     const expandedApplicationId = this.data.expandedApplicationId === id ? '' : id;
     this.setData({
       expandedApplicationId,
-      demand: presenter.presentDemand(this.data.demand, expandedApplicationId),
+      demand: this.presentDemand(this.data.demand, expandedApplicationId),
     });
   },
 
@@ -90,9 +91,35 @@ Page({
     }
     await contactDeposit.payAndRevealContact({
       targetUserId: userId,
+      demandId: this.data.id,
+      applicationId: item.id,
       contactDepositAmountCents: (item.resume && item.resume.contactDepositAmountCents) || (this.data.demand && this.data.demand.amountCents) || 0,
       consultingFeeCentsPerHour: (item.resume && item.resume.consultingFeeCentsPerHour) || (this.data.demand && this.data.demand.feeCentsPerHour) || 0,
       setLoading: (loading) => this.setData({ contactTargetUserId: loading ? userId : '' }),
+      onAccessChange: (access) => this.updateContactAccess(userId, access),
+    });
+  },
+
+  presentDemand(demand, expandedApplicationId) {
+    const currentExpandedApplicationId = typeof expandedApplicationId === 'undefined'
+      ? this.data.expandedApplicationId
+      : expandedApplicationId;
+    return presenter.presentDemand(
+      demand,
+      currentExpandedApplicationId,
+      this.data.contactAccessByUserId
+    );
+  },
+
+  updateContactAccess(userId, access) {
+    if (!access) return;
+    const contactAccessByUserId = {
+      ...this.data.contactAccessByUserId,
+      [String(userId)]: access,
+    };
+    this.setData({
+      contactAccessByUserId,
+      demand: presenter.presentDemand(this.data.demand, this.data.expandedApplicationId, contactAccessByUserId),
     });
   },
 
@@ -118,7 +145,7 @@ Page({
           const latestDemand = await demands.closeDemand(this.data.id);
           refreshState.mark(['entitlements']);
           this.setData({
-            demand: presenter.presentDemand(latestDemand, this.data.expandedApplicationId),
+            demand: this.presentDemand(latestDemand),
             closing: false,
           });
           wx.showToast({ title: currentDemand.closeSuccessText || '已撤下', icon: 'success' });
