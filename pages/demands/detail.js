@@ -16,13 +16,17 @@ Page({
     closing: false,
     contactTargetUserId: '',
     contactAccessByUserId: {},
+    demandShareRef: '',
     errorMessage: '',
   },
 
   onLoad(options) {
     if (!loginGuard.guardPage('/pages/demands/detail', { requireRegistration: true })) return;
     const id = decodeURIComponent(options.id || '');
-    this.setData({ id });
+    this.setData({
+      id,
+      demandShareRef: normalizeShareRef(options.sr || options.shareRef || ''),
+    });
     this.loadDemand(true);
   },
 
@@ -50,7 +54,9 @@ Page({
   },
 
   openApply() {
-    wx.navigateTo({ url: `/pages/demands/apply?id=${encodeURIComponent(this.data.id)}` });
+    const query = [`id=${encodeURIComponent(this.data.id)}`];
+    if (this.data.demandShareRef) query.push(`sr=${encodeURIComponent(this.data.demandShareRef)}`);
+    wx.navigateTo({ url: `/pages/demands/apply?${query.join('&')}` });
   },
 
   editDemand() {
@@ -162,9 +168,10 @@ Page({
   },
 
   showReferralRewardRule() {
+    const demand = this.data.demand || {};
     wx.showModal({
-      title: '转发需求',
-      content: '需求收满后会从公域列表撤下，但仍可通过分享链接访问。你可以继续转发给合适的人查看投递简历。',
+      title: '推荐奖励',
+      content: `有人通过你的转发进入页面并投递简历，且最终被选中后，你可获得本单介绍费 ${demand.referralRewardText || '¥0.00'}。\n\n介绍费按实际支付的试讲定金 10% 计算，具体到账以微信支付分账结果为准。`,
       confirmText: '知道了',
       showCancel: false,
     });
@@ -199,3 +206,8 @@ Page({
     }
   },
 });
+
+function normalizeShareRef(input) {
+  const value = String(input || '').trim().toLowerCase();
+  return /^u_[0-9a-z]{3,30}$/.test(value) ? value : '';
+}

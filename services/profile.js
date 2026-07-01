@@ -122,11 +122,8 @@ function getContactDepositAccess(userId, options) {
 
 function createContactDepositOrder(userId, options) {
   const requestOptions = options || {};
-  const app = getApp();
-  const shareRef = app && app.globalData ? String(app.globalData.sessionShareRef || '') : '';
   const data = {
     targetUserId: userId,
-    shareRef,
   };
   if (requestOptions.demandId) data.demandId = requestOptions.demandId;
   if (requestOptions.applicationId) data.applicationId = requestOptions.applicationId;

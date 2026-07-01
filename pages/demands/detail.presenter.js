@@ -20,12 +20,16 @@ function presentDemand(rawDemand, expandedApplicationId, contactAccessByUserId) 
   const organizationText = organizationNames.join('、');
   const applicationLimit = Number(rawDemand.applicationLimit || 1);
   const totalApplicationCount = Number(rawDemand.totalApplicationCount || 0);
+  const activeApplicationCount = Number(rawDemand.activeApplicationCount || totalApplicationCount || 0);
   const isOpen = rawDemand.status === 'open';
   const isClosed = rawDemand.status === 'closed';
   const isPoster = Boolean(rawDemand.isPoster);
   const showMyApplication = Boolean(myApplication && !isPoster);
   const showApplyControl = Boolean(!isPoster && (isOpen || showMyApplication));
-  const showShareAction = Boolean(isOpen);
+  const isApplicationFull = activeApplicationCount >= applicationLimit;
+  const referralRewardCents = Math.floor(Number(rawDemand.amountCents || 0) * 0.1);
+  const referralRewardText = moneyText(referralRewardCents);
+  const showShareAction = Boolean(!isPoster && isOpen && !isApplicationFull);
   const showCloseAction = Boolean(isPoster && !isClosed);
   const showEditAction = Boolean(isPoster && !isClosed);
   const isFilled = rawDemand.status === 'filled';
@@ -44,7 +48,10 @@ function presentDemand(rawDemand, expandedApplicationId, contactAccessByUserId) 
     hasDescription: Boolean(rawDemand.description),
     hasApplications: applications.length > 0,
     totalApplicationCount,
+    activeApplicationCount,
     applicationLimit,
+    referralRewardCents,
+    referralRewardText,
     candidateCountText: `已收到 ${totalApplicationCount}/${applicationLimit} 份简历`,
     overviewMetaText: isPoster
       ? `已收到 ${totalApplicationCount}/${applicationLimit} 份简历，收满后会自动撤下`
@@ -67,7 +74,7 @@ function presentDemand(rawDemand, expandedApplicationId, contactAccessByUserId) 
     applyActionText: applyActionEnabled ? '我想试试' : (myApplication ? myApplication.statusText : '暂不符合要求'),
     applyDisabledHint,
     showApplyDisabledHint: Boolean(applyDisabledHint),
-    shareTipText: isPoster ? '转发给合适的人，帮我收集更多简历' : '转发给合适的人，一起看看这个需求',
+    shareTipText: `转发给合适的人，成功匹配可得介绍费 ${referralRewardText}`,
     emptyCandidateText: isPoster ? '还没有人投递，转发后更容易收到简历' : '还没有人投递，可以先投递简历',
     showMyApplication: false,
   };
@@ -120,6 +127,10 @@ function presentEngagement(item) {
     metaText: [item.counterpartName, item.confirmedAt ? String(item.confirmedAt).slice(0, 10) : ''].filter(Boolean).join(' · '),
     descriptionText: item.description || '',
   };
+}
+
+function moneyText(cents) {
+  return `¥${(Number(cents || 0) / 100).toFixed(2)}`;
 }
 
 module.exports = {

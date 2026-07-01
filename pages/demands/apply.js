@@ -10,6 +10,7 @@ Page({
     demand: null,
     resume: null,
     message: '',
+    demandShareRef: '',
     loading: true,
     submitting: false,
     bindingPhone: false,
@@ -19,7 +20,10 @@ Page({
   onLoad(options) {
     if (!loginGuard.guardPage('/pages/demands/apply', { requireRegistration: true })) return;
     const id = decodeURIComponent(options.id || '');
-    this.setData({ id });
+    this.setData({
+      id,
+      demandShareRef: normalizeShareRef(options.sr || options.shareRef || ''),
+    });
     this.loadPreview();
   },
 
@@ -55,6 +59,7 @@ Page({
       await subscribeMessage.requestDemandSelectionNotice().catch(() => false);
       await demands.applyDemand(this.data.id, {
         message: this.data.message,
+        shareRef: this.data.demandShareRef,
       });
       wx.showToast({ title: '已投递', icon: 'success' });
       setTimeout(() => {
@@ -97,6 +102,11 @@ Page({
   },
 
 });
+
+function normalizeShareRef(input) {
+  const value = String(input || '').trim().toLowerCase();
+  return /^u_[0-9a-z]{3,30}$/.test(value) ? value : '';
+}
 
 function decorateResume(resume) {
   const credentials = Array.isArray(resume.credentials) ? resume.credentials : [];

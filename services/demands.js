@@ -1,11 +1,5 @@
 const { request } = require('./api-client');
 
-function currentShareRef() {
-  const app = typeof getApp === 'function' ? getApp() : null;
-  const value = app && app.globalData ? String(app.globalData.sessionShareRef || '') : '';
-  return /^u_[0-9a-z]{3,30}$/.test(value) ? value : '';
-}
-
 function listOrganizationRateRanges(options) {
   const requestOptions = options || {};
   return request({
@@ -47,11 +41,10 @@ function listMine(options) {
 }
 
 function createDemand(payload) {
-  const shareRef = currentShareRef();
   return request({
     path: '/api/me/demands',
     method: 'POST',
-    data: shareRef ? { ...(payload || {}), shareRef } : payload,
+    data: payload,
   });
 }
 
@@ -80,7 +73,7 @@ function previewApplication(id) {
 }
 
 function applyDemand(id, payload) {
-  const shareRef = currentShareRef();
+  const shareRef = payload && payload.shareRef ? String(payload.shareRef || '') : '';
   return request({
     path: `/api/demands/${encodeURIComponent(id)}/applications`,
     method: 'POST',
