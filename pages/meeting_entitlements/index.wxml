@@ -11,7 +11,7 @@
 
   <block wx:else>
     <view class="surface-card entitlements-orders-card tappable" bindtap="openOrders">
-      <view class="entitlements-orders-title">购买记录</view>
+      <view class="entitlements-orders-title">交易记录/退款</view>
     </view>
 
     <view wx:if="{{showPendingActivationNotice}}" class="surface-card entitlements-pending-card">
