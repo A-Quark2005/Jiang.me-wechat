@@ -150,6 +150,10 @@ function normalizeOrderStatusText(value) {
   if (!key) return '未知';
   if (['paid', 'completed', 'success', 'succeeded', 'active'].includes(key)) return '已完成';
   if (['pending', 'created', 'processing', 'unpaid'].includes(key)) return '待支付';
+  if (['refund_requested', 'submitted'].includes(key)) return '退款审核中';
+  if (['refunding', 'refund_approved', 'approved'].includes(key)) return '退款处理中';
+  if (['refunded'].includes(key)) return '已退款';
+  if (['refund_rejected', 'rejected'].includes(key)) return '退款未通过';
   if (['expired', 'invalid', 'closed', 'cancelled', 'canceled', 'failed'].includes(key)) return '已失效';
   return text;
 }

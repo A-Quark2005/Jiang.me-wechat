@@ -1,0 +1,37 @@
+<view class="page refund-request-page">
+  <view class="surface-card refund-form-card">
+    <view class="section-title">退款说明</view>
+    <view class="section-subtitle">请说明试讲不满意或无法继续的原因，平台审核通过后将原路退款。</view>
+    <textarea
+      class="refund-textarea"
+      maxlength="1000"
+      placeholder="请填写退款原因，至少 10 个字"
+      value="{{reason}}"
+      bindinput="onReasonInput"
+    ></textarea>
+  </view>
+
+  <view class="surface-card refund-form-card">
+    <view class="section-title">沟通记录截图</view>
+    <view class="section-subtitle">请上传与对方沟通记录截图，最多 6 张。</view>
+    <view class="evidence-grid">
+      <view wx:for="{{evidenceImages}}" wx:key="url" class="evidence-item">
+        <image class="evidence-image" src="{{item.url}}" mode="aspectFill" data-url="{{item.url}}" bindtap="previewImage"></image>
+        <view class="evidence-remove tappable" data-index="{{index}}" bindtap="removeImage">删除</view>
+      </view>
+      <view wx:if="{{canAddImage}}" class="evidence-add tappable" bindtap="chooseImages">
+        <view class="evidence-add-plus">+</view>
+        <view class="evidence-add-text">上传截图</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="refund-submit-panel">
+    <button
+      class="primary-button refund-submit"
+      loading="{{submitting || uploading}}"
+      disabled="{{submitting || uploading}}"
+      bindtap="submit"
+    >提交申请</button>
+  </view>
+</view>

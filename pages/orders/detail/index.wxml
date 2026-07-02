@@ -1,4 +1,4 @@
-<view class="page page-plain order-detail-page">
+<view class="page page-plain order-detail-page {{canConfirmTrialCompletion ? 'order-detail-page-with-bar' : ''}}">
   <view wx:if="{{loading}}" class="surface-card">
     <view class="section-title">正在读取订单详情</view>
     <view class="section-subtitle">请稍候。</view>
@@ -18,16 +18,43 @@
       </view>
       <view class="order-detail-amount">{{amountText}}</view>
       <view class="order-detail-status-desc">{{statusDescriptionText}}</view>
+      <view wx:if="{{showAutoSettlementText}}" class="order-detail-settlement">{{autoSettlementText}}</view>
     </view>
 
     <view class="surface-card">
-      <view class="section-title">订单信息</view>
+      <view class="detail-section-header">
+        <view class="section-title">订单信息</view>
+        <view
+          wx:if="{{isContactDeposit}}"
+          class="after-sale-toggle tappable"
+          bindtap="toggleAfterSale"
+        >申请售后</view>
+      </view>
       <view wx:for="{{facts}}" wx:key="label" class="detail-row">
         <view class="detail-row-label">{{item.label}}</view>
         <view class="detail-row-value-wrap">
           <view class="detail-row-value">{{item.value}}</view>
           <view wx:if="{{item.copyable}}" class="detail-row-copy tappable" data-value="{{item.value}}" bindtap="copyField">复制</view>
         </view>
+      </view>
+      <view wx:if="{{afterSaleExpanded}}" class="after-sale-panel">
+        <view wx:if="{{hasRefundRequest}}" class="after-sale-status">
+          <view wx:if="{{refundStatusText}}" class="section-subtitle">{{refundStatusText}}</view>
+          <view wx:if="{{refundReasonText}}" class="refund-reason">{{refundReasonText}}</view>
+          <view wx:if="{{refundReviewerNote}}" class="refund-note">{{refundReviewerNote}}</view>
+        </view>
+        <view
+          wx:elif="{{canRequestRefund}}"
+          class="after-sale-option tappable"
+          bindtap="openRefundRequest"
+        >
+          <view class="after-sale-option-main">
+            <view class="after-sale-option-title">退款</view>
+            <view class="after-sale-option-desc">试讲不满意，可提交退款申请，平台审核通过后原路退款。</view>
+          </view>
+          <view class="after-sale-option-action">申请</view>
+        </view>
+        <view wx:else class="section-subtitle">{{trialCompletionConfirmed ? '试课已完成，售后申请已关闭。' : '暂无可申请的售后服务'}}</view>
       </view>
     </view>
 
@@ -37,6 +64,15 @@
         <view class="detail-row-label">{{item.label}}</view>
         <view class="detail-row-value">{{item.value}}</view>
       </view>
+    </view>
+
+    <view wx:if="{{canConfirmTrialCompletion}}" class="trial-completion-bar">
+      <button
+        class="primary-button trial-completion-button"
+        loading="{{confirmingTrialCompletion}}"
+        disabled="{{confirmingTrialCompletion}}"
+        bindtap="confirmTrialCompletion"
+      >确认完成试讲</button>
     </view>
   </block>
 </view>

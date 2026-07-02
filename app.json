@@ -22,6 +22,7 @@
     "pages/resume/engagement_detail/index",
     "pages/meeting_entitlements/index",
     "pages/meeting_products/index",
+    "pages/orders/refund-request/index",
     "pages/orders/detail/index",
     "pages/orders/index"
   ],

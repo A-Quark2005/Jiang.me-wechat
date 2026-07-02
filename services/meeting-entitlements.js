@@ -131,6 +131,16 @@ function getOrders(options) {
   });
 }
 
+function getReferralCommissions(options) {
+  const requestOptions = options || {};
+  return request({
+    path: '/api/payments/referral-commissions',
+    cacheKey: 'payment_referral_commissions',
+    maxAgeMs: 60 * 1000,
+    forceRefresh: Boolean(requestOptions.forceRefresh),
+  });
+}
+
 function getOrder(orderId) {
   return request({ path: `/api/payments/${encodeURIComponent(orderId)}` });
 }
@@ -245,6 +255,7 @@ module.exports = {
   getEntitlements,
   getOrder,
   getOrders,
+  getReferralCommissions,
   getReferralDashboard,
   getCachedTencentMeetingHistorySection,
   getTencentMeetingHistorySection,

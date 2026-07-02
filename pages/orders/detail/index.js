@@ -1,4 +1,5 @@
 const service = require('../../../services/meeting-entitlements');
+const contactDeposit = require('../../../services/contact-deposit');
 const displayFormatters = require('../../../services/display-formatters');
 const loginGuard = require('../../../services/login-guard');
 
@@ -7,6 +8,14 @@ function statusTextOf(item) {
 }
 
 function statusMetaOf(item) {
+  const contactDeposit = contactDepositOf(item);
+  if (contactDeposit) {
+    return {
+      title: contactDeposit.statusText || '--',
+      className: contactDeposit.statusClassName || 'detail-status-pending',
+      description: contactDeposit.descriptionText || '',
+    };
+  }
   const statusText = statusTextOf(item);
   if (['paid', 'completed', 'success', 'succeeded', 'active'].includes(statusText)) {
     return {
@@ -27,6 +36,14 @@ function statusMetaOf(item) {
     className: 'detail-status-expired',
     description: '该订单当前不可继续使用，可重新购买新的权益。',
   };
+}
+
+function isContactDepositOrder(item) {
+  return Boolean(contactDepositOf(item)) || String(item && item.sourceType || '').toLowerCase() === 'contact_deposit';
+}
+
+function contactDepositOf(item) {
+  return item && item.contactDeposit ? item.contactDeposit : null;
 }
 
 function formatDateTimeWithSeconds(value, fallback) {
@@ -88,6 +105,9 @@ function amountTextOf(item) {
 }
 
 function titleOf(item) {
+  if (isContactDepositOrder(item)) {
+    return '试讲定金';
+  }
   return (
     (item.extraData && item.extraData.product && item.extraData.product.name) ||
     (item.extraData && item.extraData.product && item.extraData.product.title) ||
@@ -118,6 +138,18 @@ function buildTimeline(item) {
 }
 
 function buildFacts(item) {
+  const contactDeposit = contactDepositOf(item);
+  if (contactDeposit) {
+    const paidAt = item.paidAt ? formatDateTimeText(item.paidAt, '--') : '--';
+    return [
+      { label: '订单编号', value: item.id || '--', copyable: true },
+      { label: '订单状态', value: contactDeposit.statusText || '--' },
+      { label: '支付金额', value: amountTextOf(item) },
+      { label: '支付渠道', value: '微信支付' },
+      { label: '支付时间', value: paidAt },
+      { label: '用途说明', value: '抵扣 2 小时试讲服务' },
+    ];
+  }
   const product = item.extraData && item.extraData.product ? item.extraData.product : null;
   const purchaseOptions = item.extraData && item.extraData.purchaseOptions ? item.extraData.purchaseOptions : null;
   const effectiveStartAt = item.paidAt || item.createdAt || item.submittedAt || '';
@@ -154,21 +186,55 @@ function buildFacts(item) {
 
 function buildPageState(order) {
   const statusMeta = statusMetaOf(order);
+  const contactDeposit = contactDepositOf(order);
+  const refundRequest = contactDeposit && contactDeposit.refundRequest ? contactDeposit.refundRequest : null;
+  const trialCompletionConfirmed = Boolean(contactDeposit && contactDeposit.trialCompleted);
+  const autoSettlementText = buildAutoSettlementText(order);
   return {
     order,
+    isContactDeposit: isContactDepositOrder(order),
+    trialCompletionConfirmed,
     titleText: titleOf(order),
     amountText: amountTextOf(order),
     statusText: statusMeta.title,
     statusClassName: statusMeta.className,
     statusDescriptionText: statusMeta.description,
+    autoSettlementText,
+    showAutoSettlementText: Boolean(autoSettlementText),
     facts: buildFacts(order),
     timeline: buildTimeline(order),
+    canConfirmTrialCompletion: Boolean(contactDeposit && contactDeposit.canConfirmCompletion),
+    refundInfo: contactDeposit || null,
+    canRequestRefund: Boolean(contactDeposit && contactDeposit.canRequestRefund),
+    hasRefundRequest: Boolean(refundRequest),
+    refundStatusText: refundRequest ? refundRequest.statusText : '',
+    refundReasonText: refundRequest && refundRequest.reason ? refundRequest.reason : '',
+    refundReviewerNote: refundRequest && refundRequest.reviewerNote ? refundRequest.reviewerNote : '',
   };
+}
+
+function buildAutoSettlementText(order) {
+  const contactDeposit = contactDepositOf(order);
+  const autoSettlementAt = String(contactDeposit && contactDeposit.autoSettlementAt || '').trim();
+  if (!autoSettlementAt) return '';
+  const timestamp = Date.parse(autoSettlementAt);
+  if (!Number.isFinite(timestamp)) return '';
+  const remainingMs = timestamp - Date.now();
+  if (remainingMs <= 0) return '已到自动结算时间，平台将尽快完成结算。';
+  const remainingHours = Math.ceil(remainingMs / (60 * 60 * 1000));
+  const days = Math.floor(remainingHours / 24);
+  const hours = remainingHours % 24;
+  const remainingText = days > 0
+    ? `${days}天${hours > 0 ? `${hours}小时` : ''}`
+    : `${hours || 1}小时`;
+  const dateText = formatDateTimeText(autoSettlementAt, '');
+  return `${remainingText}后自动完成结算${dateText ? `（预计 ${dateText}）` : ''}`;
 }
 
 Page({
   data: {
     loading: true,
+    hasLoaded: false,
     errorMessage: '',
     orderId: '',
     order: null,
@@ -177,8 +243,21 @@ Page({
     statusText: '',
     statusClassName: '',
     statusDescriptionText: '',
+    autoSettlementText: '',
+    showAutoSettlementText: false,
     facts: [],
     timeline: [],
+    isContactDeposit: false,
+    canConfirmTrialCompletion: false,
+    confirmingTrialCompletion: false,
+    trialCompletionConfirmed: false,
+    refundInfo: null,
+    canRequestRefund: false,
+    hasRefundRequest: false,
+    afterSaleExpanded: false,
+    refundStatusText: '',
+    refundReasonText: '',
+    refundReviewerNote: '',
   },
 
   onLoad(options) {
@@ -192,6 +271,9 @@ Page({
 
   onShow() {
     loginGuard.guardPage('/pages/orders/detail/index', { requireRegistration: true });
+    if (this.data.orderId && this.data.hasLoaded) {
+      this.loadDetail();
+    }
   },
 
   async loadDetail() {
@@ -207,6 +289,7 @@ Page({
       const order = await service.getOrder(this.data.orderId);
       this.setData({
         loading: false,
+        hasLoaded: true,
         ...buildPageState(order),
       });
     } catch (error) {
@@ -223,5 +306,46 @@ Page({
       return;
     }
     wx.setClipboardData({ data: value });
+  },
+
+  toggleAfterSale() {
+    if (!this.data.isContactDeposit) return;
+    this.setData({ afterSaleExpanded: !this.data.afterSaleExpanded });
+  },
+
+  openRefundRequest() {
+    if (!this.data.canRequestRefund || !this.data.orderId) {
+      return;
+    }
+    wx.navigateTo({
+      url: `/pages/orders/refund-request/index?id=${encodeURIComponent(this.data.orderId)}`,
+    });
+  },
+
+  confirmTrialCompletion() {
+    if (!this.data.canConfirmTrialCompletion || this.data.confirmingTrialCompletion) return;
+    wx.showModal({
+      title: '确认完成试讲',
+      content: '确认后，此单试讲定金将结束冻结并完成结算；如已有退款申请，也会自动关闭。',
+      confirmText: '确认完成',
+      cancelText: '再想想',
+      success: async (result) => {
+        if (!result.confirm) return;
+        this.setData({ confirmingTrialCompletion: true });
+        try {
+          await contactDeposit.confirmTrialCompletion(this.data.orderId);
+          wx.showToast({ title: '已确认完成', icon: 'success' });
+          await this.loadDetail();
+        } catch (error) {
+          wx.showModal({
+            title: '确认失败',
+            content: error && error.message ? error.message : '请稍后重试',
+            showCancel: false,
+          });
+        } finally {
+          this.setData({ confirmingTrialCompletion: false });
+        }
+      },
+    });
   },
 });

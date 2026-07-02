@@ -2,11 +2,13 @@ const service = require('../../services/meeting-entitlements');
 const refreshState = require('../../services/refresh-state');
 const displayFormatters = require('../../services/display-formatters');
 const loginGuard = require('../../services/login-guard');
+const avatar = require('../../services/avatar');
 
 const PAGE_KEY = 'orders';
 const CACHE_MAX_AGE_MS = 5 * 60 * 1000;
 const MEETING_SOURCE_TYPES = ['hour_pass', 'single', 'duration', 'recording_pack'];
 const CONTACT_DEPOSIT_SOURCE_TYPES = ['contact_deposit'];
+const REFERRAL_TAB = 'referral_commission';
 
 function normalizeList(raw) {
   if (Array.isArray(raw)) return raw;
@@ -71,7 +73,14 @@ function buildAmountFragments(item) {
 
 function normalizeOrder(item) {
   const expired = isExpiredEntitlement(item);
+  const sourceType = String(item.sourceType || '').toLowerCase();
+  const contactDeposit = item.contactDeposit || null;
+  const target = contactDeposit && contactDeposit.target ? contactDeposit.target : {};
+  const contactDepositAvatarUrl = sourceType === 'contact_deposit'
+    ? avatar.resolveAvatarUrl(target.avatarUrl)
+    : '';
   const friendlyTitle =
+    sourceType === 'contact_deposit' ? '试讲定金' :
     (item.extraData && item.extraData.product && item.extraData.product.name) ||
     (item.extraData && item.extraData.product && item.extraData.product.title) ||
     displayFormatters.normalizeMeetingProductTitle(item.productName) ||
@@ -91,20 +100,66 @@ function normalizeOrder(item) {
     entitlementExpired: expired,
     isExpired: expired,
     iconClass: expired ? 'ticket-icon-expired' : '',
+    usesAvatarIcon: sourceType === 'contact_deposit',
+    avatarIconUrl: contactDepositAvatarUrl,
     statusClass: expired ? 'order-status-expired' : '',
     titleText: friendlyTitle,
     timeText,
-    statusDisplayText: displayFormatters.normalizeOrderStatusText(item.status || item.orderStatus),
+    statusDisplayText: sourceType === 'contact_deposit'
+      ? (contactDeposit && contactDeposit.statusText ? contactDeposit.statusText : '--')
+      : displayFormatters.normalizeOrderStatusText(item.status || item.orderStatus),
     chevronText: '›',
   };
 }
 
+function splitMoneyText(value) {
+  const raw = String(value || '').trim().replace(/^¥\s*/, '');
+  return {
+    amountUnitText: '¥',
+    amountValueText: raw || '--',
+  };
+}
+
+function normalizeReferralCommission(item) {
+  const target = item && item.target ? item.target : {};
+  const demand = item && item.demand ? item.demand : {};
+  const trial = item && item.trial ? item.trial : {};
+  const money = splitMoneyText(item.commissionText);
+  const timeText = displayFormatters.formatDateText(
+    item.settledAt || item.payableAt || item.createdAt,
+    { fallback: '暂无时间' },
+  ) || '暂无时间';
+  const title = demand.title || '需求转介绍';
+  const subtitleParts = [];
+  if (target.displayName) subtitleParts.push(`被选中：${target.displayName}`);
+  if (item.payableAt && item.status !== 'paid') {
+    subtitleParts.push(`预计结算：${displayFormatters.formatDateText(item.payableAt, { includeTime: true })}`);
+  }
+  if (trial.completed) subtitleParts.push('试课已完成');
+  return {
+    id: `referral-${item.id}`,
+    rawId: item.id,
+    isReferralCommission: true,
+    titleText: title,
+    timeText,
+    statusDisplayText: item.statusText || '--',
+    statusClass: item.status === 'paid' ? '' : 'order-status-pending',
+    iconClass: '',
+    usesAvatarIcon: true,
+    avatarIconUrl: avatar.resolveAvatarUrl(target.avatarUrl),
+    chevronText: '',
+    amountUnitText: money.amountUnitText,
+    amountValueText: money.amountValueText,
+    referralSubtitleText: subtitleParts.join(' · '),
+  };
+}
+
 function cachedOrdersPage() {
-  return wx.getStorageSync('jiangleme.page.orders.summary') || null;
+  return wx.getStorageSync('jiangleme.page.orders.summary.v2') || null;
 }
 
 function saveCachedOrdersPage(payload) {
-  wx.setStorageSync('jiangleme.page.orders.summary', {
+  wx.setStorageSync('jiangleme.page.orders.summary.v2', {
     savedAt: Date.now(),
     data: payload,
   });
@@ -121,10 +176,17 @@ function tabClassState(activeTab) {
   return {
     activeMeetingTabClass: activeTab === 'meeting' ? 'tab-chip-active' : 'muted-chip',
     activeContactDepositTabClass: activeTab === 'contact_deposit' ? 'tab-chip-active' : 'muted-chip',
+    activeReferralTabClass: activeTab === REFERRAL_TAB ? 'tab-chip-active' : 'muted-chip',
   };
 }
 
 function orderBelongsToTab(item, tab) {
+  if (tab === REFERRAL_TAB) {
+    return Boolean(item.isReferralCommission);
+  }
+  if (item.isReferralCommission) {
+    return false;
+  }
   const sourceType = String(item.sourceType || '').toLowerCase();
   if (tab === 'contact_deposit') {
     return CONTACT_DEPOSIT_SOURCE_TYPES.includes(sourceType);
@@ -172,9 +234,14 @@ Page({
       this.setData({ errorMessage: '' });
     }
     try {
-      const raw = await service.getOrders({ forceRefresh });
+      const [raw, referralRaw] = await Promise.all([
+        service.getOrders({ forceRefresh }),
+        service.getReferralCommissions({ forceRefresh }),
+      ]);
       const orders = normalizeList(raw).map(normalizeOrder);
-      this.setData({ loading: false, hasLoaded: true, orders }, () => {
+      const referralCommissions = normalizeList(referralRaw).map(normalizeReferralCommission);
+      const allOrders = orders.concat(referralCommissions);
+      this.setData({ loading: false, hasLoaded: true, orders: allOrders }, () => {
         this.applyFilter();
         saveCachedOrdersPage({
           activeTab: this.data.activeTab,
@@ -216,6 +283,10 @@ Page({
   openDetail(event) {
     const orderId = String(event.currentTarget.dataset.id || '');
     if (!orderId) {
+      return;
+    }
+    const item = this.data.visibleOrders.find((order) => String(order.id) === orderId);
+    if (item && item.isReferralCommission) {
       return;
     }
     wx.navigateTo({

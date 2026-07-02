@@ -2,6 +2,7 @@
   <view class="tab-strip">
     <view class="tab-chip tappable {{activeMeetingTabClass}}" data-tab="meeting" bindtap="switchTab">腾讯会议</view>
     <view class="tab-chip tappable {{activeContactDepositTabClass}}" data-tab="contact_deposit" bindtap="switchTab">试讲定金</view>
+    <view class="tab-chip tappable {{activeReferralTabClass}}" data-tab="referral_commission" bindtap="switchTab">转介绍费</view>
   </view>
 
   <view wx:if="{{loading}}" class="surface-card">正在读取订单</view>
@@ -9,18 +10,20 @@
     <view class="error-box">{{errorMessage}}</view>
     <button class="primary-button action-button" bindtap="loadOrders">重新加载</button>
   </view>
-  <view wx:elif="{{visibleOrders.length === 0}}" class="empty-box">暂无订单记录</view>
+  <view wx:elif="{{visibleOrders.length === 0}}" class="empty-box">暂无交易记录</view>
 
   <view wx:for="{{visibleOrders}}" wx:key="id" class="surface-card order-card tappable" data-id="{{item.id}}" bindtap="openDetail">
     <view class="row">
       <view class="row feature-row">
         <view class="ticket-icon {{item.iconClass}}">
-          <image wx:if="{{!item.isExpired}}" class="ticket-icon-image" src="/assets/ui/card-ticket-icon.svg" mode="aspectFit"></image>
+          <image wx:if="{{item.usesAvatarIcon}}" class="ticket-avatar-image" src="{{item.avatarIconUrl}}" mode="aspectFill"></image>
+          <image wx:elif="{{!item.isExpired}}" class="ticket-icon-image" src="/assets/ui/card-ticket-icon.svg" mode="aspectFit"></image>
           <image wx:else class="ticket-icon-image" src="/assets/ui/card-ticket-icon-expired.svg" mode="aspectFit"></image>
         </view>
         <view class="row-main">
           <view class="section-title">{{item.titleText}}</view>
           <view class="section-subtitle">{{item.timeText}}</view>
+          <view wx:if="{{item.referralSubtitleText}}" class="section-subtitle referral-subtitle">{{item.referralSubtitleText}}</view>
         </view>
       </view>
       <view class="order-side">

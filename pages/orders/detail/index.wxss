@@ -3,6 +3,10 @@
   padding-bottom: 24rpx;
 }
 
+.order-detail-page-with-bar {
+  padding-bottom: 132rpx;
+}
+
 .order-detail-hero {
   margin-top: 20rpx;
   padding: 32rpx 32rpx 28rpx;
@@ -39,6 +43,16 @@
   color: #6b7280;
 }
 
+.order-detail-settlement {
+  margin-top: 12rpx;
+  padding: 14rpx 16rpx;
+  border-radius: 8rpx;
+  background: #f7f8fa;
+  font-size: 24rpx;
+  line-height: 1.55;
+  color: #6b7280;
+}
+
 .detail-status-success {
   color: #0f9d58;
   background: #e8f7ee;
@@ -52,6 +66,20 @@
 .detail-status-expired {
   color: #9ca3af;
   background: #f3f4f6;
+}
+
+.detail-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.after-sale-toggle {
+  flex-shrink: 0;
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: #0071fe;
 }
 
 .detail-row {
@@ -98,4 +126,74 @@
   font-size: 24rpx;
   line-height: 1.6;
   color: #0071fe;
+}
+
+.after-sale-panel {
+  margin-top: 24rpx;
+  padding-top: 24rpx;
+  border-top: 1rpx solid #f3f4f6;
+}
+
+.after-sale-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  padding: 20rpx 0;
+}
+
+.after-sale-option-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.after-sale-option-title {
+  font-size: 28rpx;
+  line-height: 1.5;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.after-sale-option-desc {
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  line-height: 1.55;
+  color: #9ca3af;
+}
+
+.after-sale-option-action {
+  flex-shrink: 0;
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: #0071fe;
+}
+
+.refund-reason,
+.refund-note {
+  margin-top: 16rpx;
+  font-size: 26rpx;
+  line-height: 1.7;
+  color: #4b5563;
+  white-space: pre-wrap;
+}
+
+.refund-note {
+  color: #9ca3af;
+}
+
+.trial-completion-bar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 20;
+  box-sizing: border-box;
+  padding: 16rpx 32rpx calc(16rpx + env(safe-area-inset-bottom));
+  background: #ffffff;
+  box-shadow: 0 -8rpx 24rpx rgba(15, 23, 42, 0.06);
+}
+
+.trial-completion-button {
+  width: 100%;
+  min-height: 82rpx;
 }

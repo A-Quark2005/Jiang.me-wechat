@@ -5,11 +5,14 @@
 
 .tab-strip {
   display: flex;
+  flex-wrap: nowrap;
   gap: 16rpx;
   margin: 0 -32rpx;
   padding: 16rpx 32rpx;
   background: #ffffff;
   border-bottom: 1rpx solid #f3f4f6;
+  overflow-x: auto;
+  white-space: nowrap;
 }
 
 .tab-chip {
@@ -36,6 +39,15 @@
   color: #666666;
 }
 
+.referral-subtitle {
+  margin-top: 4rpx;
+  color: #6b7280;
+}
+
+.order-status-pending {
+  color: #8b6f19;
+}
+
 .order-card {
   min-height: 160rpx;
   margin-top: 16rpx;
@@ -59,6 +71,13 @@
 .ticket-icon-image {
   width: 88rpx;
   height: 88rpx;
+}
+
+.ticket-avatar-image {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 24rpx;
+  background: #f3f4f6;
 }
 
 .order-side {

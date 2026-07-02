@@ -1,5 +1,7 @@
 const profileService = require('./profile');
 const paymentService = require('./meeting-entitlements');
+const apiClient = require('./api-client');
+const sessionStore = require('./session-store');
 
 function moneyText(cents) {
   return `¥${(Number(cents || 0) / 100).toFixed(2)}`;
@@ -38,6 +40,52 @@ function showPhone(access) {
         wx.setClipboardData({ data: phone });
       }
     },
+  });
+}
+
+function uploadRefundEvidence(filePath) {
+  const token = sessionStore.getAccessToken();
+  const uploadUrl = `${apiClient.backendBaseUrl()}/api/uploads/refund-evidence`;
+  return new Promise((resolve, reject) => {
+    wx.uploadFile({
+      url: uploadUrl,
+      filePath,
+      name: 'file',
+      header: token ? { Authorization: `Bearer ${token}` } : {},
+      success(response) {
+        const statusCode = response.statusCode || 0;
+        let body = {};
+        try {
+          body = response.data ? JSON.parse(response.data) : {};
+        } catch (error) {
+          reject(new Error('截图上传响应格式异常'));
+          return;
+        }
+        if (statusCode >= 200 && statusCode < 300 && body.ok === true) {
+          resolve(body.data || {});
+          return;
+        }
+        reject(new Error(body.message || body.error || '截图上传失败'));
+      },
+      fail(error) {
+        reject(new Error(error && error.errMsg ? `截图上传失败：${error.errMsg}` : '截图上传失败'));
+      },
+    });
+  });
+}
+
+function submitRefundRequest(id, payload) {
+  return apiClient.request({
+    path: `/api/me/contact-deposits/${encodeURIComponent(String(id || ''))}/refund-requests`,
+    method: 'POST',
+    data: payload || {},
+  });
+}
+
+function confirmTrialCompletion(id) {
+  return apiClient.request({
+    path: `/api/me/contact-deposits/${encodeURIComponent(String(id || ''))}/confirm-completion`,
+    method: 'POST',
   });
 }
 
@@ -112,7 +160,10 @@ async function payAndRevealContact(options) {
 }
 
 module.exports = {
+  confirmTrialCompletion,
   moneyText,
   payAndRevealContact,
   showPhone,
+  submitRefundRequest,
+  uploadRefundEvidence,
 };
