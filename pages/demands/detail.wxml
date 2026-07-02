@@ -10,6 +10,14 @@
       </view>
       <view class="overview-title">{{demand.title}}</view>
       <view class="overview-meta">{{demand.overviewMetaText}}</view>
+      <view wx:if="{{demand.showFilledDecisionCountdown}}" class="filled-decision-countdown">
+        <view
+          wx:for="{{demand.filledDecision.hintLines}}"
+          wx:for-item="line"
+          wx:key="*this"
+          class="filled-decision-line"
+        >{{line}}</view>
+      </view>
       <view wx:if="{{demand.hasDescription}}" class="overview-desc">{{demand.description}}</view>
       <view class="detail-org-row" wx:if="{{demand.hasOrganizations}}">
         <view wx:for="{{demand.organizations}}" wx:for-item="org" wx:key="id" class="detail-org-chip">{{org.name}}</view>

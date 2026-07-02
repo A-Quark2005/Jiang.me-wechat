@@ -43,6 +43,7 @@ function presentDemand(rawDemand, expandedApplicationId, contactAccessByUserId) 
   const showCloseAction = Boolean(isPoster && !isClosed);
   const showEditAction = Boolean(isPoster && !isClosed);
   const isFilled = rawDemand.status === 'filled';
+  const filledDecision = presentFilledDecision(rawDemand.filledDecision);
   const applyActionEnabled = Boolean(rawDemand.canApply);
   const applyDisabledHint = !isPoster && !myApplication && !applyActionEnabled
     ? rawDemand.applyDisabledReason || ''
@@ -66,6 +67,8 @@ function presentDemand(rawDemand, expandedApplicationId, contactAccessByUserId) 
     overviewMetaText: isPoster
       ? `已收到 ${totalApplicationCount}/${applicationLimit} 份简历，收满后会自动撤下`
       : `已收到 ${totalApplicationCount}/${applicationLimit} 份简历，符合条件即可投递`,
+    filledDecision,
+    showFilledDecisionCountdown: Boolean(filledDecision.showCountdown),
     showCandidateList: true,
     showBottomBar: Boolean(showApplyControl || showShareAction),
     showApplyControl,
@@ -77,14 +80,14 @@ function presentDemand(rawDemand, expandedApplicationId, contactAccessByUserId) 
     canEditMyApplicationMessage,
     showCloseAction,
     showEditAction,
-    closeActionText: isFilled ? '完成征集' : '撤下需求',
-    closeModalTitle: isFilled ? '完成征集' : '撤下需求',
+    closeActionText: isFilled ? '结束需求' : '撤下需求',
+    closeModalTitle: isFilled ? '结束需求' : '撤下需求',
     closeModalContent: isFilled
-      ? '完成征集后将结束这条已收满的需求，不能继续通过分享链接接收新的简历。已投递的简历仍可在详情页查看。'
+      ? '结束后，需求将标记为已结束。已收到的简历仍可继续查看。'
       : '撤下后将不再出现在公域需求列表中，也不能继续接收新的简历。已投递的简历仍可在详情页查看。',
-    closeModalConfirmText: isFilled ? '完成' : '撤下',
-    closeSuccessText: isFilled ? '已完成征集' : '已撤下',
-    closeFailureTitle: isFilled ? '完成失败' : '撤下失败',
+    closeModalConfirmText: isFilled ? '结束' : '撤下',
+    closeSuccessText: isFilled ? '已结束' : '已撤下',
+    closeFailureTitle: isFilled ? '结束失败' : '撤下失败',
     applyActionEnabled,
     applyActionText: applyActionEnabled ? '我想试试' : (myApplication ? myApplication.statusText : '暂不符合要求'),
     applyDisabledHint,
@@ -92,6 +95,24 @@ function presentDemand(rawDemand, expandedApplicationId, contactAccessByUserId) 
     shareTipText: `转发给合适的人，成功匹配可得介绍费 ${referralRewardText}`,
     emptyCandidateText: isPoster ? '还没有人投递，转发后更容易收到简历' : '还没有人投递，可以先投递简历',
     showMyApplication: false,
+  };
+}
+
+function presentFilledDecision(rawDecision) {
+  const remainingSeconds = Math.max(0, Math.ceil(Number(rawDecision && rawDecision.remainingSeconds || 0)));
+  const minutes = Math.floor(remainingSeconds / 60);
+  const seconds = remainingSeconds % 60;
+  return {
+    ...(rawDecision || {}),
+    remainingSeconds,
+    showCountdown: Boolean(rawDecision && rawDecision.showCountdown && remainingSeconds > 0),
+    remainingText: `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`,
+    hintLines: remainingSeconds > 0
+      ? [
+        '简历已收满，请尽快查看简历并联系合适的人选。',
+        `剩余 ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} 后，需求将自动结束。`,
+      ]
+      : [],
   };
 }
 

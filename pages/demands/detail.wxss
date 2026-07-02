@@ -65,6 +65,20 @@
   line-height: 38rpx;
 }
 
+.filled-decision-countdown {
+  margin-top: 16rpx;
+  padding: 16rpx 20rpx;
+  border-radius: 8rpx;
+  background: #fff7ed;
+  color: #b45309;
+  font-size: 24rpx;
+  line-height: 36rpx;
+}
+
+.filled-decision-line + .filled-decision-line {
+  margin-top: 4rpx;
+}
+
 .overview-desc {
   margin-top: 18rpx;
   color: #667085;

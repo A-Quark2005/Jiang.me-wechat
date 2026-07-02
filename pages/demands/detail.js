@@ -18,6 +18,7 @@ Page({
     contactAccessByUserId: {},
     demandShareRef: '',
     errorMessage: '',
+    countdownTimer: null,
   },
 
   onLoad(options) {
@@ -34,6 +35,18 @@ Page({
     this.loadDemand(true).finally(() => wx.stopPullDownRefresh());
   },
 
+  onShow() {
+    this.scheduleCountdown();
+  },
+
+  onHide() {
+    this.stopCountdown();
+  },
+
+  onUnload() {
+    this.stopCountdown();
+  },
+
   async loadDemand(forceRefresh) {
     if (!this.data.id) return;
     this.setData({ loading: true, errorMessage: '' });
@@ -43,6 +56,7 @@ Page({
         demand: this.presentDemand(demand),
         loading: false,
       }, () => {
+        this.scheduleCountdown();
         this.prepareShareImage();
       });
     } catch (error) {
@@ -51,6 +65,37 @@ Page({
         errorMessage: error && error.message ? error.message : '需求读取失败',
       });
     }
+  },
+
+  scheduleCountdown() {
+    this.stopCountdown();
+    const decision = this.data.demand && this.data.demand.filledDecision;
+    if (!decision || !decision.showCountdown || !decision.remainingSeconds) return;
+    const countdownTimer = setInterval(() => {
+      const currentDemand = this.data.demand || {};
+      const currentDecision = currentDemand.filledDecision || {};
+      const remainingSeconds = Math.max(0, Number(currentDecision.remainingSeconds || 0) - 1);
+      const nextDemand = this.presentDemand({
+        ...currentDemand,
+        filledDecision: {
+          ...currentDecision,
+          remainingSeconds,
+          showCountdown: remainingSeconds > 0,
+        },
+      });
+      this.setData({ demand: nextDemand });
+      if (remainingSeconds <= 0) {
+        this.stopCountdown();
+        this.loadDemand(true);
+      }
+    }, 1000);
+    this.setData({ countdownTimer });
+  },
+
+  stopCountdown() {
+    if (!this.data.countdownTimer) return;
+    clearInterval(this.data.countdownTimer);
+    this.setData({ countdownTimer: null });
   },
 
   openApply() {
