@@ -129,6 +129,35 @@ Page({
     });
   },
 
+  editMyApplicationMessage() {
+    const demand = this.data.demand || {};
+    if (!demand.canEditMyApplicationMessage) return;
+    wx.showModal({
+      title: demand.myApplicationMessageEmpty ? '补充留言' : '修改留言',
+      editable: true,
+      placeholderText: '简单说明你为什么适合这个需求',
+      content: demand.myApplicationMessageEmpty ? '' : (demand.myApplicationMessageText || ''),
+      confirmText: '保存',
+      success: async (result) => {
+        if (!result.confirm) return;
+        const message = String(result.content || '').trim();
+        try {
+          const latestDemand = await demands.updateApplicationMessage(this.data.id, message);
+          this.setData({
+            demand: this.presentDemand(latestDemand),
+          });
+          wx.showToast({ title: '已保存', icon: 'success' });
+        } catch (error) {
+          wx.showModal({
+            title: '保存失败',
+            content: error && error.message ? error.message : '请稍后重试',
+            showCancel: false,
+          });
+        }
+      },
+    });
+  },
+
   findApplicationByUserId(userId) {
     const applications = this.data.demand && Array.isArray(this.data.demand.applications)
       ? this.data.demand.applications

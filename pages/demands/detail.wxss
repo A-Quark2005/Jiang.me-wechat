@@ -13,6 +13,7 @@
 
 .demand-overview,
 .candidates-card,
+.my-application-card,
 .application-state {
   box-shadow: none;
   border: 1rpx solid #edf0f5;
@@ -187,6 +188,29 @@
   justify-content: center;
   color: #b0b8c9;
   font-size: 26rpx;
+}
+
+.my-application-edit {
+  width: 156rpx;
+  height: 58rpx;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  line-height: 58rpx;
+}
+
+.my-application-message {
+  margin-top: 20rpx;
+  padding: 18rpx 22rpx;
+  border-radius: 8rpx;
+  background: #f7f9fc;
+  color: #475467;
+  font-size: 26rpx;
+  line-height: 40rpx;
+  white-space: pre-wrap;
+}
+
+.my-application-message-empty {
+  color: #98a2b3;
 }
 
 .candidate-card {

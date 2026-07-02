@@ -57,6 +57,7 @@ Page({
     this.setData({ submitting: true });
     try {
       await subscribeMessage.requestDemandSelectionNotice().catch(() => false);
+      await subscribeMessage.requestDemandStatusNotice().catch(() => false);
       await demands.applyDemand(this.data.id, {
         message: this.data.message,
         shareRef: this.data.demandShareRef,

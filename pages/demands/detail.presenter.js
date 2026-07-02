@@ -24,6 +24,16 @@ function presentDemand(rawDemand, expandedApplicationId, contactAccessByUserId) 
   const isOpen = rawDemand.status === 'open';
   const isClosed = rawDemand.status === 'closed';
   const isPoster = Boolean(rawDemand.isPoster);
+  const myApplicationSelected = Boolean(
+    rawMyApplication &&
+    (
+      rawMyApplication.selectedContactDepositOrderId ||
+      rawMyApplication.selectedAt ||
+      rawMyApplication.selected
+    )
+  );
+  const canEditMyApplicationMessage = Boolean(myApplication && !isPoster && !isClosed && !myApplicationSelected);
+  const myApplicationMessage = myApplication && myApplication.message ? String(myApplication.message) : '';
   const showMyApplication = Boolean(myApplication && !isPoster);
   const showApplyControl = Boolean(!isPoster && (isOpen || showMyApplication));
   const isApplicationFull = activeApplicationCount >= applicationLimit;
@@ -60,6 +70,11 @@ function presentDemand(rawDemand, expandedApplicationId, contactAccessByUserId) 
     showBottomBar: Boolean(showApplyControl || showShareAction),
     showApplyControl,
     showShareAction,
+    showMyApplicationCard: Boolean(myApplication && !isPoster),
+    myApplicationMessageText: myApplicationMessage || '还没有填写留言',
+    myApplicationMessageEmpty: !myApplicationMessage,
+    myApplicationMessageActionText: myApplicationMessage ? '修改留言' : '补充留言',
+    canEditMyApplicationMessage,
     showCloseAction,
     showEditAction,
     closeActionText: isFilled ? '完成征集' : '撤下需求',

@@ -81,6 +81,14 @@ function applyDemand(id, payload) {
   });
 }
 
+function updateApplicationMessage(id, message) {
+  return request({
+    path: `/api/demands/${encodeURIComponent(id)}/applications/me/message`,
+    method: 'PATCH',
+    data: { message: String(message || '') },
+  });
+}
+
 function closeDemand(id) {
   return request({
     path: `/api/me/demands/${encodeURIComponent(id)}/close`,
@@ -98,5 +106,6 @@ module.exports = {
   getDemand,
   previewApplication,
   applyDemand,
+  updateApplicationMessage,
   closeDemand,
 };

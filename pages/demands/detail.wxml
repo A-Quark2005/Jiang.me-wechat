@@ -31,6 +31,21 @@
       </view>
     </view>
 
+    <view wx:if="{{demand.showMyApplicationCard}}" class="surface-card my-application-card">
+      <view class="section-head">
+        <view>
+          <view class="section-title">我的投递</view>
+          <view class="section-subtitle">投递留言</view>
+        </view>
+        <button
+          wx:if="{{demand.canEditMyApplicationMessage}}"
+          class="ghost-button my-application-edit"
+          bindtap="editMyApplicationMessage"
+        >{{demand.myApplicationMessageActionText}}</button>
+      </view>
+      <view class="my-application-message {{demand.myApplicationMessageEmpty ? 'my-application-message-empty' : ''}}">{{demand.myApplicationMessageText}}</view>
+    </view>
+
     <view wx:if="{{demand.showCandidateList}}" class="surface-card candidates-card">
       <view class="section-head">
         <view>
