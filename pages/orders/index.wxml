@@ -16,7 +16,7 @@
     <view class="row">
       <view class="row feature-row">
         <view class="ticket-icon {{item.iconClass}}">
-          <image wx:if="{{item.usesAvatarIcon}}" class="ticket-avatar-image" src="{{item.avatarIconUrl}}" mode="aspectFill"></image>
+          <image wx:if="{{item.usesAvatarIcon}}" class="ticket-avatar-image" src="{{item.avatarIconUrl}}" mode="aspectFill" data-url="{{item.avatarIconUrl}}" catchtap="previewAvatar"></image>
           <image wx:elif="{{!item.isExpired}}" class="ticket-icon-image" src="/assets/ui/card-ticket-icon.svg" mode="aspectFit"></image>
           <image wx:else class="ticket-icon-image" src="/assets/ui/card-ticket-icon-expired.svg" mode="aspectFit"></image>
         </view>

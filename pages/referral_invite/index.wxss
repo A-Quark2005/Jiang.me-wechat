@@ -111,24 +111,39 @@
   color: #9ca3af;
 }
 
-.referral-status.activated {
+.referral-status.pending {
   color: #0071fe;
 }
 
-.referral-status.rewarded {
+.referral-status.waiting_activation {
+  color: #9ca3af;
+}
+
+.referral-status.redeemed {
   color: #0f9d58;
 }
 
 .referral-redeem-button {
-  width: 132rpx;
-  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 120rpx;
+  width: 120rpx;
+  min-width: 120rpx;
+  height: 52rpx;
+  margin: 0;
   padding: 0;
-  border-radius: 8rpx;
+  box-sizing: border-box;
+  border-radius: 26rpx;
   background: #0071fe;
   color: #ffffff;
   font-size: 24rpx;
-  line-height: 64rpx;
+  line-height: normal;
   flex-shrink: 0;
+}
+
+.referral-redeem-button::after {
+  border: 0;
 }
 
 .referral-bottom-bar {
@@ -137,12 +152,105 @@
   right: 0;
   bottom: 0;
   z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
   padding: 18rpx 32rpx calc(18rpx + env(safe-area-inset-bottom));
   background: #ffffff;
   box-shadow: 0 -8rpx 24rpx rgba(0, 0, 0, 0.06);
 }
 
 .referral-share-button {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
   height: 88rpx;
+  margin: 0;
+  padding: 0;
   border-radius: 8rpx;
+  line-height: 88rpx;
+}
+
+.referral-tool-button {
+  width: 132rpx;
+  flex: 0 0 132rpx;
+  height: 88rpx;
+  margin: 0;
+  padding: 0;
+  border-radius: 8rpx;
+  background: #f2f4f7;
+  color: #333333;
+  font-size: 28rpx;
+  line-height: 88rpx;
+  flex-shrink: 0;
+}
+
+.invite-copy-mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 54rpx;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.invite-copy-dialog {
+  width: 100%;
+  max-width: 620rpx;
+  border-radius: 12rpx;
+  background: #ffffff;
+  overflow: hidden;
+  box-shadow: 0 12rpx 48rpx rgba(0, 0, 0, 0.12);
+}
+
+.invite-copy-title {
+  padding: 42rpx 40rpx 14rpx;
+  font-size: 34rpx;
+  line-height: 48rpx;
+  font-weight: 600;
+  color: #111111;
+  text-align: center;
+}
+
+.invite-copy-content {
+  padding: 0 44rpx 38rpx;
+  font-size: 28rpx;
+  line-height: 42rpx;
+  color: #666666;
+  text-align: left;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.invite-copy-actions {
+  display: flex;
+  border-top: 1rpx solid #e5e5e5;
+}
+
+.invite-copy-cancel,
+.invite-copy-confirm {
+  flex: 1;
+  height: 96rpx;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  background: #ffffff;
+  font-size: 28rpx;
+  line-height: 96rpx;
+  font-weight: 500;
+}
+
+.invite-copy-cancel {
+  color: #333333;
+  border-right: 1rpx solid #e5e5e5;
+}
+
+.invite-copy-confirm {
+  color: #0052d9;
+  font-weight: 600;
 }

@@ -9,6 +9,10 @@
         <view class="overview-price">{{demand.feePerHourText}}</view>
       </view>
       <view class="overview-title">{{demand.title}}</view>
+      <view wx:if="{{demand.showPosterProfile}}" class="overview-poster-row">
+        <image class="overview-poster-avatar" src="{{demand.poster.avatarUrlResolved}}" mode="aspectFill" data-url="{{demand.poster.avatarUrlResolved}}" bindtap="previewAvatar"></image>
+        <view class="overview-poster-name">{{demand.poster.displayNameText}}</view>
+      </view>
       <view class="overview-meta">{{demand.overviewMetaText}}</view>
       <view wx:if="{{demand.showFilledDecisionCountdown}}" class="filled-decision-countdown">
         <view
@@ -51,7 +55,7 @@
           bindtap="editMyApplicationMessage"
         >{{demand.myApplicationMessageActionText}}</button>
       </view>
-      <view class="my-application-message {{demand.myApplicationMessageEmpty ? 'my-application-message-empty' : ''}}">{{demand.myApplicationMessageText}}</view>
+      <text selectable="{{true}}" class="my-application-message {{demand.myApplicationMessageEmpty ? 'my-application-message-empty' : ''}}">{{demand.myApplicationMessageText}}</text>
     </view>
 
     <view wx:if="{{demand.showCandidateList}}" class="surface-card candidates-card">
@@ -66,20 +70,20 @@
 
       <view wx:for="{{demand.applications}}" wx:key="id" class="candidate-card">
         <view class="candidate-summary">
-          <image class="candidate-avatar" src="{{item.resume.avatarUrlResolved}}" mode="aspectFill"></image>
+          <image class="candidate-avatar" src="{{item.resume.avatarUrlResolved}}" mode="aspectFill" data-url="{{item.resume.avatarUrlResolved}}" bindtap="previewAvatar"></image>
           <view class="candidate-main">
             <view class="candidate-name-row">
               <view class="candidate-name">{{item.resume.displayNameText}}</view>
               <view wx:if="{{item.isMine}}" class="candidate-self-badge">我的投递</view>
             </view>
             <view class="candidate-meta">{{item.summaryText}}</view>
-            <view wx:if="{{item.showMessage}}" class="candidate-message">{{item.message}}</view>
+            <text wx:if="{{item.showMessage}}" selectable="{{true}}" class="candidate-message">{{item.message}}</text>
           </view>
         </view>
         <view wx:if="{{item.expanded}}" class="resume-panel">
           <view class="resume-section">
             <view class="resume-section-title">自我介绍</view>
-            <view class="resume-text">{{item.resume.selfIntroductionText}}</view>
+            <text selectable="{{true}}" class="resume-text">{{item.resume.selfIntroductionText}}</text>
           </view>
 
           <view class="resume-section">
@@ -97,7 +101,7 @@
             <view wx:for="{{item.resume.engagements}}" wx:for-item="engagement" wx:key="id" class="resume-line">
               <view class="resume-line-title">{{engagement.titleText}}</view>
               <view wx:if="{{engagement.metaText}}" class="resume-line-meta">{{engagement.metaText}}</view>
-              <view wx:if="{{engagement.descriptionText}}" class="resume-text">{{engagement.descriptionText}}</view>
+              <text wx:if="{{engagement.descriptionText}}" selectable="{{true}}" class="resume-text">{{engagement.descriptionText}}</text>
             </view>
           </view>
         </view>

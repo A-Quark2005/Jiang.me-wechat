@@ -49,12 +49,37 @@ function sendTencentMeetingActivationInvite() {
   });
 }
 
+function createTencentMeetingActivationAuthLink() {
+  return request({
+    path: '/api/tencent-meeting/activation/auth-link',
+    method: 'POST',
+  });
+}
+
+function getTencentMeetingWebScheduleUrl() {
+  return request({
+    path: '/api/tencent-meeting/web-schedule-url',
+    cacheKey: '',
+    forceRefresh: true,
+  });
+}
+
 function createTencentMeeting(input) {
   const payload = typeof input === 'string' ? { subject: input } : (input || {});
   return request({
     path: '/api/tencent-meeting/meetings',
     method: 'POST',
     data: payload,
+  });
+}
+
+function getTencentMeetingMeetings(options) {
+  const requestOptions = options || {};
+  return request({
+    path: '/api/tencent-meeting/meetings',
+    cacheKey: 'tencent_meeting_current_meetings',
+    maxAgeMs: 30 * 1000,
+    forceRefresh: Boolean(requestOptions.forceRefresh),
   });
 }
 
@@ -145,31 +170,6 @@ function getOrder(orderId) {
   return request({ path: `/api/payments/${encodeURIComponent(orderId)}` });
 }
 
-function getReferralDashboard(options) {
-  const requestOptions = options || {};
-  return request({
-    path: '/api/me/referrals',
-    cacheKey: 'meeting_referrals',
-    maxAgeMs: 30 * 1000,
-    forceRefresh: Boolean(requestOptions.forceRefresh),
-  });
-}
-
-function acceptReferral(code) {
-  return request({
-    path: '/api/me/referrals/accept',
-    method: 'POST',
-    data: { code },
-  });
-}
-
-function redeemReferralReward(inviteeUserId) {
-  return request({
-    path: `/api/me/referrals/${encodeURIComponent(inviteeUserId)}/redeem`,
-    method: 'POST',
-  });
-}
-
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -250,16 +250,18 @@ function payOrder(order) {
 
 module.exports = {
   createTencentMeeting,
-  createWechatMiniProgramOrder,
+  createWechatMiniProgramOrder,
+  createTencentMeetingActivationAuthLink,
   getCapabilities,
   getEntitlements,
   getOrder,
   getOrders,
   getReferralCommissions,
-  getReferralDashboard,
   getCachedTencentMeetingHistorySection,
   getTencentMeetingHistorySection,
   getTencentMeetingHistory,
+  getTencentMeetingMeetings,
+  getTencentMeetingWebScheduleUrl,
   confirmPaidOrder,
   getTencentMeetingActivation,
   getProducts,
@@ -267,8 +269,6 @@ module.exports = {
   payOrder,
   requestPayment,
   requestVirtualPayment,
-  acceptReferral,
-  redeemReferralReward,
   sendTencentMeetingActivationInvite,
   syncPaymentStatus,
 };

@@ -293,4 +293,8 @@ Page({
       url: `/pages/orders/detail/index?id=${encodeURIComponent(orderId)}`,
     });
   },
+
+  previewAvatar(event) {
+    avatar.previewAvatar(event.currentTarget.dataset.url);
+  },
 });

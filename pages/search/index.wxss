@@ -29,6 +29,8 @@
   width: 34rpx;
   height: 34rpx;
   flex: 0 0 34rpx;
+  filter: brightness(0);
+  opacity: 0.56;
 }
 
 .search-input {

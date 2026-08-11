@@ -1,4 +1,5 @@
 const demands = require('../../services/demands');
+const avatar = require('../../services/avatar');
 const contactDeposit = require('../../services/contact-deposit');
 const loginGuard = require('../../services/login-guard');
 const refreshState = require('../../services/refresh-state');
@@ -132,6 +133,10 @@ Page({
     });
   },
 
+  previewAvatar(event) {
+    avatar.previewAvatar(event.currentTarget.dataset.url);
+  },
+
   async addCandidateFriend(event) {
     if (!loginGuard.guardPage('/pages/demands/detail', { requireRegistration: true })) return;
     const userId = String(event.currentTarget.dataset.userId || '').trim();
@@ -144,8 +149,8 @@ Page({
       targetUserId: userId,
       demandId: this.data.id,
       applicationId: item.id,
-      contactDepositAmountCents: (item.resume && item.resume.contactDepositAmountCents) || (this.data.demand && this.data.demand.amountCents) || 0,
-      consultingFeeCentsPerHour: (item.resume && item.resume.consultingFeeCentsPerHour) || (this.data.demand && this.data.demand.feeCentsPerHour) || 0,
+      contactDepositAmountCents: (this.data.demand && this.data.demand.amountCents) || 0,
+      consultingFeeCentsPerHour: (this.data.demand && this.data.demand.feeCentsPerHour) || 0,
       setLoading: (loading) => this.setData({ contactTargetUserId: loading ? userId : '' }),
       onAccessChange: (access) => this.updateContactAccess(userId, access),
     });
@@ -245,7 +250,7 @@ Page({
     const demand = this.data.demand || {};
     wx.showModal({
       title: '推荐奖励',
-      content: `有人通过你的转发进入页面并投递简历，且最终被选中后，你可获得本单介绍费 ${demand.referralRewardText || '¥0.00'}。\n\n介绍费按实际支付的试讲定金 10% 计算，具体到账以微信支付分账结果为准。`,
+      content: `有人通过你的转发进入页面并投递简历，且最终被选中后，你可获得本单介绍费 ${demand.referralRewardText || '¥0.00'}。\n\n介绍费按实际支付的试讲定金 25% 计算，具体到账以微信支付分账结果为准。`,
       confirmText: '知道了',
       showCancel: false,
     });

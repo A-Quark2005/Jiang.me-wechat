@@ -63,7 +63,7 @@ Page({
     serviceEngagements: [],
     consumptionEngagements: [],
     contactAccess: null,
-    contactButtonText: '缴纳定金，添加好友',
+    contactButtonText: '缴纳定金，认识一下',
     contactActionLoading: false,
     consultingFeeText: '',
     shareImagePath: '',
@@ -122,7 +122,7 @@ Page({
           avatarUrlResolved: avatar.resolveAvatarUrl(resume.avatarUrl),
         },
         selfIntroductionText: resume.selfIntroduction || '暂无自我介绍',
-        consultingFeeText: `价格：${contactDeposit.moneyText(resume.consultingFeeCentsPerHour)}/小时`,
+        consultingFeeText: `报价：${contactDeposit.moneyText(resume.consultingFeeCentsPerHour)}/小时`,
         credentials: decorateCredentials(resume.certifiedQualifications || resume.credentials),
         serviceEngagements: numberEngagements(engagements.filter((item) => engagementSide(item) === 'provider')),
         consumptionEngagements: numberEngagements(engagements.filter((item) => engagementSide(item) === 'receiver')),
@@ -143,19 +143,23 @@ Page({
     wx.navigateTo({ url: `/pages/organization_members/index?id=${encodeURIComponent(id)}` });
   },
 
+  previewAvatar(event) {
+    avatar.previewAvatar(event.currentTarget.dataset.url);
+  },
+
   async loadContactAccess(forceRefresh) {
     if (!loginGuard.isLoggedIn || !loginGuard.isLoggedIn()) {
-      this.setData({ contactAccess: null, contactButtonText: '缴纳定金，添加好友' });
+      this.setData({ contactAccess: null, contactButtonText: '缴纳定金，认识一下' });
       return;
     }
     try {
       const access = await profileService.getContactDepositAccess(this.data.userId, { forceRefresh });
       this.setData({
         contactAccess: access,
-        contactButtonText: access && access.hasPaid ? '查看手机号' : '缴纳定金，添加好友',
+        contactButtonText: access && access.hasPaid ? '查看手机号' : '缴纳定金，认识一下',
       });
     } catch {
-      this.setData({ contactAccess: null, contactButtonText: '缴纳定金，添加好友' });
+      this.setData({ contactAccess: null, contactButtonText: '缴纳定金，认识一下' });
     }
   },
 
@@ -172,7 +176,7 @@ Page({
       onAccessChange: (contactAccess) => {
         this.setData({
           contactAccess,
-          contactButtonText: contactAccess && contactAccess.hasPaid ? '查看手机号' : '缴纳定金，添加好友',
+          contactButtonText: contactAccess && contactAccess.hasPaid ? '查看手机号' : '缴纳定金，认识一下',
         });
       },
     });
@@ -332,7 +336,7 @@ function drawShareImage(page, input) {
     ctx.fillText(input.accountTierText || '普通账号', 150, 140);
     ctx.setFillStyle('#374151');
     ctx.setFontSize(21);
-    ctx.fillText(input.consultingFeeText || '价格：¥250.00/小时', 150, 178);
+    ctx.fillText(input.consultingFeeText || '报价：¥250.00/小时', 150, 178);
     const credential = firstCredentialText(input.credentials);
     if (credential) {
       ctx.setFillStyle('#eef5ff');

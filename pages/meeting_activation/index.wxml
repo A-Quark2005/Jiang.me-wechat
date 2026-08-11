@@ -48,6 +48,15 @@
 
       <view wx:if="{{successMessage}}" class="success-box">{{successMessage}}</view>
       <view wx:if="{{errorMessage}}" class="error-box">{{errorMessage}}</view>
+      <button
+        wx:if="{{activation && !activation.needsPhone && activation.needsActivation}}"
+        class="activation-browser-button"
+        bindtap="openBrowserActivation"
+        loading="{{activationAuthLinkLoading}}"
+        disabled="{{activationAuthLinkLoading}}"
+      >
+        去浏览器中激活
+      </button>
     </block>
   </view>
 </view>

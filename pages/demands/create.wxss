@@ -1,6 +1,6 @@
 .demand-form-page {
   padding-top: 16rpx;
-  padding-bottom: calc(360rpx + env(safe-area-inset-bottom));
+  padding-bottom: calc(190rpx + env(safe-area-inset-bottom));
 }
 
 .form-card {
@@ -56,6 +56,43 @@
   color: #9ca3af;
   font-size: 24rpx;
   line-height: 36rpx;
+}
+
+.scope-toggle {
+  min-height: 48rpx;
+}
+
+.scope-toggle-value {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14rpx;
+}
+
+.scope-arrow {
+  width: 14rpx;
+  height: 14rpx;
+  flex: 0 0 14rpx;
+  border-right: 3rpx solid #9ca3af;
+  border-bottom: 3rpx solid #9ca3af;
+  transform: rotate(45deg);
+  transition: transform 160ms ease;
+}
+
+.scope-arrow.expanded {
+  transform: rotate(225deg);
+}
+
+.scope-help,
+.scope-loading {
+  margin-top: 18rpx;
+}
+
+.scope-help {
+  color: #8b95a7;
+  font-size: 24rpx;
+  line-height: 34rpx;
 }
 
 .org-list {
@@ -207,37 +244,29 @@
   font-weight: 600;
 }
 
-.settlement-panel {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 21;
-  padding: 22rpx 32rpx calc(18rpx + env(safe-area-inset-bottom));
-  background: #ffffff;
-  box-shadow: 0 -8rpx 24rpx rgba(0, 0, 0, 0.06);
-}
-
-.settlement-rate-row,
-.settlement-bottom-row {
+.quote-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24rpx;
 }
 
-.settlement-title {
-  color: #333333;
-  font-size: 30rpx;
-  line-height: 42rpx;
-  font-weight: 500;
+.settlement-panel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 21;
+  padding: 18rpx 32rpx calc(18rpx + env(safe-area-inset-bottom));
+  background: #ffffff;
+  box-shadow: 0 -8rpx 24rpx rgba(0, 0, 0, 0.06);
 }
 
-.settlement-hint {
-  margin-top: 2rpx;
-  color: #9ca3af;
-  font-size: 24rpx;
-  line-height: 34rpx;
+.settlement-bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
 }
 
 .settlement-rate-control {
@@ -264,9 +293,9 @@
 }
 
 .settlement-bottom-row {
-  margin-top: 18rpx;
-  padding-top: 18rpx;
-  border-top: 1rpx solid #edf0f5;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
 }
 
 .bottom-total {

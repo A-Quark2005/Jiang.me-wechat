@@ -91,9 +91,11 @@ function getCertificationOrganizationMembers(organizationId, options) {
   const requestOptions = options || {};
   const limit = Number(requestOptions.limit || 50);
   const offset = Number(requestOptions.offset || 0);
+  const seed = String(requestOptions.seed || '').trim();
+  const seedQuery = seed ? `&seed=${encodeURIComponent(seed)}` : '';
   return request({
-    path: `/api/certification/organizations/${encodeURIComponent(organizationId)}/members?limit=${encodeURIComponent(limit)}&offset=${encodeURIComponent(offset)}`,
-    cacheKey: `certification_members_${organizationId}_${limit}_${offset}`,
+    path: `/api/certification/organizations/${encodeURIComponent(organizationId)}/members?limit=${encodeURIComponent(limit)}&offset=${encodeURIComponent(offset)}${seedQuery}`,
+    cacheKey: `certification_members_${organizationId}_${limit}_${offset}_${seed}`,
     maxAgeMs: 30 * 1000,
     forceRefresh: Boolean(requestOptions.forceRefresh),
   });
@@ -131,6 +133,27 @@ function createContactDepositOrder(userId, options) {
     path: '/api/me/contact-deposits/orders',
     method: 'POST',
     data,
+  });
+}
+
+function createContactDepositMiniProgramPayTicket(userId, options) {
+  const requestOptions = options || {};
+  const data = {
+    targetUserId: userId,
+  };
+  if (requestOptions.demandId) data.demandId = requestOptions.demandId;
+  if (requestOptions.applicationId) data.applicationId = requestOptions.applicationId;
+  return request({
+    path: '/api/me/contact-deposits/mini-program-pay-tickets',
+    method: 'POST',
+    data,
+  });
+}
+
+function consumeContactDepositMiniProgramPayTicket(ticket) {
+  return request({
+    path: `/api/me/contact-deposits/mini-program-pay-tickets/${encodeURIComponent(String(ticket || ''))}/orders`,
+    method: 'POST',
   });
 }
 
@@ -279,6 +302,8 @@ module.exports = {
   requestEngagementUpdate,
   sendCertificationEmailCode,
   createContactDepositOrder,
+  createContactDepositMiniProgramPayTicket,
+  consumeContactDepositMiniProgramPayTicket,
   createOrganizationMembersMiniProgramCode,
   createPublicResumeMiniProgramCode,
   updateEngagementVisibility,

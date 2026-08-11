@@ -29,7 +29,7 @@
 
     <view class="surface-card detail-content-card">
       <view class="section-title">服务内容</view>
-      <view class="detail-content-text">{{detailText}}</view>
+      <text selectable="{{true}}" class="detail-content-text">{{detailText}}</text>
     </view>
 
     <view class="soft-note detail-note">此条履历需双方同意方可修改或删除，系统将自动通知对方</view>

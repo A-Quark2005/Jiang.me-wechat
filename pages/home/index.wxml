@@ -61,51 +61,31 @@
       </view>
 
       <view class="home-schedule-card">
-        <view class="home-field">
-          <view class="home-field-label">会议主题</view>
-          <input
-            class="meeting-subject-input"
-            value="{{subject}}"
-            bindinput="onSubjectInput"
-            placeholder="请输入会议主题"
-            maxlength="50"
-          />
-        </view>
-
-        <view class="home-divider"></view>
-
-        <view class="home-field">
-          <view class="home-field-label">会议时间</view>
-          <view class="home-time-row">
-            <view class="home-time-column">
-              <picker mode="time" value="{{startTime}}" bindchange="onStartTimeChange">
-                <view class="home-time-value">{{startTime}}</view>
-              </picker>
-              <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange">
-                <view class="home-date-value">{{startDateLabel}}</view>
-              </picker>
-            </view>
-            <image class="home-time-arrow-image" src="/assets/ui/time-arrow.svg" mode="aspectFit"></image>
-            <view class="home-time-column right">
-              <picker mode="time" value="{{endTime}}" bindchange="onEndTimeChange">
-                <view class="home-time-value">{{endTime}}</view>
-              </picker>
-              <picker mode="date" value="{{endDate}}" bindchange="onEndDateChange">
-                <view class="home-date-value">{{endDateLabel}}</view>
-              </picker>
+        <view>
+          <view class="home-field-label">我的会议</view>
+          <view wx:if="{{currentMeetings.length}}" class="home-meeting-list">
+            <view
+              wx:for="{{currentMeetings}}"
+              wx:key="id"
+              class="home-meeting-item"
+              data-index="{{index}}"
+              data-meeting-id="{{item.id}}"
+              hover-class="home-meeting-item-active"
+              catchtap="showMeetingInfoModal"
+            >
+              <view class="home-meeting-subject">{{item.subjectText}}</view>
+              <view class="home-meeting-meta">会议号：{{item.meetingCodeText}}</view>
+              <view class="home-meeting-meta">{{item.timeRangeText}}</view>
             </view>
           </view>
+          <view wx:else class="home-schedule-guide">暂无待开始的会议</view>
         </view>
-
-        <view wx:if="{{submitErrorMessage}}" class="error-box">{{submitErrorMessage}}</view>
 
         <button
           class="primary-button home-book-button"
-          bindtap="submit"
-          loading="{{submitting}}"
-          disabled="{{submitting}}"
+          bindtap="showWechatWebScheduleGuide"
         >
-          {{submitButtonText}}
+          立即预定
         </button>
       </view>
 

@@ -21,7 +21,7 @@ function statusMetaOf(item) {
     return {
       title: '支付成功',
       className: 'detail-status-success',
-      description: '权益已生效，可直接在首页或权益页查看。',
+      description: '权益已生效，可直接在首页或“权益”页查看。',
     };
   }
   if (['pending', 'created', 'processing', 'unpaid'].includes(statusText)) {

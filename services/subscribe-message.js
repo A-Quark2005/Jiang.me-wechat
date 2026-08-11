@@ -1,6 +1,7 @@
 const DEMAND_APPLICATION_TEMPLATE_ID = '9ttNJs3tDcUmZmRhMO_Ho7g6uoZSCfwLkSRxqejmwUc';
 const DEMAND_SELECTION_TEMPLATE_ID = 'AOrQv-fs67sDpaHNDpRkhrE-gP5fGB5m1kE3cjauZqk';
 const DEMAND_STATUS_TEMPLATE_ID = 'eX2U6QH-GBXfxxVwtte6Vy7qaTKeXT1YqAixWOwnp6s';
+const NEW_DEMAND_TEMPLATE_ID = 'VJheKvOxjSfUJ4NUGDdoXvceN0-e5NF_3bnNTN31ePc';
 
 async function requestDemandApplicationNotices(count) {
   const templateId = DEMAND_APPLICATION_TEMPLATE_ID;
@@ -37,5 +38,8 @@ module.exports = {
   },
   requestDemandStatusNotice() {
     return requestOnce(DEMAND_STATUS_TEMPLATE_ID);
+  },
+  requestNewDemandNotice() {
+    return requestOnce(NEW_DEMAND_TEMPLATE_ID);
   },
 };

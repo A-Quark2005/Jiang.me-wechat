@@ -2,35 +2,52 @@
   <view class="referral-hero">
     <image class="referral-hero-icon" src="/assets/ui/referral-invite-icon.png" mode="aspectFit"></image>
     <view class="referral-hero-copy">
-      <view class="referral-hero-title">邀请好友，送24小时权益卡</view>
-      <view class="referral-hero-subtitle">好友激活讲了么账号后，你可以手动兑现 24 小时高级账号权益。</view>
+      <view class="referral-hero-title">邀请好友，双方各得24小时会员卡</view>
+      <view class="referral-hero-subtitle">新用户激活账号后，双方可分别获得24小时会员卡。</view>
     </view>
   </view>
 
   <view class="referral-section">
-    <view class="referral-section-title">邀请记录</view>
-    <view wx:if="{{loading}}" class="referral-empty">正在读取邀请记录</view>
-    <view wx:elif="{{items.length === 0}}" class="referral-empty">还没有邀请记录</view>
+    <view class="referral-section-title">邀请奖励</view>
+    <view wx:if="{{loading}}" class="referral-empty">正在读取会员卡</view>
+    <view wx:elif="{{cards.length === 0}}" class="referral-empty">邀请新用户激活账号后，这里会显示可使用会员卡</view>
     <view wx:else class="referral-list">
-      <view wx:for="{{items}}" wx:key="inviteeUserId" class="referral-row">
-        <image class="referral-avatar" src="{{item.inviteeAvatarUrlResolved}}" mode="aspectFill"></image>
+      <view wx:for="{{cards}}" wx:key="id" class="referral-row">
+        <image class="referral-avatar" src="{{item.counterpartAvatarUrlResolved}}" mode="aspectFill" data-url="{{item.counterpartAvatarUrlResolved}}" bindtap="previewAvatar"></image>
         <view class="referral-row-main">
-          <view class="referral-name">{{item.inviteeDisplayName}}</view>
-          <view class="referral-status {{item.status}}">{{item.statusText}}</view>
+          <view class="referral-name">{{item.subtitle}}</view>
+          <view class="referral-status {{item.statusClass}}">{{item.statusText}}</view>
         </view>
         <button
-          wx:if="{{item.canRedeem}}"
+          wx:if="{{item.showRedeemButton}}"
           class="referral-redeem-button"
-          data-id="{{item.inviteeUserId}}"
-          loading="{{redeemingId === item.inviteeUserId}}"
+          data-id="{{item.id}}"
+          loading="{{redeemingId === item.id}}"
           disabled="{{!!redeemingId}}"
-          bindtap="redeemReward"
-        >兑现</button>
+          bindtap="redeemCard"
+        >使用</button>
       </view>
     </view>
   </view>
 
   <view class="referral-bottom-bar">
     <button class="primary-button referral-share-button" open-type="share">邀请好友</button>
+    <button
+      class="referral-tool-button"
+      loading="{{inviteToolLoading}}"
+      disabled="{{inviteToolLoading}}"
+      bindtap="showInviteTools"
+    >复制</button>
+  </view>
+
+  <view wx:if="{{inviteCopyModalVisible}}" class="invite-copy-mask" catchtap="hideInviteCopyModal">
+    <view class="invite-copy-dialog" catchtap="noop">
+      <view class="invite-copy-title">{{inviteCopyTitle}}</view>
+      <view class="invite-copy-content">{{inviteCopyText}}</view>
+      <view class="invite-copy-actions">
+        <button class="invite-copy-cancel" bindtap="hideInviteCopyModal">关闭</button>
+        <button class="invite-copy-confirm" bindtap="confirmCopyInviteText">复制链接</button>
+      </view>
+    </view>
   </view>
 </view>

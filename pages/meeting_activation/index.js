@@ -114,6 +114,7 @@ Page({
     redirectTarget: '',
     sending: false,
     bindingPhone: false,
+    activationAuthLinkLoading: false,
     activation: null,
     errorMessage: '',
     successMessage: '',
@@ -174,6 +175,9 @@ Page({
         hasLoaded: true,
         ...viewState,
       });
+      if (viewState.activation && viewState.activation.isActive) {
+        refreshState.mark(['home', 'entitlements', 'referrals']);
+      }
     } catch (error) {
       this.setData({
         loading: false,
@@ -202,7 +206,7 @@ Page({
         successMessage: result.inviteMessage || '启用通知已发送',
       });
       showActivationSmsNotice();
-      refreshState.mark(['home', 'entitlements']);
+      refreshState.mark(['home', 'entitlements', 'referrals']);
       await this.loadActivation(true);
     } catch (error) {
       this.setData({
@@ -246,6 +250,39 @@ Page({
       return;
     }
     await this.loadActivation(true);
+  },
+
+  async openBrowserActivation() {
+    if (this.data.activationAuthLinkLoading) return;
+    this.setData({ activationAuthLinkLoading: true });
+    try {
+      const result = await service.createTencentMeetingActivationAuthLink();
+      const authUrl = String(result && (result.authUrl || result.url) || '').trim();
+      if (!authUrl) {
+        throw new Error('暂时没有获取到激活链接，请稍后重试。');
+      }
+      wx.showModal({
+        title: '去浏览器中激活',
+        content: '请复制链接到手机浏览器中打开，按提示完成腾讯会议功能激活。\n链接48小时内有效。',
+        cancelText: '取消',
+        confirmText: '复制链接',
+        success: (modalResult) => {
+          if (!modalResult.confirm) return;
+          wx.setClipboardData({
+            data: authUrl,
+            success: () => {
+              wx.showToast({ title: '已复制链接', icon: 'success' });
+            },
+          });
+        },
+      });
+    } catch (error) {
+      this.setData({
+        errorMessage: error && error.message ? error.message : '激活链接获取失败，请稍后重试。',
+      });
+    } finally {
+      this.setData({ activationAuthLinkLoading: false });
+    }
   },
 
   goBack() {

@@ -8,27 +8,42 @@ function titleOf(demand) {
 
 function drawImage(page, demand) {
   return new Promise((resolve, reject) => {
+    const applicationLimit = Number(demand.applicationLimit || 1);
+    const referralRewardText = demand.referralRewardText || '¥0.00';
     const ctx = wx.createCanvasContext(CANVAS_ID, page);
     ctx.setFillStyle('#f7f8fa');
     ctx.fillRect(0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
     drawRoundRect(ctx, 30, 30, 440, 340, 24, '#ffffff');
+
+    drawRoundRect(ctx, 58, 58, 122, 34, 17, '#e8f2ff');
     ctx.setFillStyle('#0071fe');
-    ctx.fillRect(30, 30, 440, 10);
-    ctx.setFillStyle('#0071fe');
-    ctx.setFontSize(22);
-    ctx.fillText('需求广场', 58, 82);
+    ctx.setFontSize(18);
+    ctx.fillText('需求转介绍', 74, 81);
+
     ctx.setFillStyle('#111827');
-    ctx.setFontSize(32);
-    drawWrappedText(ctx, demand.title, 58, 128, 384, 40, 2);
-    ctx.setFillStyle('#0071fe');
-    ctx.setFontSize(24);
-    ctx.fillText(`${demand.feePerHourText}  ${demand.candidateCountText || ''}`, 58, 218);
+    ctx.setFontSize(26);
+    drawWrappedText(ctx, demand.description || '有人发布了新的单子，欢迎查看并投递简历。', 58, 128, 384, 34, 3);
+
+    drawRoundRect(ctx, 58, 238, 384, 82, 16, '#f7f8fa');
     ctx.setFillStyle('#4b5563');
+    ctx.setFontSize(18);
+    ctx.fillText('认证要求', 78, 267);
+    ctx.setFillStyle('#111827');
+    ctx.setFontSize(18);
+    drawWrappedText(ctx, demand.requirementText || '无认证要求，所有人都可以投递简历', 160, 267, 260, 24, 1);
+    ctx.setFillStyle('#6b7280');
+    ctx.setFontSize(18);
+    ctx.fillText('接收规则', 78, 300);
+    ctx.setFillStyle('#111827');
+    ctx.setFontSize(18);
+    ctx.fillText(`最多 ${applicationLimit} 份，收满后停止接收`, 160, 300);
+
+    ctx.setFillStyle('#0071fe');
     ctx.setFontSize(20);
-    drawWrappedText(ctx, demand.requirementText || '无认证要求，所有人都可以投递简历', 58, 260, 384, 30, 2);
+    ctx.fillText(`允许转介绍，介绍费 ${referralRewardText}`, 58, 346);
     ctx.setFillStyle('#9ca3af');
     ctx.setFontSize(18);
-    ctx.fillText('讲了么 - 腾讯会议，会开会', 58, 338);
+    ctx.fillText('讲了么', 386, 346);
     ctx.draw(false, () => {
       wx.canvasToTempFilePath({
         canvasId: CANVAS_ID,

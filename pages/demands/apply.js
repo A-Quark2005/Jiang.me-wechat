@@ -52,6 +52,10 @@ Page({
     this.setData({ message: event.detail.value });
   },
 
+  previewAvatar(event) {
+    avatar.previewAvatar(event.currentTarget.dataset.url);
+  },
+
   async submit() {
     if (this.data.submitting) return;
     this.setData({ submitting: true });

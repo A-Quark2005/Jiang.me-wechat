@@ -16,6 +16,10 @@
           <view class="demand-title">{{item.title}}</view>
           <view class="demand-price">{{item.feePerHourText}}</view>
         </view>
+        <view wx:if="{{item.showPoster}}" class="demand-poster-row">
+          <image class="demand-poster-avatar" src="{{item.poster.avatarUrlResolved}}" mode="aspectFill" data-url="{{item.poster.avatarUrlResolved}}" catchtap="previewPosterAvatar"></image>
+          <view class="demand-poster-name">{{item.poster.displayNameText}}</view>
+        </view>
         <view class="demand-desc">{{item.descriptionText}}</view>
         <view class="demand-org-row" wx:if="{{item.hasOrganizations}}">
           <view wx:for="{{item.organizations}}" wx:for-item="org" wx:key="id" class="demand-org-chip">{{org.name}}</view>

@@ -118,7 +118,8 @@
   line-height: 1.6;
   text-align: right;
   color: #1f2937;
-  word-break: break-all;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .detail-row-copy {

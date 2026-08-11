@@ -37,7 +37,7 @@ function presentDemand(rawDemand, expandedApplicationId, contactAccessByUserId) 
   const showMyApplication = Boolean(myApplication && !isPoster);
   const showApplyControl = Boolean(!isPoster && (isOpen || showMyApplication));
   const isApplicationFull = activeApplicationCount >= applicationLimit;
-  const referralRewardCents = Math.floor(Number(rawDemand.amountCents || 0) * 0.1);
+  const referralRewardCents = Math.floor(Number(rawDemand.amountCents || 0) * 0.25);
   const referralRewardText = moneyText(referralRewardCents);
   const showShareAction = Boolean(!isPoster && isOpen && !isApplicationFull);
   const showCloseAction = Boolean(isPoster && !isClosed);
@@ -48,9 +48,16 @@ function presentDemand(rawDemand, expandedApplicationId, contactAccessByUserId) 
   const applyDisabledHint = !isPoster && !myApplication && !applyActionEnabled
     ? rawDemand.applyDisabledReason || ''
     : '';
+  const poster = rawDemand.poster || {};
 
   return {
     ...rawDemand,
+    poster: {
+      ...poster,
+      avatarUrlResolved: avatar.resolveAvatarUrl(poster.avatarUrl),
+      displayNameText: poster.displayName || '发布人',
+    },
+    showPosterProfile: Boolean(!isPoster),
     applications,
     myApplication,
     organizationText,
@@ -93,7 +100,7 @@ function presentDemand(rawDemand, expandedApplicationId, contactAccessByUserId) 
     applyDisabledHint,
     showApplyDisabledHint: Boolean(applyDisabledHint),
     shareTipText: `转发给合适的人，成功匹配可得介绍费 ${referralRewardText}`,
-    emptyCandidateText: isPoster ? '还没有人投递，转发后更容易收到简历' : '还没有人投递，可以先投递简历',
+    emptyCandidateText: isPoster ? '还没有人投递，请耐心等待，有新简历会通过微信消息通知' : '还没有人投递，可以先投递简历',
     showMyApplication: false,
   };
 }
@@ -132,7 +139,7 @@ function presentApplication(application, expandedApplicationId, isMine, contactA
     expanded,
     isMine: Boolean(isMine),
     detailButtonText: expanded ? '收起' : '查看简历',
-    contactButtonText: hasContactAccess ? '查看手机号' : (expanded ? '缴纳定金，添加好友' : '添加好友'),
+    contactButtonText: hasContactAccess ? '查看手机号' : (expanded ? '缴纳定金，认识一下' : '认识一下'),
     showMessage: Boolean(application.message),
     summaryText: `${credentialCount} 个认证，${engagementCount} 条履历`,
     resume: {

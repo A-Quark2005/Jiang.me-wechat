@@ -3,7 +3,7 @@
     <image class="hour-product-icon" src="/assets/ui/card-ticket-icon.svg" mode="aspectFit"></image>
     <view class="hour-product-copy">
       <view class="hour-title">购买小时卡</view>
-      <view class="hour-subtitle">按小时购买，灵活延长高级账号权益</view>
+      <view class="hour-subtitle">购买后立即生效，灵活延长高级权益</view>
     </view>
     <view class="hour-unit-price">
       <text class="hour-unit-symbol">¥</text>
@@ -31,7 +31,7 @@
   <view class="hour-section-card">
     <view class="hour-section-head">
       <view class="hour-section-title">所需时长</view>
-      <view class="hour-section-meta">最多 240 小时</view>
+      <view class="hour-section-meta">1 小时起购</view>
     </view>
 
     <view class="hour-input-row">

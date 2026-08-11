@@ -49,22 +49,26 @@ Page({
     feeFloorText: '0.00',
     amountText: '0.00',
     applicationLimit: 1,
+    applicationLimitExpanded: false,
+    applicationLimitText: '1份',
     applicationLimitOptions: [
       { value: 1, label: '1份', active: true },
       { value: 2, label: '2份', active: false },
       { value: 3, label: '3份', active: false },
     ],
+    organizationScopeExpanded: false,
     hasSelectedOrganizations: false,
-    organizationScopeText: '所有用户都可以投递简历',
+    organizationScopeText: '不限制',
     canSubmit: false,
     settlementHint: '发布后先收集简历，添加好友时再缴纳定金',
     submitting: false,
     bindingPhone: false,
     needsPhone: false,
+    entryChecking: true,
     loading: true,
   },
 
-  onLoad(options) {
+  async onLoad(options) {
     const id = decodeURIComponent((options && options.id) || '');
     const mode = id ? (options && options.mode === 'recollect' ? 'recollect' : 'edit') : 'create';
     const guardPath = id
@@ -78,6 +82,14 @@ Page({
       submitText: submitTextForMode(mode),
     });
     wx.setNavigationBarTitle({ title: pageTitleForMode(mode) });
+    if (mode === 'create') {
+      const createEntry = await demands.getCreateEntry({ forceRefresh: true }).catch(() => null);
+      if (Number(createEntry && createEntry.hidden) === 1) {
+        wx.switchTab({ url: '/pages/home/index' });
+        return;
+      }
+    }
+    this.setData({ entryChecking: false });
     this.loadOrganizations();
   },
 
@@ -140,12 +152,13 @@ Page({
         feeText: centsToYuan(fee),
         amountText: centsToYuan(fee * 2),
         applicationLimit: Number(demand.applicationLimit || 1),
+        applicationLimitText: `${Number(demand.applicationLimit || 1)}份`,
         applicationLimitOptions: this.data.applicationLimitOptions.map((item) => ({
           ...item,
           active: Number(item.value) === Number(demand.applicationLimit || 1),
         })),
         hasSelectedOrganizations: selectedIds.length > 0,
-        organizationScopeText: selectedIds.length > 0 ? `仅所选组织认证用户可投递（已选 ${selectedIds.length} 个）` : '所有用户都可以投递简历',
+        organizationScopeText: selectedIds.length > 0 ? `已选 ${selectedIds.length} 个组织` : '不限制',
         canSubmit: this.canSubmitWithFee(fee, minRequired, feeFloor),
         settlementHint: this.settlementHintText(minRequired, feeFloor),
         loading: false,
@@ -169,6 +182,14 @@ Page({
     });
   },
 
+  toggleOrganizationScope() {
+    this.setData({ organizationScopeExpanded: !this.data.organizationScopeExpanded });
+  },
+
+  toggleApplicationLimit() {
+    this.setData({ applicationLimitExpanded: !this.data.applicationLimitExpanded });
+  },
+
   clearOrganizationScope() {
     const organizations = this.data.organizations.map((item) => ({ ...item, selected: false }));
     const fee = Number(this.data.feeCentsPerHour || 0);
@@ -179,7 +200,7 @@ Page({
       minRequiredCents: 0,
       minRequiredText: '0.00',
       hasSelectedOrganizations: false,
-      organizationScopeText: '所有用户都可以投递简历',
+      organizationScopeText: '不限制',
       canSubmit: this.canSubmitWithFee(fee, 0),
       settlementHint: this.settlementHintText(0),
     });
@@ -197,6 +218,7 @@ Page({
     const value = Math.min(Math.max(Number(event.currentTarget.dataset.value || 1), 1), 3);
     this.setData({
       applicationLimit: value,
+      applicationLimitText: `${value}份`,
       applicationLimitOptions: this.data.applicationLimitOptions.map((item) => ({
         ...item,
         active: Number(item.value) === value,
@@ -220,9 +242,9 @@ Page({
   editFee() {
     const floor = this.feeFloor();
     wx.showModal({
-      title: '手动输入时薪',
+      title: '手动输入报价',
       editable: true,
-      placeholderText: floor > 0 ? `不低于 ¥${centsToYuan(floor)}/小时` : '请输入时薪',
+      placeholderText: floor > 0 ? `不低于 ¥${centsToYuan(floor)}/小时` : '请输入报价',
       content: this.data.feeText,
       success: (result) => {
         if (!result.confirm) return;
@@ -265,7 +287,7 @@ Page({
       feeText: centsToYuan(nextFee),
       amountText: centsToYuan(nextFee * 2),
       hasSelectedOrganizations: selected.length > 0,
-      organizationScopeText: selected.length > 0 ? `仅所选组织认证用户可投递（已选 ${selected.length} 个）` : '所有用户都可以投递简历',
+      organizationScopeText: selected.length > 0 ? `已选 ${selected.length} 个组织` : '不限制',
       canSubmit: this.canSubmitWithFee(nextFee, minRequired),
       settlementHint: this.settlementHintText(minRequired),
     });
@@ -302,7 +324,7 @@ Page({
       return;
     }
     if (!this.data.canSubmit) {
-      wx.showToast({ title: '请填写时薪', icon: 'none' });
+      wx.showToast({ title: '请填写报价', icon: 'none' });
       return;
     }
     if (feeCentsPerHour < floor) {

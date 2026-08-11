@@ -43,7 +43,8 @@ App({
 
   captureReferralCode(options) {
     const query = (options && options.query) || {};
-    const code = query.ref || query.referral || '';
+    const scene = decodeScene(query.scene || '');
+    const code = query.ref || query.referral || scene.ref || scene.referral || '';
     if (!code) return;
     this.globalData.pendingReferralCode = String(code);
     wx.setStorageSync('jiangleme.pending-referral-code', String(code));

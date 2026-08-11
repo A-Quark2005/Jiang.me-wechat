@@ -30,6 +30,19 @@ function getCreateEntry(options) {
   });
 }
 
+function getNewDemandNoticeSubscription() {
+  return request({
+    path: '/api/me/demands/new-notice-subscription',
+  });
+}
+
+function addNewDemandNoticeSubscription() {
+  return request({
+    path: '/api/me/demands/new-notice-subscription',
+    method: 'POST',
+  });
+}
+
 function listMine(options) {
   const requestOptions = options || {};
   return request({
@@ -100,6 +113,8 @@ module.exports = {
   listOrganizationRateRanges,
   listFeed,
   getCreateEntry,
+  getNewDemandNoticeSubscription,
+  addNewDemandNoticeSubscription,
   listMine,
   createDemand,
   updateDemand,

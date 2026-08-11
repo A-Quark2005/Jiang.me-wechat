@@ -97,3 +97,11 @@
   width: 18px;
   height: 18px;
 }
+
+.products-note {
+  padding-top: 4rpx;
+  font-size: 24rpx;
+  line-height: 36rpx;
+  text-align: center;
+  color: #9ca3af;
+}

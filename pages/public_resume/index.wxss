@@ -124,6 +124,7 @@
 
 .public-text,
 .public-empty {
+  display: block;
   margin-top: 16rpx;
   color: #8b95a5;
   font-size: 26rpx;
@@ -172,6 +173,7 @@
 .public-credential-meta,
 .public-engagement-meta,
 .public-engagement-summary {
+  display: block;
   margin-top: 4rpx;
   color: #9ca3af;
   font-size: 24rpx;

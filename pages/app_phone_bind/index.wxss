@@ -1,0 +1,81 @@
+.page {
+  min-height: 100vh;
+  padding: 32rpx 32rpx 48rpx;
+  background: #f7f8fa;
+  box-sizing: border-box;
+}
+
+.surface-card {
+  background: #ffffff;
+  border-radius: 16rpx;
+  box-shadow: 0 8rpx 24rpx rgba(15, 35, 80, 0.06);
+}
+
+.bind-card {
+  min-height: 420rpx;
+  padding: 52rpx 32rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.status-icon {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 28rpx;
+  font-size: 44rpx;
+  font-weight: 700;
+}
+
+.status-icon.waiting {
+  color: #0071fe;
+  background: #eef5ff;
+}
+
+.status-icon.success {
+  color: #0ca678;
+  background: #eafaf4;
+}
+
+.status-icon.error {
+  color: #ff4d4f;
+  background: #fff1f0;
+}
+
+.title {
+  font-size: 36rpx;
+  line-height: 52rpx;
+  color: #152033;
+  font-weight: 600;
+}
+
+.message {
+  margin-top: 16rpx;
+  font-size: 28rpx;
+  line-height: 42rpx;
+  color: #7d8799;
+  text-align: center;
+}
+
+.action {
+  width: 100%;
+  height: 92rpx;
+  margin-top: 36rpx;
+  border-radius: 8rpx;
+  font-size: 30rpx;
+}
+
+.primary-button {
+  color: #ffffff;
+  background: #0071fe;
+}
+
+.secondary-button {
+  color: #0071fe;
+  background: #eef5ff;
+}

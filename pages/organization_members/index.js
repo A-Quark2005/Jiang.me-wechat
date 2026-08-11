@@ -3,6 +3,7 @@ const displayFormatters = require('../../services/display-formatters');
 const loginGuard = require('../../services/login-guard');
 const share = require('../../services/share');
 const avatar = require('../../services/avatar');
+const listSeed = require('../../services/list-seed');
 
 const PAGE_SIZE = 20;
 
@@ -37,6 +38,7 @@ Page({
     errorMessage: '',
     hasMore: false,
     offset: 0,
+    listSeed: '',
     sharePanelVisible: false,
     miniProgramCodeLoading: false,
     miniProgramCodeUrl: '',
@@ -85,16 +87,19 @@ Page({
   },
 
   async loadMembers(reset) {
+    const seed = reset ? listSeed.createListSeed() : this.data.listSeed;
     const offset = reset ? 0 : this.data.offset;
     this.setData({
       loading: reset,
       loadingMore: !reset,
+      listSeed: seed,
       errorMessage: '',
     });
     try {
       const data = await profileService.getCertificationOrganizationMembers(this.data.organizationId, {
         limit: PAGE_SIZE,
         offset,
+        seed,
         forceRefresh: true,
       });
       const organization = data && data.organization ? data.organization : null;
@@ -128,6 +133,10 @@ Page({
     const id = String(event.currentTarget.dataset.id || '');
     if (!id) return;
     wx.navigateTo({ url: `/pages/public_resume/index?id=${encodeURIComponent(id)}` });
+  },
+
+  previewAvatar(event) {
+    avatar.previewAvatar(event.currentTarget.dataset.url);
   },
 
   toggleMemberResume(event) {

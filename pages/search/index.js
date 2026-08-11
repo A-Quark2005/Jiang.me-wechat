@@ -3,6 +3,9 @@ const loginGuard = require('../../services/login-guard');
 const displayFormatters = require('../../services/display-formatters');
 const avatar = require('../../services/avatar');
 const organizationGroups = require('../../services/organization-groups');
+const listSeed = require('../../services/list-seed');
+const demands = require('../../services/demands');
+const subscribeMessage = require('../../services/subscribe-message');
 
 const PAGE_SIZE = 20;
 const TABS = [
@@ -23,6 +26,7 @@ Page({
     errorMessage: '',
     hasMore: false,
     offset: 0,
+    searchSeed: '',
   },
 
   onLoad(options) {
@@ -34,9 +38,12 @@ Page({
       activeType: type,
       tabs: decorateTabs(type),
     });
-    if (keyword) {
-      this.searchFirstPage();
-    }
+    this.searchFirstPage();
+  },
+
+  onShow() {
+    if (!loginGuard.guardPage('/pages/search/index')) return;
+    void this.requestNewDemandNotice();
   },
 
   onReachBottom() {
@@ -58,6 +65,7 @@ Page({
       hasMore: false,
       offset: 0,
     });
+    this.searchFirstPage();
   },
 
   submitSearch() {
@@ -76,12 +84,11 @@ Page({
       hasMore: false,
       offset: 0,
     });
-    if (String(this.data.keyword || '').trim()) {
-      this.searchFirstPage();
-    }
+    this.searchFirstPage();
   },
 
   async searchFirstPage() {
+    this.setData({ searchSeed: listSeed.createListSeed() });
     await this.searchPage(true);
   },
 
@@ -91,10 +98,6 @@ Page({
 
   async searchPage(reset) {
     const keyword = String(this.data.keyword || '').trim();
-    if (!keyword) {
-      this.clearKeyword();
-      return;
-    }
     const offset = reset ? 0 : this.data.offset;
     this.setData({
       loading: reset,
@@ -108,6 +111,7 @@ Page({
         keyword,
         limit: PAGE_SIZE,
         offset,
+        seed: this.data.searchSeed,
       });
       const nextItems = presentItems(this.data.activeType, result);
       this.setData({
@@ -138,6 +142,22 @@ Page({
       return;
     }
     wx.navigateTo({ url: `/pages/demands/detail?id=${encodeURIComponent(id)}` });
+  },
+
+  previewAvatar(event) {
+    avatar.previewAvatar(event.currentTarget.dataset.url);
+  },
+
+  async requestNewDemandNotice() {
+    try {
+      const subscription = await demands.getNewDemandNoticeSubscription();
+      if (!subscription || !subscription.eligible) return;
+      const accepted = await subscribeMessage.requestNewDemandNotice();
+      if (!accepted) return;
+      await demands.addNewDemandNoticeSubscription();
+    } catch {
+      // Notification consent must not block search.
+    }
   },
 });
 

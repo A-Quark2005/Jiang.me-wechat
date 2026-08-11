@@ -123,6 +123,7 @@ async function ensureLoggedInAsync(options) {
   const config = options || {};
   const targetUrl = config.targetUrl || currentRouteUrl() || HOME_PAGE;
   if (isLoggedIn()) {
+    auth.handlePendingReferralForExistingSession();
     return true;
   }
   try {

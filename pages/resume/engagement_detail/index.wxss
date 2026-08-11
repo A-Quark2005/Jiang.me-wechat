@@ -63,6 +63,7 @@
 }
 
 .detail-content-text {
+  display: block;
   margin-top: 12rpx;
   font-size: 28rpx;
   line-height: 1.7;

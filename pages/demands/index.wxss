@@ -63,6 +63,26 @@
   font-weight: 600;
 }
 
+.demand-poster-row {
+  margin-top: 10rpx;
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.demand-poster-avatar {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  background: #f2f4f7;
+}
+
+.demand-poster-name {
+  color: #667085;
+  font-size: 24rpx;
+  line-height: 34rpx;
+}
+
 .demand-desc {
   margin-top: 8rpx;
   color: #8b95a7;

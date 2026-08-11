@@ -4,23 +4,24 @@ const refreshState = require('../../services/refresh-state');
 const loginGuard = require('../../services/login-guard');
 const tencentMeetingAccess = require('../../services/tencent-meeting-access');
 
-const PRICE_CENTS_PER_HOUR = 250;
+const UNIT_HOURS = 1;
+const PRICE_CENTS_PER_UNIT = 250;
 
 function normalizeHours(value) {
-  const numeric = Math.floor(Number(value || 1));
-  if (!Number.isFinite(numeric) || numeric < 1) return 1;
-  return Math.min(numeric, 240);
+  const numeric = Math.floor(Number(value || UNIT_HOURS));
+  if (!Number.isFinite(numeric) || numeric < UNIT_HOURS) return UNIT_HOURS;
+  return numeric;
 }
 
 function amountText(hours) {
-  return ((normalizeHours(hours) * PRICE_CENTS_PER_HOUR) / 100).toFixed(2);
+  return ((normalizeHours(hours) / UNIT_HOURS) * PRICE_CENTS_PER_UNIT / 100).toFixed(2);
 }
 
 Page({
   data: {
-    hours: 1,
-    amountText: amountText(1),
-    presetHours: [1, 2, 4, 8],
+    hours: UNIT_HOURS,
+    amountText: amountText(UNIT_HOURS),
+    presetHours: [1, 3, 6, 12],
     paying: false,
   },
 
@@ -50,11 +51,11 @@ Page({
   },
 
   decreaseHours() {
-    this.setHours(this.data.hours - 1);
+    this.setHours(this.data.hours - UNIT_HOURS);
   },
 
   increaseHours() {
-    this.setHours(this.data.hours + 1);
+    this.setHours(this.data.hours + UNIT_HOURS);
   },
 
   async buyHours() {

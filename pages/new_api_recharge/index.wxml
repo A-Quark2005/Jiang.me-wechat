@@ -1,0 +1,26 @@
+<view class="page recharge-page">
+  <view class="recharge-card">
+    <view class="status-icon {{status}}"></view>
+    <view class="title">{{title}}</view>
+    <view class="message">{{message}}</view>
+
+    <view wx:if="{{money}}" class="amount-row">
+      <text class="amount-label">支付金额</text>
+      <text class="amount-value">¥{{money}}</text>
+    </view>
+
+    <button
+      wx:if="{{canRetry}}"
+      class="primary-button"
+      loading="{{paying}}"
+      disabled="{{paying}}"
+      bindtap="startPay"
+    >重新支付</button>
+
+    <button
+      wx:if="{{paid}}"
+      class="primary-button"
+      bindtap="backHome"
+    >完成</button>
+  </view>
+</view>

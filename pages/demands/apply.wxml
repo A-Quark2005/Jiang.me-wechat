@@ -10,7 +10,7 @@
     <view class="surface-card resume-card">
       <view class="apply-label">将投出的简历</view>
       <view class="resume-head">
-        <image class="resume-avatar" src="{{resume.avatarUrlResolved}}" mode="aspectFill"></image>
+        <image class="resume-avatar" src="{{resume.avatarUrlResolved}}" mode="aspectFill" data-url="{{resume.avatarUrlResolved}}" bindtap="previewAvatar"></image>
         <view class="resume-main">
           <view class="resume-name">{{resume.displayNameText}}</view>
           <view class="resume-meta">{{resume.credentialCount}} 个认证，{{resume.engagementCount}} 条履历</view>

@@ -1,4 +1,5 @@
 <view class="page page-with-bar demand-form-page">
+  <block wx:if="{{!entryChecking}}">
   <view class="surface-card form-card">
     <view class="form-label">需求标题</view>
     <input class="form-input" maxlength="80" placeholder="例如：AI 产品设计咨询" value="{{title}}" bindinput="onTitleInput"></input>
@@ -7,11 +8,30 @@
   </view>
 
   <view class="surface-card form-card">
-    <view class="form-head">
-      <view class="form-title">接收简历数量</view>
-      <view class="form-meta">收满后不再接收新投递</view>
+    <view class="quote-row">
+      <view>
+        <view class="form-title">报价</view>
+        <view class="form-meta">{{settlementHint}}</view>
+      </view>
+      <view class="settlement-rate-control tappable" bindtap="editFee">
+        <view class="settlement-rate">¥{{feeText}}/小时</view>
+        <view class="settlement-rate-hint">点击修改</view>
+      </view>
     </view>
-    <view class="limit-options">
+  </view>
+
+  <view class="surface-card form-card">
+    <view class="form-head scope-toggle tappable" bindtap="toggleApplicationLimit">
+      <view>
+        <view class="form-title">接收简历数量</view>
+        <view class="form-meta">收满后不再接收新投递</view>
+      </view>
+      <view class="scope-toggle-value">
+        <view class="form-meta">{{applicationLimitText}}</view>
+        <view class="scope-arrow {{applicationLimitExpanded ? 'expanded' : ''}}"></view>
+      </view>
+    </view>
+    <view wx:if="{{applicationLimitExpanded}}" class="limit-options">
       <view
         wx:for="{{applicationLimitOptions}}"
         wx:key="value"
@@ -23,54 +43,49 @@
   </view>
 
   <view class="surface-card form-card">
-    <view class="form-head">
+    <view class="form-head scope-toggle tappable" bindtap="toggleOrganizationScope">
       <view class="form-title">谁可以投递</view>
-      <view class="form-meta">{{organizationScopeText}}</view>
+      <view class="scope-toggle-value">
+        <view class="form-meta">{{organizationScopeText}}</view>
+        <view class="scope-arrow {{organizationScopeExpanded ? 'expanded' : ''}}"></view>
+      </view>
     </view>
-    <view wx:if="{{loading}}" class="form-loading">正在读取组织</view>
-    <view wx:elif="{{!hasOrganizations}}" class="form-loading">暂无可选认证组织</view>
-    <block wx:else>
-      <view class="scope-card tappable {{!hasSelectedOrganizations ? 'active' : ''}}" bindtap="clearOrganizationScope">
-        <view>
-          <view class="scope-title">不限制</view>
-          <view class="scope-desc">所有用户都可以投递简历</view>
-        </view>
-        <view class="org-select-icon {{!hasSelectedOrganizations ? 'active' : ''}}"></view>
-      </view>
-      <view class="segmented-strip org-filter-strip">
-        <view
-          wx:for="{{groups}}"
-          wx:key="key"
-          class="segment-chip tappable {{item.className}}"
-          data-group="{{item.key}}"
-          bindtap="switchGroup"
-        >{{item.label}}</view>
-      </view>
-      <view class="org-list">
-        <view wx:for="{{visibleOrganizations}}" wx:key="id" class="org-option {{item.selected ? 'active' : ''}}" data-id="{{item.id}}" bindtap="toggleOrganization">
-          <view class="org-title-row">
-            <view class="org-name">{{item.name}}</view>
-            <view wx:if="{{item.typeLabelText}}" class="org-type-label">{{item.typeLabelText}}</view>
-            <view class="org-select-icon {{item.selected ? 'active' : ''}}"></view>
+    <block wx:if="{{organizationScopeExpanded}}">
+      <view wx:if="{{loading}}" class="form-loading scope-loading">正在读取组织</view>
+      <view wx:elif="{{!hasOrganizations}}" class="form-loading scope-loading">暂无可选认证组织，默认不限制</view>
+      <block wx:else>
+        <view class="scope-help">可选择多个组织，投递者满足任一所选组织认证即可</view>
+        <view class="scope-card tappable {{!hasSelectedOrganizations ? 'active' : ''}}" bindtap="clearOrganizationScope">
+          <view>
+            <view class="scope-title">不限制</view>
+            <view class="scope-desc">所有用户都可以投递简历</view>
           </view>
-          <view class="org-rate">建议时薪 {{item.minFeeText}} - {{item.maxFeeText}}</view>
+          <view class="org-select-icon {{!hasSelectedOrganizations ? 'active' : ''}}"></view>
         </view>
-      </view>
+        <view class="segmented-strip org-filter-strip">
+          <view
+            wx:for="{{groups}}"
+            wx:key="key"
+            class="segment-chip tappable {{item.className}}"
+            data-group="{{item.key}}"
+            bindtap="switchGroup"
+          >{{item.label}}</view>
+        </view>
+        <view class="org-list">
+          <view wx:for="{{visibleOrganizations}}" wx:key="id" class="org-option {{item.selected ? 'active' : ''}}" data-id="{{item.id}}" bindtap="toggleOrganization">
+            <view class="org-title-row">
+              <view class="org-name">{{item.name}}</view>
+              <view wx:if="{{item.typeLabelText}}" class="org-type-label">{{item.typeLabelText}}</view>
+              <view class="org-select-icon {{item.selected ? 'active' : ''}}"></view>
+            </view>
+            <view class="org-rate">建议报价 {{item.minFeeText}} - {{item.maxFeeText}}</view>
+          </view>
+        </view>
+      </block>
     </block>
   </view>
 
   <view class="settlement-panel">
-    <view class="settlement-rate-row">
-      <view>
-        <view class="settlement-title">时薪</view>
-        <view class="settlement-hint">{{settlementHint}}</view>
-      </view>
-      <view class="settlement-rate-control tappable" bindtap="editFee">
-        <view class="settlement-rate">¥{{feeText}}/小时</view>
-        <view class="settlement-rate-hint">点击修改</view>
-      </view>
-    </view>
-
     <view class="settlement-bottom-row">
       <view class="bottom-total">
         <text>试讲定金</text>
@@ -94,4 +109,5 @@
       >{{submitText}}</button>
     </view>
   </view>
+  </block>
 </view>

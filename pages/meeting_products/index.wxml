@@ -18,13 +18,17 @@
         <view wx:for="{{item.features}}" wx:key="*this" class="product-feature">{{item}}</view>
       </view>
       <view class="product-side">
-        <view class="product-price"><text class="product-price-unit">{{item.priceUnitText}}</text><text class="product-price-value">{{item.priceValueText}}</text></view>
+        <view class="product-price">
+          <text class="product-price-unit">¥</text>
+          <text class="product-price-value">{{item.priceText}}</text>
+        </view>
         <view class="product-buy tappable" data-id="{{item.id}}" bindtap="buyProduct">
-          <text>购买</text>
+          <text>{{paying && payingId === item.id ? '处理中' : '购买'}}</text>
           <image class="product-buy-icon" src="/assets/ui/arrow-light.svg" mode="aspectFit"></image>
         </view>
       </view>
     </view>
+    <view class="products-note">购买后立即生效</view>
     <view wx:if="{{errorMessage}}" class="error-box">{{errorMessage}}</view>
   </view>
 </view>

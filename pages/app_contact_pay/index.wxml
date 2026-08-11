@@ -1,0 +1,19 @@
+<view class="page">
+  <view class="surface-card pay-card">
+    <view class="status-icon {{status}}">{{iconText}}</view>
+    <text class="title">{{title}}</text>
+    <text class="message">{{message}}</text>
+    <button
+      wx:if="{{canRetry}}"
+      class="primary-button action"
+      loading="{{paying}}"
+      disabled="{{paying}}"
+      bindtap="startPay"
+    >重新支付</button>
+    <button
+      wx:if="{{showBackButton}}"
+      class="secondary-button action"
+      bindtap="returnToApp"
+    >返回 APP</button>
+  </view>
+</view>

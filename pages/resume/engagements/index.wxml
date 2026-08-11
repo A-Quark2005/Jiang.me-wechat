@@ -37,7 +37,7 @@
           <text>{{item.counterpartNameText}}</text>
           <text>{{item.monthText}}</text>
         </view>
-        <view wx:if="{{item.summaryText}}" class="engagement-summary">{{item.summaryText}}</view>
+        <text wx:if="{{item.summaryText}}" selectable="{{true}}" class="engagement-summary">{{item.summaryText}}</text>
       </view>
       <image class="engagement-arrow-icon" src="/assets/ui/engagement-arrow.svg" mode="aspectFit"></image>
     </view>

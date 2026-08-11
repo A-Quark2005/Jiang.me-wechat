@@ -1,51 +1,33 @@
-<view class="page page-with-bar page-plain entitlements-page">
+<view class="page page-plain entitlements-page">
   <view wx:if="{{loading}}" class="surface-card">
     <view class="section-title">正在读取权益</view>
     <view class="section-subtitle">请稍候。</view>
   </view>
 
-  <view wx:elif="{{errorMessage && unfinishedDemandCards.length === 0}}" class="surface-card">
+  <view wx:elif="{{errorMessage}}" class="surface-card">
     <view class="error-box">{{errorMessage}}</view>
     <button class="primary-button action-button" bindtap="loadPage">重新加载</button>
   </view>
 
-  <block wx:else>
+  <view wx:else class="entitlements-content">
     <view class="surface-card entitlements-orders-card tappable" bindtap="openOrders">
-      <view class="entitlements-orders-title">交易记录/退款</view>
+      <view class="entitlements-orders-title">交易记录</view>
     </view>
 
-    <view wx:if="{{showPendingActivationNotice}}" class="surface-card entitlements-pending-card">
-      <view class="section-title">腾讯会议待激活</view>
-      <view class="section-subtitle">{{pendingActivationText}}</view>
-      <button class="secondary-button entitlements-pending-button" loading="{{sendingActivationInvite}}" bindtap="resendActivationInvite">重发激活链接</button>
-    </view>
-
-    <view wx:if="{{unfinishedDemandCards.length > 0}}" class="unfinished-demands-list">
-      <view wx:for="{{unfinishedDemandCards}}" wx:key="id" class="surface-card unfinished-demand-card tappable" data-id="{{item.id}}" bindtap="openDemandDetail">
-        <view class="unfinished-demand-main">
-          <view class="unfinished-demand-copy">
-            <view class="unfinished-demand-title">{{item.title}}</view>
-            <view class="unfinished-demand-summary">{{item.summary}}</view>
-            <view wx:if="{{item.meta}}" class="unfinished-demand-meta">{{item.meta}}</view>
-          </view>
-          <view class="unfinished-demand-side">
-            <view class="unfinished-demand-badge">{{item.badge}}</view>
-            <view class="unfinished-demand-status">{{item.statusText}}</view>
-          </view>
+    <view class="entitlements-middle">
+      <view class="entitlements-empty">
+        <view class="entitlements-empty-main">
+          <image class="entitlements-empty-image" src="{{sleepImageUrl}}" mode="aspectFit"></image>
+          <view class="entitlements-empty-text">{{emptyStateText}}</view>
         </view>
+        <view class="entitlements-empty-button tappable" bindtap="openSearch">远方的人</view>
       </view>
-    </view>
 
-    <view wx:else class="entitlements-empty">
-      <image class="entitlements-empty-image" src="{{sleepImageUrl}}" mode="aspectFit"></image>
-      <view class="entitlements-empty-text">{{emptyStateText}}</view>
-      <view class="entitlements-empty-button tappable" bindtap="openDistantPeople">远方的人</view>
-    </view>
-
-    <view class="entitlements-history-row">
-      <view class="entitlements-history-button tappable" bindtap="openHistory">
-        <text>历史会议</text>
-        <image class="entitlements-history-arrow" src="/assets/ui/arrow-light.svg" mode="aspectFit"></image>
+      <view class="entitlements-history-row">
+        <view class="entitlements-history-button tappable" bindtap="openHistory">
+          <text>历史会议</text>
+          <image class="entitlements-history-arrow" src="/assets/ui/arrow-light.svg" mode="aspectFit"></image>
+        </view>
       </view>
     </view>
 
@@ -59,8 +41,8 @@
       <view class="entitlements-recommend-card tappable" bindtap="openReferralInvite">
         <image class="entitlements-recommend-icon-image" src="/assets/ui/referral-invite-icon.png" mode="aspectFit"></image>
         <view class="row-main">
-          <view class="entitlements-recommend-title">邀请好友，送24小时权益卡</view>
-          <view class="entitlements-recommend-meta">好友激活讲了么账号后可兑现</view>
+          <view class="entitlements-recommend-title">邀请好友，送24小时会议卡</view>
+          <view class="entitlements-recommend-meta">邀请新用户，双方各得24小时会议卡</view>
         </view>
         <view class="entitlements-recommend-action">
           <text>去邀请</text>
@@ -72,7 +54,7 @@
         <image class="entitlements-recommend-icon-image" src="/assets/ui/card-ticket-icon.svg" mode="aspectFit"></image>
         <view class="row-main">
           <view class="entitlements-recommend-title">购买小时卡</view>
-          <view class="entitlements-recommend-meta">按小时购买，¥2.50/小时</view>
+          <view class="entitlements-recommend-meta">1 小时起购，¥2.50/小时</view>
         </view>
         <view class="entitlements-recommend-action">
           <text>去购买</text>
@@ -92,5 +74,5 @@
         </view>
       </view>
     </view>
-  </block>
+  </view>
 </view>

@@ -27,7 +27,7 @@ async function ensureReady(options) {
   }
 
   const activation = displayFormatters.normalizeMeetingActivationState(
-    await meetingEntitlements.getTencentMeetingActivation({ forceRefresh: config.forceRefresh !== false }),
+    await meetingEntitlements.getTencentMeetingActivation({ forceRefresh: config.forceRefresh === true }),
   );
   if (
     activation.needsPhone ||

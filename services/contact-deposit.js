@@ -122,7 +122,7 @@ async function payAndRevealContact(options) {
       : moneyText(settings.contactDepositAmountCents);
     const confirmed = await confirmDialog({
       title: '确认缴纳',
-      content: `为减少无效打扰，平台会先收取 2 小时试讲定金。本次需支付 ${amountText}。\n\n支付后将展示对方微信绑定的手机号，可通过微信搜索手机号与对方建立联系。\n\n该定金可抵扣 2 小时试讲服务，期间无需另行付费。\n\n若试讲满意，从第 3 小时起，双方可自行协商后续服务，平台不再收取其它费用。\n\n如试讲不满意，可向平台提交退款申请。`,
+      content: `为避免对对方构成骚扰，平台会先收取 2 小时试讲定金。本次需支付 ${amountText}。\n\n支付后将展示对方微信绑定的手机号，微信搜索手机号即可添加对方。\n\n该定金可抵扣 2 小时试讲服务，期间无需另行付费。\n\n若试讲满意，从第 3 小时起，双方可自行协商后续服务，平台不再收取其它费用。\n\n如试讲不满意，或对方长时间未通过好友申请，请及时向平台提交退款申请。`,
     });
     if (!confirmed) return null;
 

@@ -26,7 +26,7 @@
     </view>
   </view>
 
-  <view wx:if="{{!searched}}" class="search-state">输入关键词开始搜索</view>
+  <view wx:if="{{!searched}}" class="search-state">输入关键词，或直接浏览</view>
   <view wx:elif="{{loading}}" class="search-state">正在搜索</view>
   <view wx:elif="{{errorMessage}}" class="search-state">{{errorMessage}}</view>
   <view wx:elif="{{items.length === 0}}" class="search-state">暂无搜索结果</view>
@@ -34,7 +34,7 @@
   <view wx:else class="search-list">
     <block wx:if="{{activeType === 'people'}}">
       <view wx:for="{{items}}" wx:key="id" class="surface-card search-person-card tappable" data-id="{{item.id}}" bindtap="openItem">
-        <image class="search-avatar" src="{{item.avatarUrlResolved}}" mode="aspectFill"></image>
+        <image class="search-avatar" src="{{item.avatarUrlResolved}}" mode="aspectFill" data-url="{{item.avatarUrlResolved}}" catchtap="previewAvatar"></image>
         <view class="search-main">
           <view class="search-title">{{item.displayName}}</view>
           <view class="search-meta">{{item.metaText}}</view>

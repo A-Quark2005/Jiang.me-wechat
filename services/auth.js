@@ -38,6 +38,46 @@ function isWechatInvalidCodeError(error) {
   return message === 'wechat_invalid_code';
 }
 
+function pendingReferralCode() {
+  return wx.getStorageSync('jiangleme.pending-referral-code') || undefined;
+}
+
+function clearPendingReferralCode() {
+  const app = getApp();
+  if (app && app.globalData) {
+    app.globalData.pendingReferralCode = '';
+  }
+  wx.removeStorageSync('jiangleme.pending-referral-code');
+}
+
+function showReferralRewardResult(granted) {
+  wx.showModal({
+    title: granted ? '已领取邀请奖励' : '仅新用户可领取',
+    content: granted
+      ? '激活账号后，可在“权益”页使用24小时会员卡'
+      : '如有需要，可在“权益”页邀请新用户，或付费购买',
+    showCancel: false,
+    confirmText: '知道了',
+  });
+}
+
+function handleReferralRewardResult(result, hadReferralCode) {
+  if (!hadReferralCode || !result || typeof result.referralRewardGranted !== 'boolean') {
+    return;
+  }
+  showReferralRewardResult(result.referralRewardGranted);
+}
+
+function handlePendingReferralForExistingSession() {
+  const referralCode = pendingReferralCode();
+  if (!referralCode) {
+    return false;
+  }
+  showReferralRewardResult(false);
+  clearPendingReferralCode();
+  return true;
+}
+
 /**
  * Execute one auth request with a freshly issued `wx.login` code and retry once when that
  * code was already consumed or rejected upstream.
@@ -64,9 +104,14 @@ async function requestWithFreshMiniLoginCode(requestBuilder) {
  * @returns {Promise<object>} Auth result or registration-required payload.
  */
 async function loginWithMiniProgram() {
+  const referralCode = pendingReferralCode();
   const sessionRecord = sessionStore.getSessionRecord();
   const existingSession = sessionRecord && sessionRecord.session;
   if (existingSession && existingSession.accessToken) {
+    if (referralCode) {
+      showReferralRewardResult(false);
+    }
+    clearPendingReferralCode();
     return {
       result: 'logged_in',
       token: existingSession.accessToken,
@@ -81,10 +126,15 @@ async function loginWithMiniProgram() {
     path: '/api/auth/wechat-mini-program/login',
     method: 'POST',
     auth: false,
-    data: { miniLoginCode },
+    data: {
+      miniLoginCode,
+      referralCode,
+    },
   }));
   if (result && (result.session || result.token || result.accessToken)) {
     sessionStore.saveSession(result);
+    handleReferralRewardResult(result, Boolean(referralCode));
+    clearPendingReferralCode();
   }
   return result;
 }
@@ -96,6 +146,7 @@ async function loginWithMiniProgram() {
  * @returns {Promise<object>} Backend registration result.
  */
 async function bindPhoneWithCode(phoneCode) {
+  const referralCode = pendingReferralCode();
   if (sessionStore.getAccessToken()) {
     const result = await request({
       path: '/api/me/phone/wechat-mini-program',
@@ -114,10 +165,13 @@ async function bindPhoneWithCode(phoneCode) {
     data: {
       miniLoginCode,
       phoneCode,
+      referralCode,
     },
   }));
   if (result && (result.session || result.token || result.accessToken)) {
     sessionStore.saveSession(result);
+    handleReferralRewardResult(result, Boolean(referralCode));
+    clearPendingReferralCode();
   }
   return result;
 }
@@ -133,6 +187,7 @@ function logout() {
 
 module.exports = {
   bindPhoneWithCode,
+  handlePendingReferralForExistingSession,
   loginWithMiniProgram,
   logout,
   wxLogin,

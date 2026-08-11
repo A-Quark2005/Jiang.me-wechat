@@ -23,12 +23,12 @@ const PAGE_SHARE_COPY = {
     timelineTitle: '讲了么小时卡',
   },
   '/pages/meeting_products/index': {
-    title: '讲了么会议卡',
-    timelineTitle: '讲了么会议卡',
+    title: '讲了么权益卡',
+    timelineTitle: '讲了么权益卡',
   },
   '/pages/referral_invite/index': {
-    title: '邀请好友使用讲了么',
-    timelineTitle: '讲了么邀请好友',
+    title: '送你一张腾讯会议24小时会员卡，开通讲了么后即可使用',
+    timelineTitle: '送你一张腾讯会议24小时会员卡',
   },
   '/pages/orders/index': {
     title: '讲了么订单',
